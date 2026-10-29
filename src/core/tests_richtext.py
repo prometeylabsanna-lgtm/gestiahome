@@ -56,9 +56,23 @@ class RichTextSanitizeTests(TestCase):
         self.assertIn("<p>ok</p>", html)
         self.assertNotIn("script", html)
 
-    def test_signal_sanitizes_only_marked_fields(self):
+    def test_richhtml_preserves_plain_linebreaks(self):
+        html = Template("{% load richtext %}{{ body|richhtml }}").render(
+            Context({"body": "рядок один\n\nрядок два"})
+        )
+        self.assertIn("<p>", html)
+        self.assertIn("рядок один", html)
+        self.assertIn("рядок два", html)
+
+    def test_richinline_unwraps_single_paragraph(self):
+        html = Template("{% load richtext %}{{ body|richinline }}").render(
+            Context({"body": "<p>коротко <strong>тут</strong></p>"})
+        )
+        self.assertEqual(html, "коротко <strong>тут</strong>")
+
+    def test_signal_sanitizes_product_description(self):
         category = Category.objects.create(slug="box", name_uk="Бокс")
-        plain = Product.objects.create(
+        kept = Product.objects.create(
             category=category,
             sku="PLAIN",
             slug="plain",
@@ -67,21 +81,17 @@ class RichTextSanitizeTests(TestCase):
             price_eur=Decimal("1"),
             description_uk="<p>keep</p>",
         )
-        self.assertEqual(plain.description_uk, "<p>keep</p>")
+        self.assertEqual(kept.description_uk, "<p>keep</p>")
 
-        Product.rich_text_fields = ("description_uk",)
-        try:
-            marked = Product.objects.create(
-                category=category,
-                sku="MARKED",
-                slug="marked",
-                name_uk="Marked",
-                price_uah=Decimal("10"),
-                price_eur=Decimal("1"),
-                description_uk='<script>bad</script><p onclick="x">ok</p>',
-            )
-        finally:
-            del Product.rich_text_fields
+        marked = Product.objects.create(
+            category=category,
+            sku="MARKED",
+            slug="marked",
+            name_uk="Marked",
+            price_uah=Decimal("10"),
+            price_eur=Decimal("1"),
+            description_uk='<script>bad</script><p onclick="x">ok</p>',
+        )
         marked.refresh_from_db()
         self.assertEqual(marked.description_uk, "<p>ok</p>")
 

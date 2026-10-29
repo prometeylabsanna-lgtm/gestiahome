@@ -208,6 +208,7 @@ class Product(TimeStampedModel):
         ON_ORDER = "on_order", _("Під замовлення")
         OUT = "out", _("Немає в наявності")
 
+    rich_text_fields = ("description_uk", "description_en")
     category = models.ForeignKey(
         Category,
         verbose_name="Категорія",

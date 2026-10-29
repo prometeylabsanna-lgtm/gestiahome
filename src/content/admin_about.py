@@ -8,7 +8,8 @@ from src.content.admin_limits import tighten
 from src.content.models import AboutPage
 from src.content.models_about import AboutGalleryItem, AboutPick
 from src.content.proxies import FooterChrome
-from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
+from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
+from src.core.admin_lang import language_tabs
 
 
 class _OpenSingleton(GestiaModelAdmin):
@@ -34,24 +35,43 @@ class AboutGalleryInline(GestiaTabularInline):
     fields = ("slot", "sort", "media_kind", "image", "image_mobile", "video", "poster")
 
 
-class AboutPickInline(GestiaTabularInline):
+class AboutPickInline(GestiaStackedInline):
     model = AboutPick
     extra = 0
     max_num = 2
-    fields = ("sort", "title_uk", "title_en", "price", "slug", "modifier", "image")
+    fieldsets = language_tabs(
+        uk_fields=("sort", "title_uk", "price", "slug", "modifier", "image"),
+        en_fields=("title_en",),
+    )
 
 
 @admin.register(AboutPage)
 class AboutPageAdmin(_OpenSingleton):
     inlines = (AboutGalleryInline, AboutPickInline)
     text_limits = {"title_uk": 24, "title_en": 24}
-    fieldsets = (
-        ("Українська", {"fields": ("title_uk", "lead_uk", "crumb_uk", "story_label_uk", "body_uk")}),
-        ("Англійська", {"fields": ("title_en", "lead_en", "crumb_en", "story_label_en", "body_en")}),
-        ("Банер", {"fields": ("media_kind", "image", "image_mobile", "video", "poster")}),
-        (
-            "Пошук",
-            {"fields": ("seo_title_uk", "seo_title_en", "seo_description_uk", "seo_description_en")},
+    fieldsets = language_tabs(
+        uk_fields=(
+            "title_uk",
+            "lead_uk",
+            "crumb_uk",
+            "story_label_uk",
+            "body_uk",
+            "media_kind",
+            "image",
+            "image_mobile",
+            "video",
+            "poster",
+            "seo_title_uk",
+            "seo_description_uk",
+        ),
+        en_fields=(
+            "title_en",
+            "lead_en",
+            "crumb_en",
+            "story_label_en",
+            "body_en",
+            "seo_title_en",
+            "seo_description_en",
         ),
     )
 
@@ -64,8 +84,7 @@ class AboutPageAdmin(_OpenSingleton):
 
 @admin.register(FooterChrome)
 class FooterChromeAdmin(_OpenSingleton):
-    fieldsets = (
-        ("Підпис унизу", {"fields": ("footer_note_uk", "footer_note_en")}),
-        ("Рядок PrometeyLabs", {"fields": ("credit_uk", "credit_en")}),
-        ("Службовий підпис", {"fields": ("developer_note_uk", "developer_note_en")}),
+    fieldsets = language_tabs(
+        uk_fields=("footer_note_uk", "credit_uk", "developer_note_uk"),
+        en_fields=("footer_note_en", "credit_en", "developer_note_en"),
     )

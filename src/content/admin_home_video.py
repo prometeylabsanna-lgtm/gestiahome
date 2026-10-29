@@ -11,6 +11,7 @@ from django.db import models
 from src.content.admin_limits import tighten
 from src.content.models import HomeBlock
 from src.core.admin_base import AdminImagePreviewWidget
+from src.core.admin_lang import UK_TAB
 
 VIDEO_FIELDS = ("media_kind", "image", "image_mobile", "video", "poster")
 FIELD_PREFIX = "page_video_"
@@ -35,12 +36,27 @@ class PageVideoMixin:
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = list(super().get_fieldsets(request, obj))
+        video_fields = tuple(video_field_name(name) for name in VIDEO_FIELDS)
+        for index, (title, opts) in enumerate(fieldsets):
+            if title != UK_TAB:
+                continue
+            fields = tuple(opts.get("fields", ())) + video_fields
+            merged = {**opts, "fields": fields}
+            bits = [opts.get("description") or "", self.page_video_description or ""]
+            if self.page_video_title:
+                bits.insert(0, self.page_video_title)
+            description = "\n".join(part for part in bits if part).strip()
+            if description:
+                merged["description"] = description
+            fieldsets[index] = (title, merged)
+            return fieldsets
         fieldsets.append(
             (
-                self.page_video_title,
+                UK_TAB,
                 {
+                    "classes": ("tab",),
                     "description": self.page_video_description,
-                    "fields": tuple(video_field_name(name) for name in VIDEO_FIELDS),
+                    "fields": video_fields,
                 },
             )
         )

@@ -135,6 +135,7 @@ class HomeBlock(MediaChoice):
         PDP_SET = "pdp_set", "Товари сету"
         PDP_RELATED = "pdp_related", "Схожі товари"
 
+    rich_text_fields = ("text_uk", "text_en", "text_mobile_uk", "text_mobile_en")
     key = models.CharField("Ключ", max_length=32, choices=Key.choices, unique=True)
     title_uk = models.CharField("Заголовок", max_length=200, blank=True)
     title_en = models.CharField("Заголовок (EN)", max_length=200, blank=True)
@@ -211,6 +212,7 @@ class HomeBlock(MediaChoice):
 
 
 class Advantage(models.Model):
+    rich_text_fields = ("text_uk", "text_en")
     title_uk = models.CharField("Заголовок", max_length=160)
     title_en = models.CharField("Заголовок (EN)", max_length=160, blank=True)
     text_uk = models.TextField("Текст", blank=True)
@@ -307,6 +309,7 @@ class Review(models.Model):
         GOLD_FOUR = "gold4", "4 золоті"
         BLACK_FIVE = "black5", "5 чорних"
 
+    rich_text_fields = ("text_uk", "text_en")
     author_uk = models.CharField("Ім'я", max_length=80)
     author_en = models.CharField("Ім'я (EN)", max_length=80, blank=True)
     text_uk = models.TextField("Текст")

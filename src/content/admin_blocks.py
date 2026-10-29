@@ -1,7 +1,9 @@
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from tinymce.widgets import TinyMCE
 
 from src.content.admin_limits import tighten
 from src.content.admin_home_video import PageVideoMixin
@@ -15,11 +17,20 @@ from src.content.proxies import (
     HomeReviewsBlock,
 )
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_lang import language_tabs
 
 PHOTO_DESK = "1442×871 px. JPG або PNG."
 PHOTO_MOBILE = "390×735 px. JPG або PNG."
 VIDEO_HINT = "MP4 або WEBM."
 CARD_PHOTO = "303×197 px. Спільне фото для всіх карток. JPG або PNG."
+_TINY = frozenset(
+    {
+        "text_uk",
+        "text_en",
+        "text_mobile_uk",
+        "text_mobile_en",
+    }
+)
 
 
 class KeyedBlockAdmin(GestiaModelAdmin):
@@ -27,6 +38,7 @@ class KeyedBlockAdmin(GestiaModelAdmin):
     default_sort = 0
     text_limits = {}
     image_hints = {}
+    tiny_fields = _TINY
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(key=self.block_key)
@@ -52,6 +64,8 @@ class KeyedBlockAdmin(GestiaModelAdmin):
         super().save_model(request, obj, form, change)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_SHORT_CONFIG)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         hint = self.image_hints.get(db_field.name, "")
         if db_field.name == "video":
@@ -139,10 +153,9 @@ class HomeHeroAdmin(KeyedBlockAdmin):
         "image_mobile": PHOTO_MOBILE,
         "poster": "Кадр до старту відео, 1442×871 px. Якщо порожньо — основне фото. JPG або PNG.",
     }
-    fieldsets = (
-        ("Українська", {"fields": ("title_uk", "text_uk", "cta_uk")}),
-        ("Англійська", {"fields": ("title_en", "text_en", "cta_en")}),
-        ("Медіа", {"fields": ("media_kind", "image", "image_mobile", "video", "poster")}),
+    fieldsets = language_tabs(
+        uk_fields=("title_uk", "text_uk", "cta_uk", "media_kind", "image", "image_mobile", "video", "poster"),
+        en_fields=("title_en", "text_en", "cta_en"),
     )
 
 
@@ -157,8 +170,9 @@ class HomeCategoriesAdmin(PageVideoMixin, KeyedBlockAdmin):
         "На головній цей блок стоїть одразу після категорій і перед популярними товарами."
     )
     text_limits = {"title_uk": 20, "title_en": 20}
-    fieldsets = (
-        ("Назва секції", {"fields": ("title_uk", "title_en")}),
+    fieldsets = language_tabs(
+        uk_fields=("title_uk",),
+        en_fields=("title_en",),
     )
 
 
@@ -167,9 +181,9 @@ class HomePopularAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.POPULAR
     default_sort = 4
     text_limits = {"title_uk": 24, "title_en": 24, "cta_uk": 28, "cta_en": 28}
-    fieldsets = (
-        ("Українська", {"fields": ("title_uk", "cta_uk")}),
-        ("Англійська", {"fields": ("title_en", "cta_en")}),
+    fieldsets = language_tabs(
+        uk_fields=("title_uk", "cta_uk"),
+        en_fields=("title_en", "cta_en"),
     )
 
 
@@ -194,10 +208,9 @@ class HomeAdvantagesAdmin(PageVideoMixin, KeyedBlockAdmin):
         "cta_en": 28,
     }
     image_hints = {"image": CARD_PHOTO}
-    fieldsets = (
-        ("Українська", {"fields": ("title_uk", "text_uk", "text_mobile_uk", "cta_uk")}),
-        ("Англійська", {"fields": ("title_en", "text_en", "text_mobile_en", "cta_en")}),
-        ("Фото", {"fields": ("image",)}),
+    fieldsets = language_tabs(
+        uk_fields=("title_uk", "text_uk", "text_mobile_uk", "cta_uk", "image"),
+        en_fields=("title_en", "text_en", "text_mobile_en", "cta_en"),
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -212,7 +225,10 @@ class HomeReviewsAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.REVIEWS
     default_sort = 7
     text_limits = {"title_uk": 16, "title_en": 16}
-    fieldsets = (("Заголовок", {"fields": ("title_uk", "title_en")}),)
+    fieldsets = language_tabs(
+        uk_fields=("title_uk",),
+        en_fields=("title_en",),
+    )
 
 
 @admin.register(HomeCallbackBlock)
@@ -233,25 +249,44 @@ class HomeCallbackAdmin(KeyedBlockAdmin):
         "link_en": 40,
         "cta_uk": 28,
         "cta_en": 28,
+        "ph_name_uk": 24,
+        "ph_name_en": 24,
+        "ph_phone_uk": 24,
+        "ph_phone_en": 24,
+        "ph_message_uk": 24,
+        "ph_message_en": 24,
     }
-    fieldsets = (
-        ("Заголовок", {"fields": ("title_uk", "title_en")}),
-        ("Підзаголовок", {"fields": ("text_uk", "text_en", "text_mobile_uk", "text_mobile_en")}),
-        (
-            "Підказки в полях",
-            {
-                "fields": (
-                    "ph_name_uk",
-                    "ph_name_en",
-                    "ph_phone_uk",
-                    "ph_phone_en",
-                    "ph_message_uk",
-                    "ph_message_en",
-                )
-            },
+    fieldsets = language_tabs(
+        uk_fields=(
+            "title_uk",
+            "text_uk",
+            "text_mobile_uk",
+            "ph_name_uk",
+            "ph_phone_uk",
+            "ph_message_uk",
+            "note_uk",
+            "link_uk",
+            "cta_uk",
         ),
-        ("Згода і кнопка", {"fields": ("note_uk", "note_en", "link_uk", "link_en", "cta_uk", "cta_en")}),
+        en_fields=(
+            "title_en",
+            "text_en",
+            "text_mobile_en",
+            "ph_name_en",
+            "ph_phone_en",
+            "ph_message_en",
+            "note_en",
+            "link_en",
+            "cta_en",
+        ),
     )
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        for name, limit in self.text_limits.items():
+            if name in form.base_fields:
+                tighten(form.base_fields[name], limit)
+        return form
 
 
 class _SingletonAdmin(GestiaModelAdmin):
@@ -272,66 +307,49 @@ class _SingletonAdmin(GestiaModelAdmin):
 
 @admin.register(ContactForms)
 class ContactFormsAdmin(_SingletonAdmin):
-    fieldsets = (
-        (
-            "Вікно святкових боксів",
-            {
-                "fields": (
-                    "waitlist_title_uk",
-                    "waitlist_title_en",
-                    "waitlist_p1_uk",
-                    "waitlist_p1_en",
-                    "waitlist_p2_uk",
-                    "waitlist_p2_en",
-                    "waitlist_p3_uk",
-                    "waitlist_p3_en",
-                    "waitlist_email_uk",
-                    "waitlist_email_en",
-                    "waitlist_consent_uk",
-                    "waitlist_consent_en",
-                    "waitlist_privacy_uk",
-                    "waitlist_privacy_en",
-                    "waitlist_button_uk",
-                    "waitlist_button_en",
-                    "waitlist_thanks_title_uk",
-                    "waitlist_thanks_title_en",
-                    "waitlist_thanks_text_uk",
-                    "waitlist_thanks_text_en",
-                )
-            },
+    fieldsets = language_tabs(
+        uk_fields=(
+            "waitlist_title_uk",
+            "waitlist_p1_uk",
+            "waitlist_p2_uk",
+            "waitlist_p3_uk",
+            "waitlist_email_uk",
+            "waitlist_consent_uk",
+            "waitlist_privacy_uk",
+            "waitlist_button_uk",
+            "waitlist_thanks_title_uk",
+            "waitlist_thanks_text_uk",
+            "contact_button_uk",
+            "callback_button_uk",
+            "buy_button_uk",
+            "sheet_close_uk",
+            "sheet_consent_uk",
+            "label_name_uk",
+            "label_phone_uk",
+            "label_message_uk",
+            "label_address_uk",
+            "label_email_uk",
         ),
-        (
-            "Кнопки форм",
-            {
-                "fields": (
-                    "contact_button_uk",
-                    "contact_button_en",
-                    "callback_button_uk",
-                    "callback_button_en",
-                    "buy_button_uk",
-                    "buy_button_en",
-                    "sheet_close_uk",
-                    "sheet_close_en",
-                    "sheet_consent_uk",
-                    "sheet_consent_en",
-                )
-            },
-        ),
-        (
-            "Підписи полів",
-            {
-                "fields": (
-                    "label_name_uk",
-                    "label_name_en",
-                    "label_phone_uk",
-                    "label_phone_en",
-                    "label_message_uk",
-                    "label_message_en",
-                    "label_address_uk",
-                    "label_address_en",
-                    "label_email_uk",
-                    "label_email_en",
-                )
-            },
+        en_fields=(
+            "waitlist_title_en",
+            "waitlist_p1_en",
+            "waitlist_p2_en",
+            "waitlist_p3_en",
+            "waitlist_email_en",
+            "waitlist_consent_en",
+            "waitlist_privacy_en",
+            "waitlist_button_en",
+            "waitlist_thanks_title_en",
+            "waitlist_thanks_text_en",
+            "contact_button_en",
+            "callback_button_en",
+            "buy_button_en",
+            "sheet_close_en",
+            "sheet_consent_en",
+            "label_name_en",
+            "label_phone_en",
+            "label_message_en",
+            "label_address_en",
+            "label_email_en",
         ),
     )

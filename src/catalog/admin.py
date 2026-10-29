@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib import admin
+from tinymce.widgets import TinyMCE
 
 from src.catalog.admin_filters import (
     CatalogBooleanFilter,
@@ -15,17 +17,10 @@ from src.catalog.models import (
     ProductSet,
 )
 from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline
+from src.core.admin_lang import language_tabs
 from src.core.admin_slug import SlugAdminMixin
 
 GALLERY_HINT = "1272×1540 px. JPG або PNG."
-
-
-def _language_fieldsets(main, ukrainian, english):
-    return (
-        ("Основне", {"fields": main}),
-        ("Українська", {"classes": ("tab",), "fields": ukrainian}),
-        ("English", {"classes": ("tab",), "fields": english}),
-    )
 
 
 class ProductImageInline(GestiaStackedInline):
@@ -63,10 +58,22 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
     list_filter = ("is_active", "parent")
     search_fields = ("name_uk", "name_en", "slug")
     ordering = ("sort", "name_uk")
-    fieldsets = _language_fieldsets(
-        ("parent", "slug", "image", "is_active", "sort", "home_sort", "menu_featured", "filter_sort"),
-        ("name_uk", "filter_name_uk", "seo_title_uk", "seo_description_uk"),
-        ("name_en", "seo_title_en", "seo_description_en"),
+    fieldsets = language_tabs(
+        uk_fields=(
+            "parent",
+            "slug",
+            "image",
+            "is_active",
+            "sort",
+            "home_sort",
+            "menu_featured",
+            "filter_sort",
+            "name_uk",
+            "filter_name_uk",
+            "seo_title_uk",
+            "seo_description_uk",
+        ),
+        en_fields=("name_en", "seo_title_en", "seo_description_en"),
     )
 
 
@@ -75,10 +82,9 @@ class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
     auto_slug = False
     list_display = ("slug", "name_uk")
     search_fields = ("name_uk", "slug")
-    fieldsets = _language_fieldsets(
-        ("slug",),
-        ("name_uk",),
-        ("name_en",),
+    fieldsets = language_tabs(
+        uk_fields=("slug", "name_uk"),
+        en_fields=("name_en",),
     )
 
 
@@ -87,10 +93,9 @@ class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
     list_display = ("name_uk", "group", "slug", "sort", "is_filterable")
     list_filter = ("group", "is_filterable")
     search_fields = ("name_uk", "name_en", "slug")
-    fieldsets = _language_fieldsets(
-        ("group", "slug", "is_filterable", "show_on_pdp", "sort"),
-        ("name_uk",),
-        ("name_en",),
+    fieldsets = language_tabs(
+        uk_fields=("group", "slug", "is_filterable", "show_on_pdp", "sort", "name_uk"),
+        en_fields=("name_en",),
     )
 
 
@@ -98,10 +103,9 @@ class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
 class ProductSetAdmin(SlugAdminMixin, GestiaModelAdmin):
     list_display = ("name_uk", "slug")
     search_fields = ("name_uk", "name_en", "slug")
-    fieldsets = _language_fieldsets(
-        ("slug",),
-        ("name_uk",),
-        ("name_en",),
+    fieldsets = language_tabs(
+        uk_fields=("slug", "name_uk"),
+        en_fields=("name_en",),
     )
 
 
@@ -157,8 +161,8 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
     filter_horizontal = ("filter_attrs", "related_manual")
     inlines = [ProductImageInline]
     ordering = ("sort", "name_uk")
-    fieldsets = _language_fieldsets(
-        (
+    fieldsets = language_tabs(
+        uk_fields=(
             "category",
             "product_set",
             "sku",
@@ -177,10 +181,25 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
             "sort",
             "filter_attrs",
             "related_manual",
+            "name_uk",
+            "menu_name_uk",
+            "description_uk",
+            "seo_title_uk",
+            "seo_description_uk",
         ),
-        ("name_uk", "menu_name_uk", "description_uk", "seo_title_uk", "seo_description_uk"),
-        ("name_en", "menu_name_en", "description_en", "seo_title_en", "seo_description_en"),
+        en_fields=(
+            "name_en",
+            "menu_name_en",
+            "description_en",
+            "seo_title_en",
+            "seo_description_en",
+        ),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in {"description_uk", "description_en"}:
+            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_DEFAULT_CONFIG)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @admin.action(description="Активувати")
     def activate_products(self, request, queryset):

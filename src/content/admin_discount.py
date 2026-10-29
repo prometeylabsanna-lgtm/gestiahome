@@ -6,22 +6,24 @@ from tinymce.widgets import TinyMCE
 
 from src.content.models_discount import DiscountModal
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_lang import language_tabs
 
 _EN_HINT = "Якщо порожньо — на сайті лишається український текст."
 
 
 class DiscountModalAdmin(GestiaModelAdmin):
-    fieldsets = (
-        ("Показ", {"fields": ("enabled", "delay_seconds", "shows_per_session")}),
-        (
-            "Українська",
-            {"classes": ("tab",), "fields": ("title_uk", "text_uk", "button_uk")},
+    fieldsets = language_tabs(
+        uk_fields=(
+            "enabled",
+            "delay_seconds",
+            "shows_per_session",
+            "title_uk",
+            "text_uk",
+            "button_uk",
+            "link",
+            "image",
         ),
-        (
-            "English",
-            {"classes": ("tab",), "fields": ("title_en", "text_en", "button_en")},
-        ),
-        ("Кнопка і фото", {"fields": ("link", "image")}),
+        en_fields=("title_en", "text_en", "button_en"),
     )
 
     def has_add_permission(self, request):

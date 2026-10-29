@@ -7,6 +7,7 @@ from tinymce.widgets import TinyMCE
 from src.content.models_legal import LegalPage
 from src.content.proxies import CookiePolicyPage, OfferPage, PrivacyPolicyPage, ShippingPage
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_lang import language_tabs
 
 _BODY_HINT = "Розділи оформлюйте заголовком 2."
 _EN_HINT = "Якщо порожньо — на сайті лишається український текст."
@@ -14,22 +15,9 @@ _EN_HINT = "Якщо порожньо — на сайті лишається у�
 
 class LegalPageAdmin(GestiaModelAdmin):
     page_key = ""
-    fieldsets = (
-        ("Сторінка", {"fields": ("updated_on",)}),
-        (
-            "Українська",
-            {
-                "classes": ("tab",),
-                "fields": ("title_uk", "body_uk", "seo_title_uk", "seo_description_uk"),
-            },
-        ),
-        (
-            "English",
-            {
-                "classes": ("tab",),
-                "fields": ("title_en", "body_en", "seo_title_en", "seo_description_en"),
-            },
-        ),
+    fieldsets = language_tabs(
+        uk_fields=("updated_on", "title_uk", "body_uk", "seo_title_uk", "seo_description_uk"),
+        en_fields=("title_en", "body_en", "seo_title_en", "seo_description_en"),
     )
 
     def get_queryset(self, request):

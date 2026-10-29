@@ -3,78 +3,101 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+from src.content.admin_keyed import KeyedBlockAdmin
 from src.content.admin_limits import tighten
-from src.content.admin_home_video import PageVideoMixin
-from src.content.models import ContactForms, HomeBlock
+from src.content.home_slots import sync_category_home_sort, sync_popular_flags
+from src.content.models import Advantage, ContactForms, HomeBlock
+from src.content.models_home_slots import HomeCategorySlot, HomePopularSlot
 from src.content.proxies import (
     HomeAdvantagesBlock,
     HomeCallbackBlock,
     HomeCategoriesBlock,
-    HomeHeroBlock,
     HomePopularBlock,
     HomeReviewsBlock,
 )
-from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
-PHOTO_DESK = "1442×871 px. JPG або PNG."
-PHOTO_MOBILE = "390×735 px. JPG або PNG."
-VIDEO_HINT = "MP4 або WEBM."
 CARD_PHOTO = "303×197 px. Спільне фото для всіх карток. JPG або PNG."
-_TINY = frozenset(
-    {
-        "text_uk",
-        "text_en",
-        "text_mobile_uk",
-        "text_mobile_en",
-    }
-)
+CAT_PHOTO = "Плитка категорії. JPG або PNG, довга сторона до 2560 px."
 
 
-class KeyedBlockAdmin(GestiaModelAdmin):
-    block_key = ""
-    default_sort = 0
-    text_limits = {}
-    image_hints = {}
-    tiny_fields = _TINY
+class HomeCategorySlotForm(forms.ModelForm):
+    image = forms.ImageField(label="Фото", required=False, help_text=CAT_PHOTO)
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(key=self.block_key)
+    class Meta:
+        model = HomeCategorySlot
+        fields = ("category", "sort")
 
-    def has_add_permission(self, request):
-        return False
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk and self.instance.category_id:
+            self.fields["image"].initial = self.instance.category.image
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        if commit:
+            obj.save()
+        if obj.category_id and "image" in self.cleaned_data:
+            cat = obj.category
+            image = self.cleaned_data["image"]
+            if image is False:
+                cat.image = None
+                cat.save(update_fields=["image"])
+            elif image:
+                cat.image = image
+                cat.save(update_fields=["image"])
+        return obj
 
-    def changelist_view(self, request, extra_context=None):
-        obj = HomeBlock.objects.filter(key=self.block_key).first()
-        if obj is None:
-            obj = HomeBlock.objects.create(key=self.block_key, sort=self.default_sort)
-        url = reverse(
-            f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change",
-            args=[obj.pk],
-        )
-        return HttpResponseRedirect(url)
 
-    def save_model(self, request, obj, form, change):
-        obj.key = self.block_key
-        super().save_model(request, obj, form, change)
+class HomeCategorySlotInline(GestiaTabularInline):
+    model = HomeCategorySlot
+    form = HomeCategorySlotForm
+    extra = 0
+    ordering_field = "sort"
+    hide_ordering_field = True
+    autocomplete_fields = ("category",)
+    fields = ("category", "image", "sort")
+
+
+class HomePopularSlotInline(GestiaTabularInline):
+    model = HomePopularSlot
+    extra = 0
+    ordering_field = "sort"
+    hide_ordering_field = True
+    autocomplete_fields = ("product",)
+    fields = ("product", "sort")
+
+
+class AdvantageInline(GestiaStackedInline):
+    model = Advantage
+    extra = 0
+    ordering_field = "sort"
+    hide_ordering_field = True
+    tiny_fields = ("text_uk", "text_en")
+    text_limits = {"title_uk": 24, "title_en": 24, "text_uk": 80, "text_en": 80}
+    fieldsets = language_tabs(
+        uk_fields=("sort", "title_uk", "text_uk", "image"),
+        en_fields=("title_en", "text_en"),
+    )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=True)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        hint = self.image_hints.get(db_field.name, "")
-        if db_field.name == "video":
-            hint = VIDEO_HINT
+        hint = ""
+        if db_field.name == "image":
+            hint = "303×197 px. Якщо порожньо — лишається фото блоку. JPG або PNG."
         return tighten(formfield, self.text_limits.get(db_field.name), hint)
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change=change, **kwargs)
-        force_tinymce(form, self.tiny_fields, short=True)
-        return form
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        force_tinymce(formset.form, self.tiny_fields, short=True)
+        for name, limit in self.text_limits.items():
+            if name in formset.form.base_fields:
+                tighten(formset.form.base_fields[name], limit)
+        return formset
 
 
 class HomeCallbackForm(forms.ModelForm):
@@ -151,67 +174,45 @@ def _join(cleaned, lang):
     )
 
 
-@admin.register(HomeHeroBlock)
-class HomeHeroAdmin(KeyedBlockAdmin):
-    block_key = HomeBlock.Key.HERO
-    default_sort = 1
-    text_limits = {
-        "title_uk": 64,
-        "title_en": 64,
-        "text_uk": 200,
-        "text_en": 200,
-        "cta_uk": 28,
-        "cta_en": 28,
-    }
-    image_hints = {
-        "image": PHOTO_DESK,
-        "image_mobile": PHOTO_MOBILE,
-        "poster": "Кадр до старту відео, 1442×871 px. Якщо порожньо — основне фото. JPG або PNG.",
-    }
-    fieldsets = language_tabs(
-        uk_fields=("title_uk", "text_uk", "cta_uk", "media_kind", "image", "image_mobile", "video", "poster"),
-        en_fields=("title_en", "text_en", "cta_en"),
-    )
-
-
 @admin.register(HomeCategoriesBlock)
-class HomeCategoriesAdmin(PageVideoMixin, KeyedBlockAdmin):
+class HomeCategoriesAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.CATEGORIES
     default_sort = 2
-    page_video_key = HomeBlock.Key.VIDEO
-    page_video_sort = 3
-    page_video_title = "Відео-блок після категорій"
-    page_video_description = (
-        "На головній цей блок стоїть одразу після категорій і перед популярними товарами."
-    )
+    inlines = (HomeCategorySlotInline,)
     text_limits = {"title_uk": 20, "title_en": 20}
+    tiny_fields = ()
     fieldsets = language_tabs(
         uk_fields=("title_uk",),
         en_fields=("title_en",),
     )
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        sync_category_home_sort(form.instance)
 
 
 @admin.register(HomePopularBlock)
 class HomePopularAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.POPULAR
     default_sort = 4
+    inlines = (HomePopularSlotInline,)
     text_limits = {"title_uk": 24, "title_en": 24, "cta_uk": 28, "cta_en": 28}
+    tiny_fields = ()
     fieldsets = language_tabs(
         uk_fields=("title_uk", "cta_uk"),
         en_fields=("title_en", "cta_en"),
     )
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        sync_popular_flags(form.instance)
+
 
 @admin.register(HomeAdvantagesBlock)
-class HomeAdvantagesAdmin(PageVideoMixin, KeyedBlockAdmin):
+class HomeAdvantagesAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.ADVANTAGES
     default_sort = 5
-    page_video_key = HomeBlock.Key.VIDEO_2
-    page_video_sort = 6
-    page_video_title = "Відео-блок після переваг"
-    page_video_description = (
-        "На головній цей блок стоїть одразу після переваг і перед відгуками."
-    )
+    inlines = (AdvantageInline,)
     text_limits = {
         "title_uk": 36,
         "title_en": 36,
@@ -234,12 +235,22 @@ class HomeAdvantagesAdmin(PageVideoMixin, KeyedBlockAdmin):
             formfield.help_text = "Для телефона. Якщо порожньо — текст із комп’ютера."
         return formfield
 
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for obj in instances:
+            obj.block = form.instance
+            obj.save()
+        formset.save_m2m()
+
 
 @admin.register(HomeReviewsBlock)
 class HomeReviewsAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.REVIEWS
     default_sort = 7
     text_limits = {"title_uk": 16, "title_en": 16}
+    tiny_fields = ()
     fieldsets = language_tabs(
         uk_fields=("title_uk",),
         en_fields=("title_en",),

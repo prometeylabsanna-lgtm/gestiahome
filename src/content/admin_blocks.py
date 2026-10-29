@@ -16,7 +16,12 @@ from src.content.proxies import (
     HomePopularBlock,
     HomeReviewsBlock,
 )
-from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
+from src.core.admin_base import (
+    AdminImagePreviewWidget,
+    GestiaModelAdmin,
+    GestiaStackedInline,
+    GestiaTabularInline,
+)
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -25,7 +30,12 @@ CAT_PHOTO = "Плитка категорії. JPG або PNG, довга сто�
 
 
 class HomeCategorySlotForm(forms.ModelForm):
-    image = forms.ImageField(label="Фото", required=False, help_text=CAT_PHOTO)
+    image = forms.ImageField(
+        label="Фото",
+        required=False,
+        help_text=CAT_PHOTO,
+        widget=AdminImagePreviewWidget,
+    )
 
     class Meta:
         model = HomeCategorySlot

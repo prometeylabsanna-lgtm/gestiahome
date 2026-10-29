@@ -5,7 +5,8 @@ from django.urls import reverse
 from django.utils import translation
 
 from src.catalog.models import Category, Product
-from src.content.admin_blocks import HomeCallbackForm
+from src.content.admin_blocks import HomeCallbackForm, HomeCategorySlotForm
+from src.core.admin_base import AdminImagePreviewWidget
 from src.content.home_slots import home_categories, home_popular
 from src.content.literals import LITERALS
 from src.content.models import Advantage, HomeBlock
@@ -180,6 +181,12 @@ class HomeSlotsTests(TestCase):
         page = self.client.get("/")
         self.assertContains(page, "benefit-list--scroll")
         self.assertContains(page, "Пункт 4")
+
+
+class HomeCategorySlotFormTests(TestCase):
+    def test_image_uses_preview_widget(self):
+        field = HomeCategorySlotForm.base_fields["image"]
+        self.assertIsInstance(field.widget, AdminImagePreviewWidget)
 
 
 def _block(key, **values):

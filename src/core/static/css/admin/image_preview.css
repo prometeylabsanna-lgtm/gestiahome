@@ -1,4 +1,7 @@
-.gestia-file {
+/* Висока специфічність: Unfold/Tailwind не збивають кнопки й превʼю. */
+html body #main .gestia-file,
+html body #content-main .gestia-file,
+html body .change-form .gestia-file {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -9,7 +12,9 @@
   box-sizing: border-box;
 }
 
-.gestia-file__preview {
+html body #main .gestia-file__preview,
+html body #content-main .gestia-file__preview,
+html body .change-form .gestia-file__preview {
   display: block;
   max-width: 100%;
   border: 1px solid #e5e5e5;
@@ -19,30 +24,36 @@
   line-height: 0;
 }
 
-.gestia-admin-thumb-link {
+html body #main .gestia-admin-thumb-link,
+html body #content-main .gestia-admin-thumb-link {
   display: inline-block;
   max-width: 100%;
   margin-bottom: 0.5rem;
 }
 
-.gestia-admin-thumb {
+html body #main .gestia-admin-thumb,
+html body #content-main .gestia-admin-thumb,
+html body .change-form .gestia-admin-thumb,
+html body #main .gestia-file__preview .gestia-admin-thumb,
+html body #content-main .gestia-file__preview .gestia-admin-thumb {
   display: block;
   width: auto;
-  max-width: min(16rem, 100%);
-  max-height: 10rem;
+  max-width: min(20rem, 100%);
+  max-height: 12rem;
   height: auto;
   object-fit: contain;
   border-radius: 0.5rem;
   background-color: #ffffff;
 }
 
-.gestia-file__preview .gestia-admin-thumb {
-  max-width: min(20rem, 100%);
-  max-height: 12rem;
+html body #main .gestia-file__preview .gestia-admin-thumb,
+html body #content-main .gestia-file__preview .gestia-admin-thumb {
   border-radius: 0;
 }
 
-.gestia-file__name {
+html body #main .gestia-file__name,
+html body #content-main .gestia-file__name,
+html body .change-form .gestia-file__name {
   margin: 0;
   max-width: 100%;
   font-size: 0.75rem;
@@ -52,7 +63,9 @@
   word-break: break-word;
 }
 
-.gestia-file__actions {
+html body #main .gestia-file__actions,
+html body #content-main .gestia-file__actions,
+html body .change-form .gestia-file__actions {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -61,17 +74,24 @@
   width: 100%;
 }
 
-.gestia-file__clear,
-.gestia-file__pick {
+html body #main .gestia-file__clear,
+html body #main .gestia-file__pick,
+html body #content-main .gestia-file__clear,
+html body #content-main .gestia-file__pick,
+html body .change-form .gestia-file__clear,
+html body .change-form .gestia-file__pick {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
   gap: 0.4rem;
   margin: 0;
   cursor: pointer;
+  position: relative;
 }
 
-.gestia-file__check {
+html body #main .gestia-file__check,
+html body #content-main .gestia-file__check,
+html body .change-form .gestia-file__check {
   -webkit-appearance: checkbox;
   appearance: auto;
   width: 1rem;
@@ -83,7 +103,9 @@
   flex: none;
 }
 
-.gestia-file__btn {
+html body #main .gestia-file__btn,
+html body #content-main .gestia-file__btn,
+html body .change-form .gestia-file__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -100,37 +122,48 @@
   user-select: none;
 }
 
-.gestia-file__btn--solid {
+html body #main .gestia-file__btn--solid,
+html body #content-main .gestia-file__btn--solid,
+html body .change-form .gestia-file__btn--solid {
   background: #171717;
   color: #fff;
 }
 
-.gestia-file__btn--ghost {
+html body #main .gestia-file__btn--ghost,
+html body #content-main .gestia-file__btn--ghost,
+html body .change-form .gestia-file__btn--ghost {
   background: #fff;
   color: #171717;
 }
 
-.gestia-file__pick:hover .gestia-file__btn--solid,
-.gestia-file__clear:hover .gestia-file__btn--ghost {
+html body #main .gestia-file__pick:hover .gestia-file__btn--solid,
+html body #main .gestia-file__clear:hover .gestia-file__btn--ghost,
+html body #content-main .gestia-file__pick:hover .gestia-file__btn--solid,
+html body #content-main .gestia-file__clear:hover .gestia-file__btn--ghost {
   border-color: #dc2626;
 }
 
-.gestia-file__pick:hover .gestia-file__btn--solid {
+html body #main .gestia-file__pick:hover .gestia-file__btn--solid,
+html body #content-main .gestia-file__pick:hover .gestia-file__btn--solid {
   background: #dc2626;
   color: #fff;
 }
 
-.gestia-file__clear:hover .gestia-file__btn--ghost {
+html body #main .gestia-file__clear:hover .gestia-file__btn--ghost,
+html body #content-main .gestia-file__clear:hover .gestia-file__btn--ghost {
   color: #dc2626;
 }
 
-.gestia-file__clear:has(.gestia-file__check:checked) .gestia-file__btn--ghost {
+html body #main .gestia-file__clear:has(.gestia-file__check:checked) .gestia-file__btn--ghost,
+html body #content-main .gestia-file__clear:has(.gestia-file__check:checked) .gestia-file__btn--ghost {
   border-color: #dc2626;
   background: #fff5f5;
   color: #b91c1c;
 }
 
-.gestia-file__input {
+html body #main .gestia-file__input,
+html body #content-main .gestia-file__input,
+html body .change-form .gestia-file__input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -140,42 +173,53 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
-html.dark .gestia-file__preview,
-html.dark .gestia-admin-thumb {
+html.dark body #main .gestia-file__preview,
+html.dark body #main .gestia-admin-thumb,
+html.dark body #content-main .gestia-file__preview,
+html.dark body #content-main .gestia-admin-thumb {
   background-color: #ffffff;
   border-color: #404040;
 }
 
-html.dark .gestia-file__name {
+html.dark body #main .gestia-file__name,
+html.dark body #content-main .gestia-file__name {
   color: #a3a3a3;
 }
 
-html.dark .gestia-file__btn--solid {
+html.dark body #main .gestia-file__btn--solid,
+html.dark body #content-main .gestia-file__btn--solid {
   background: #f5f5f5;
   border-color: #f5f5f5;
   color: #171717;
 }
 
-html.dark .gestia-file__btn--ghost {
+html.dark body #main .gestia-file__btn--ghost,
+html.dark body #content-main .gestia-file__btn--ghost {
   background: transparent;
   border-color: #a3a3a3;
   color: #f5f5f5;
 }
 
 @media (max-width: 767px) {
-  .gestia-file__actions {
+  html body #main .gestia-file__actions,
+  html body #content-main .gestia-file__actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .gestia-file__clear,
-  .gestia-file__pick {
+  html body #main .gestia-file__clear,
+  html body #main .gestia-file__pick,
+  html body #content-main .gestia-file__clear,
+  html body #content-main .gestia-file__pick {
     width: 100%;
   }
 
-  .gestia-file__btn {
+  html body #main .gestia-file__btn,
+  html body #content-main .gestia-file__btn {
     width: 100%;
   }
 }

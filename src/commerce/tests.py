@@ -152,6 +152,8 @@ class CheckoutTests(TestCase):
         self.assertNotContains(page, "figma.com")
         checkout = self.client.get("/zamovlennia/")
         self.assertEqual(checkout.status_code, 200)
+        self.assertContains(checkout, "Купити")
+        self.assertNotContains(checkout, "Перейти до оформлення")
         self.assertContains(checkout, "Контактні дані")
         self.assertContains(checkout, "Кур\u2019єрська доставка")
         self.assertNotContains(checkout, "Контактні данні")

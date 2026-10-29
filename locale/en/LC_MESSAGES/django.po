@@ -285,6 +285,9 @@ msgstr "Total price:"
 msgid "Перейти до оформлення"
 msgstr "Proceed to checkout"
 
+msgid "Купити"
+msgstr "Buy"
+
 msgid "Кошик порожній."
 msgstr "The basket is empty."
 

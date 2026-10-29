@@ -122,14 +122,16 @@ def _convert_group(refs: list[ImageRef], taken: set[str], day: str, report: Conv
         report.skipped += 1
         return
     located = _locate(storage, name)
-    if located is not None and is_static_tree(located):
-        report.unsafe += 1
-        report.problems.append(f"{name}: unsafe")
-        return
-    if not _exists(storage, name) and located is None:
-        report.missing += 1
-        return
-    if located is not None and not located.is_file() and not _exists(storage, name):
+    local = _supports_local_path(storage)
+    if local:
+        if located is None or is_static_tree(located):
+            report.unsafe += 1
+            report.problems.append(f"{name}: unsafe")
+            return
+        if not located.is_file():
+            report.missing += 1
+            return
+    elif not _exists(storage, name):
         report.missing += 1
         return
     suffix = PurePosixPath(name).suffix.lower()
@@ -227,6 +229,16 @@ def _read_bytes(storage, name: str, located: Path | None) -> bytes:
         return located.read_bytes()
     with storage.open(name, "rb") as handle:
         return handle.read()
+
+
+def _supports_local_path(storage) -> bool:
+    try:
+        storage.path("__gestia_path_probe__")
+    except NotImplementedError:
+        return False
+    except Exception:
+        return True
+    return True
 
 
 def _plan_target(storage, name: str, taken: set[str], *, apply: bool) -> str:

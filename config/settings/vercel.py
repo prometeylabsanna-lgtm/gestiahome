@@ -1,11 +1,10 @@
-"""Vercel demo/production settings. No Postgres required for free demo."""
+"""Vercel demo settings. Runtime works with zero env vars (test/demo project)."""
 
 from __future__ import annotations
 
 import logging
 import os
 import shutil
-import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -20,21 +19,13 @@ logger = logging.getLogger(__name__)
 
 DEBUG = False
 
+# demo only, Vercel test project
+DEMO_SECRET_KEY = (
+    "zGWU9thFpLz_B3PdvIuzdKApucgdkzzzoQf5C7RHD32BSv_2q6hLsqO29szXgVo242MRwF_rSHdr422IFTa9YA"
+)
+
 DEMO_DB_SOURCE = BASE_DIR / "demo" / "gestia_demo.sqlite3"
 DEMO_DB_RUNTIME = Path("/tmp/gestia_demo.sqlite3")
-_BUILD_DUMMY_SECRET = "vercel-build-only-not-for-runtime-use"
-
-
-def _is_build_phase() -> bool:
-    if os.environ.get("DJANGO_BUILD_PHASE") == "1":
-        return True
-    argv = [str(item).lower() for item in sys.argv]
-    if any(item == "collectstatic" or item.endswith("collectstatic") for item in argv):
-        return True
-    # Vercel: CI=1 лише на build; VERCEL=1 і на runtime.
-    if os.environ.get("VERCEL") == "1" and os.environ.get("CI") == "1":
-        return True
-    return False
 
 
 def _strip_host(raw: str) -> str:
@@ -53,22 +44,14 @@ def _https_origin(host: str) -> str:
 
 
 _secret = (config("SECRET_KEY", default="") or "").strip()
-if _secret:
-    SECRET_KEY = _secret
-elif _is_build_phase():
-    SECRET_KEY = _BUILD_DUMMY_SECRET
-else:
-    raise ImproperlyConfigured(
-        "SECRET_KEY must be set in the Vercel Environment Variables UI "
-        "(Project → Settings → Environment Variables)."
-    )
+SECRET_KEY = _secret or DEMO_SECRET_KEY
 
 _hosts: list[str] = [
     item.strip()
     for item in config("ALLOWED_HOSTS", default="", cast=Csv())
     if item and item.strip()
 ]
-_hosts.append(".vercel.app")
+_hosts.extend([".vercel.app", "localhost", "127.0.0.1"])
 for _var in ("VERCEL_URL", "VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_BRANCH_URL"):
     _host = _strip_host(os.environ.get(_var, ""))
     if _host:
@@ -80,10 +63,9 @@ _csrf: list[str] = [
     for item in config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
     if item and item.strip()
 ]
-for _host in ALLOWED_HOSTS:
-    if _host.startswith("."):
-        continue
-    _origin = _https_origin(_host)
+_csrf.append("https://*.vercel.app")
+for _var in ("VERCEL_URL", "VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_BRANCH_URL"):
+    _origin = _https_origin(os.environ.get(_var, ""))
     if _origin:
         _csrf.append(_origin)
 CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_csrf))
@@ -237,5 +219,5 @@ LOGGING = {
     },
 }
 
-# Cold-start hook flag for wsgi.py (ORM needs apps ready).
-ENSURE_DEMO_SUPERUSER_ON_START = not bool(_database_url)
+# Demo superuser is opt-in via manage.py ensure_demo_superuser (needs env vars).
+ENSURE_DEMO_SUPERUSER_ON_START = False

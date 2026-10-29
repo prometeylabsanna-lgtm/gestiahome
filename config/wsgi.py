@@ -32,8 +32,3 @@ if _demo_media.is_dir() and not getattr(settings, "AWS_STORAGE_BUCKET_NAME", "")
 
 # Vercel Python / деякі runtime очікують імʼя `app`.
 app = application
-
-if getattr(settings, "ENSURE_DEMO_SUPERUSER_ON_START", False):
-    from src.core.demo_runtime import ensure_demo_superuser
-
-    ensure_demo_superuser()

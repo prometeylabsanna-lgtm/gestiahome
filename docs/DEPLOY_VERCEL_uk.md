@@ -8,8 +8,8 @@
 |------|-----------|
 | БД | `demo/gestia_demo.sqlite3` копіюється в `/tmp/gestia_demo.sqlite3` на cold start |
 | Записи | Замовлення, правки в адмінці, зміни контенту зникають після cold start / redeploy |
-| Media (каталог) | `demo/media` → `public/media` на build → CDN `/media/…` |
-| Uploads у runtime | Пишуться в `/tmp/media` (ефемерні, CDN їх не віддає надійно) |
+| Media (каталог) | `demo/media` (~44 MB) у бандлі функції; WhiteNoise віддає `/media/…`. На build також копія в `public/media` |
+| Uploads у runtime | Пишуться в `/tmp/media` (ефемерні, WhiteNoise їх не бачить) |
 | Background | Немає Celery / cron / постійних воркерів |
 | Function size | Python bundle ≤ ~500 MB unzipped; media **не** входить у function (`excludeFiles`) |
 | Cold start | Копія SQLite (+ опційний `ensure_demo_superuser`) на старті інстансу |
@@ -82,9 +82,12 @@ DJANGO_SETTINGS_MODULE=config.settings.develop python manage.py build_demo_db
 
 Перегенеруйте й закомітьте перед демо-деплоєм, якщо контент змінився.
 
-## Media → CDN
+## Media
 
-`build_vercel.py` копіює `demo/media` → `public/media`. Запити `/media/…` обслуговує CDN, не Python function. У `vercel.json` → `excludeFiles` прибрані `media/**`, `demo/media/**`, `public/**` з бандла функції.
+- **Читання демо-файлів:** `config/wsgi.py` обгортає app у WhiteNoise з `demo/media` → URL `/media/…`. Тому `demo/media` **входить** у function bundle (~44 MB; ліміт Python ~500 MB).
+- **Build:** `build_vercel.py` також копіює в `public/media` (на випадок CDN-віддачі платформою).
+- **excludeFiles:** прибирає важкий `/media` (dev), `public/`, docs/figma, sqlite backups — не `demo/media`.
+- **Uploads** без S3 → `/tmp/media`, ефемерні.
 
 ### Синхронізація на S3/R2 (після апгрейду)
 

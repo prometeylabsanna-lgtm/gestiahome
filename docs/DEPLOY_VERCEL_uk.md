@@ -100,6 +100,8 @@ rclone sync ./media remote:YOUR_BUCKET --exclude "_originals_backup/**"
 
 У demo DB є суперкористувач **admin / admin** (зашитий у `demo/gestia_demo.sqlite3` під час `build_demo_db`). Cold start не створює інших користувачів. Команда `python manage.py ensure_demo_superuser` лишається для опційного оверрайду через `DJANGO_SUPERUSER_*`.
 
+Сесії адмінки на Vercel — `signed_cookies` (не SQLite у `/tmp`), інакше логін «відлітає» на кожному переході між serverless-інстансами.
+
 Якщо підключили Postgres:
 
 ```bash

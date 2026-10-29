@@ -50,6 +50,10 @@ class VercelSettingsSourceTests(SimpleTestCase):
             text,
         )
         self.assertIn("ENSURE_DEMO_SUPERUSER_ON_START = False", text)
+        self.assertIn(
+            'SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"',
+            text,
+        )
         self.assertIn('".vercel.app"', text)
         self.assertIn('"localhost"', text)
         self.assertIn('"127.0.0.1"', text)

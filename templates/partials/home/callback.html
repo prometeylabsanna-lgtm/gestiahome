@@ -3,6 +3,7 @@
 {% cms block.text "callback_text" as cb_text %}
 {% cms block.text_mobile "callback_text_mobile" as cb_mob %}
 {% cms block.cta "callback_cta" as cb_cta %}
+{% cms "" "contact_button" as cb_send %}
 {% cms block.note "callback_note" as cb_note %}
 {% cms block.link_label "callback_privacy" as cb_privacy %}
 {% cms block.field_labels.0 "callback_name" as cb_name %}
@@ -45,6 +46,9 @@
       </label>
       <p class="figma-error" data-error-for="consent"{% if not home_form.consent.errors %} hidden{% endif %}>{% if home_form.consent.errors %}{{ home_form.consent.errors|striptags }}{% endif %}</p>
     </div>
-    <button class="figma-btn figma-btn--brown figma-btn--wide" type="submit">{{ cb_cta }}</button>
+    <div class="callback__actions">
+      <button class="figma-btn figma-btn--brown" type="submit">{{ cb_send }}</button>
+      <a class="figma-btn figma-btn--brown" href="{% url 'catalog' %}">{{ cb_cta }}</a>
+    </div>
   </form>
 </section>

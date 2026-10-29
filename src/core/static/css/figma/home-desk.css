@@ -347,7 +347,7 @@
     color: #9a9088;
   }
 
-  .callback .figma-btn--wide {
+  .callback__actions .figma-btn {
     font-weight: 500;
     border-color: var(--brown);
     color: var(--brown);

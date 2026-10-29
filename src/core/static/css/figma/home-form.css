@@ -206,7 +206,37 @@
   }
 }
 
-.callback .figma-btn--wide {
+.callback__actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+}
+
+.callback__actions .figma-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  box-sizing: border-box;
+  padding-inline: 10px;
   font-weight: 400;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+@media (max-width: 767px) {
+  .callback__actions {
+    gap: 8px;
+  }
+
+  .callback__actions .figma-btn {
+    min-height: 44px;
+    font-size: 13px;
+    padding-inline: 8px;
+  }
 }
 

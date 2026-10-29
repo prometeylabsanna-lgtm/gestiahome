@@ -1,12 +1,20 @@
 from urllib.parse import urlparse
 
 from decouple import config
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F403
+from .base import SECRET_KEY as _BASE_SECRET_KEY
 
 DEBUG = False
 
-_db = urlparse(config("DATABASE_URL"))
+if not (_BASE_SECRET_KEY or "").strip():
+    raise ImproperlyConfigured("SECRET_KEY is required for production settings.")
+
+_db_url = (config("DATABASE_URL", default="") or "").strip()
+if not _db_url:
+    raise ImproperlyConfigured("DATABASE_URL is required for production settings.")
+_db = urlparse(_db_url)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",

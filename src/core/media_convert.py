@@ -122,11 +122,16 @@ def _convert_group(refs: list[ImageRef], taken: set[str], day: str, report: Conv
         report.skipped += 1
         return
     located = _locate(storage, name)
-    if located is None or is_static_tree(located):
-        report.unsafe += 1
-        report.problems.append(f"{name}: unsafe")
-        return
-    if not located.is_file():
+    local = _supports_local_path(storage)
+    if local:
+        if located is None or is_static_tree(located):
+            report.unsafe += 1
+            report.problems.append(f"{name}: unsafe")
+            return
+        if not located.is_file():
+            report.missing += 1
+            return
+    elif not _exists(storage, name):
         report.missing += 1
         return
     suffix = PurePosixPath(name).suffix.lower()
@@ -137,7 +142,7 @@ def _convert_group(refs: list[ImageRef], taken: set[str], day: str, report: Conv
         report.skipped += 1
         return
     try:
-        payload = located.read_bytes()
+        payload = _read_bytes(storage, name, located)
         content = encode_upload(BytesIO(payload), name)
     except Exception as exc:
         report.errors += 1
@@ -197,24 +202,43 @@ def _delete_source(storage, name: str, new_name: str, report: ConvertReport) -> 
 
 def _write_backup(storage, name: str, payload: bytes, day: str) -> str:
     relative = f"{BACKUP_PREFIX}/{day}/{name.replace(chr(92), '/').lstrip('/')}"
+    # Local FS: keep path traversal guard. S3 / remote: storage API only.
+    located = _locate(storage, relative)
+    if located is not None:
+        if located.is_file() and located.stat().st_size > 0:
+            return "kept"
+        try:
+            located.parent.mkdir(parents=True, exist_ok=True)
+            located.write_bytes(payload)
+        except OSError:
+            return "failed"
+        if located.is_file() and located.stat().st_size == len(payload):
+            return "new"
+        return "failed"
     try:
-        path = Path(storage.path(relative))
-        root = Path(settings.MEDIA_ROOT).resolve()
-        path.resolve().relative_to(root)
-    except _UNSAFE:
-        return "failed"
-    except ValueError:
-        return "failed"
-    if path.is_file() and path.stat().st_size > 0:
-        return "kept"
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(payload)
-    except OSError:
-        return "failed"
-    if path.is_file() and path.stat().st_size == len(payload):
+        if _exists(storage, relative):
+            return "kept"
+        storage.save(relative, ContentFile(payload))
         return "new"
-    return "failed"
+    except Exception:
+        return "failed"
+
+
+def _read_bytes(storage, name: str, located: Path | None) -> bytes:
+    if located is not None and located.is_file():
+        return located.read_bytes()
+    with storage.open(name, "rb") as handle:
+        return handle.read()
+
+
+def _supports_local_path(storage) -> bool:
+    try:
+        storage.path("__gestia_path_probe__")
+    except NotImplementedError:
+        return False
+    except Exception:
+        return True
+    return True
 
 
 def _plan_target(storage, name: str, taken: set[str], *, apply: bool) -> str:
@@ -264,4 +288,10 @@ def _storage_location(storage) -> str:
     try:
         return str(Path(storage.location).resolve())
     except Exception:
-        return ""
+        pass
+    bucket = getattr(storage, "bucket_name", None) or getattr(
+        settings, "AWS_STORAGE_BUCKET_NAME", ""
+    )
+    if bucket:
+        return f"s3:{bucket}"
+    return storage.__class__.__module__ + "." + storage.__class__.__name__

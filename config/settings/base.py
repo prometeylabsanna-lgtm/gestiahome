@@ -4,7 +4,9 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = config("SECRET_KEY")
+# Підкласи (develop / production / vercel) задають або перевіряють ключ.
+# Порожній default — щоб імпорт base не падав на Vercel build без .env.
+SECRET_KEY = config("SECRET_KEY", default="")
 
 DEBUG = False
 
@@ -215,8 +217,8 @@ UNFOLD = {
     "SITE_HEADER": "Gestia Home",
     "SITE_URL": "/",
     "SITE_ICON": {
-        "light": _admin_asset("images/apple-touch-icon.png"),
-        "dark": _admin_asset("images/apple-touch-icon.png"),
+        "light": _admin_asset("images/favicon.png"),
+        "dark": _admin_asset("images/favicon.png"),
     },
     "SITE_FAVICONS": [
         {

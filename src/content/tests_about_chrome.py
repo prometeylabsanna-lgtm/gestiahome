@@ -75,10 +75,10 @@ class HeaderFooterRenderTests(TestCase):
         self.site.logo = ""
         self.site.save()
         page = self.client.get("/")
-        self.assertContains(page, "Вітрину зібрано в")
+        self.assertContains(page, "Зроблено")
         self.assertContains(page, "figma/desktop/5493c.png")
         english = self.client.get("/en/")
-        self.assertContains(english, "Storefront assembled by")
+        self.assertContains(english, "Made by")
 
     def test_telegram_url_in_social_row(self):
         self.site.telegram_url = "https://t.me/gestia_home"

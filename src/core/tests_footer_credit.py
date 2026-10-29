@@ -16,7 +16,7 @@ class FooterDeveloperLinkTests(TestCase):
         self.assertContains(response, 'rel="nofollow noopener noreferrer"')
         self.assertContains(response, ">PrometeyLabs</a>")
         self.assertContains(response, "site-footer__credit-link")
-        self.assertContains(response, "Вітрину зібрано в")
+        self.assertContains(response, "Зроблено")
 
     def test_english_home_keeps_credit_link(self):
         response = self.client.get("/en/")

@@ -72,6 +72,7 @@ class Command(BaseCommand):
             target_db.unlink()
         shutil.copy2(source_db, target_db)
         self._purge_pii(target_db)
+        self._seed_demo_superuser(target_db)
         self.stdout.write(self.style.SUCCESS(f"Wrote {target_db} (PII purged)"))
 
         if options["skip_media"]:
@@ -120,6 +121,47 @@ class Command(BaseCommand):
                     conn.execute(statement)
             conn.commit()
             conn.execute("VACUUM")
+        finally:
+            conn.close()
+
+    def _seed_demo_superuser(self, db_path: Path) -> None:
+        """Vercel demo login: admin / admin (baked into committed SQLite)."""
+        from datetime import datetime, timezone
+
+        from django.contrib.auth.hashers import make_password
+
+        conn = sqlite3.connect(str(db_path))
+        try:
+            tables = {
+                row[0]
+                for row in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+            }
+            if "auth_user" not in tables:
+                return
+            pwd = make_password("admin")
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            row = conn.execute(
+                "SELECT id FROM auth_user WHERE username = ?",
+                ("admin",),
+            ).fetchone()
+            if row:
+                conn.execute(
+                    "UPDATE auth_user SET password = ?, is_staff = 1, "
+                    "is_superuser = 1, is_active = 1, email = ? WHERE id = ?",
+                    (pwd, "admin@gestia.local", row[0]),
+                )
+            else:
+                conn.execute(
+                    "INSERT INTO auth_user ("
+                    "password, last_login, is_superuser, username, first_name, "
+                    "last_name, email, is_staff, is_active, date_joined"
+                    ") VALUES (?, NULL, 1, 'admin', '', '', ?, 1, 1, ?)",
+                    (pwd, "admin@gestia.local", now),
+                )
+            conn.commit()
+            self.stdout.write("Demo superuser admin / admin seeded")
         finally:
             conn.close()
 

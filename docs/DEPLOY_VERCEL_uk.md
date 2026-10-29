@@ -98,7 +98,7 @@ rclone sync ./media remote:YOUR_BUCKET --exclude "_originals_backup/**"
 
 На **демо SQLite** міграції вже всередині committed файлу — `migrate` на Vercel не потрібен.
 
-У demo DB **немає** admin-користувача; cold start його не створює. Команда `python manage.py ensure_demo_superuser` лишається, але без `DJANGO_SUPERUSER_*` нічого не робить. Отримання admin для демо — поза межами цього документа.
+У demo DB є суперкористувач **admin / admin** (зашитий у `demo/gestia_demo.sqlite3` під час `build_demo_db`). Cold start не створює інших користувачів. Команда `python manage.py ensure_demo_superuser` лишається для опційного оверрайду через `DJANGO_SUPERUSER_*`.
 
 Якщо підключили Postgres:
 

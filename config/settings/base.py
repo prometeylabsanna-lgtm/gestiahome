@@ -4,7 +4,9 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = config("SECRET_KEY")
+# Підкласи (develop / production / vercel) задають або перевіряють ключ.
+# Порожній default — щоб імпорт base не падав на Vercel build без .env.
+SECRET_KEY = config("SECRET_KEY", default="")
 
 DEBUG = False
 

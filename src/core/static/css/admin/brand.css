@@ -1,11 +1,11 @@
-/* Gestia admin branding: logo square + white shell */
+/* Gestia admin branding: G mark on white / transparent */
 #nav-sidebar .shrink-0 img,
 .navigation_header .shrink-0 img {
   border-radius: 0.5rem;
   height: 38px;
   width: 38px;
-  object-fit: cover;
-  background: #000;
+  object-fit: contain;
+  background: #fff;
 }
 
 body {

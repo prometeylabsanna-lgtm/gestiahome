@@ -215,8 +215,8 @@ UNFOLD = {
     "SITE_HEADER": "Gestia Home",
     "SITE_URL": "/",
     "SITE_ICON": {
-        "light": _admin_asset("images/apple-touch-icon.png"),
-        "dark": _admin_asset("images/apple-touch-icon.png"),
+        "light": _admin_asset("images/favicon.png"),
+        "dark": _admin_asset("images/favicon.png"),
     },
     "SITE_FAVICONS": [
         {

@@ -5,11 +5,11 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
-from src.catalog.models import Category, Product
 from src.commerce.forms import ContactForm, style_form
 from src.commerce.models import Inquiry
 from src.commerce.services import create_inquiry
 from src.core.ratelimit import honeypot_filled, reject_if_limited
+from src.content.home_slots import home_categories, home_popular
 from src.content.legal_pages import legal_document
 from src.content.models import AboutPage, Advantage, HomeBlock, Review
 
@@ -31,19 +31,16 @@ def home(request):
             consent=True,
         )
         return redirect(f"{reverse('thanks')}?kind=contact")
-    categories = Category.objects.filter(is_active=True, home_sort__isnull=False).order_by("home_sort", "id")
-    popular = (
-        Product.objects.filter(is_active=True, is_popular=True)
-        .prefetch_related("images")
-        .order_by("sort", "id")
-    )
+    advantages = Advantage.objects.filter(block__key=HomeBlock.Key.ADVANTAGES)
+    if not advantages.exists():
+        advantages = Advantage.objects.filter(block__isnull=True)
     return render(
         request,
         "content/home.html",
         {
-            "categories": categories,
-            "popular": popular,
-            "advantages": Advantage.objects.all(),
+            "categories": home_categories(),
+            "popular": home_popular(),
+            "advantages": advantages,
             "reviews": Review.objects.all(),
             "home_form": form,
         },
@@ -60,17 +57,12 @@ def _figma_block(key, title, cta=""):
 
 def about(request):
     page = AboutPage.load()
-    popular = (
-        Product.objects.filter(is_active=True, is_popular=True)
-        .prefetch_related("images")
-        .order_by("sort", "id")
-    )
     return render(
         request,
         "content/about.html",
         {
             "page": page,
-            "popular": popular,
+            "popular": home_popular(),
             "reviews": Review.objects.all(),
             "popular_block": _figma_block("popular", "Популярні товари", "Перейти до каталогу"),
             "reviews_block": _figma_block("reviews", "Відгуки"),

@@ -152,6 +152,27 @@
     grid-template-columns: repeat(4, 303px);
   }
 
+  .benefit-list--scroll {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 30px;
+    width: 100%;
+    max-width: 1440px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .benefit-list--scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .benefit-list--scroll .benefit {
+    flex: 0 0 303px;
+  }
+
   .benefit,
   .benefit h3,
   .benefit p,

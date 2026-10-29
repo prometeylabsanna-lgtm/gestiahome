@@ -1,12 +1,28 @@
-from src.content.models import HomeBlock, SiteSettings
+from src.content.models import AboutPage, HomeBlock, SiteSettings
 from src.content.models_legal import LegalPage
 
 
-class HomeHeroBlock(HomeBlock):
+class HomeBannerMedia(HomeBlock):
     class Meta:
         proxy = True
-        verbose_name = "Головний банер"
-        verbose_name_plural = "Головний банер"
+        verbose_name = "Банер"
+        verbose_name_plural = "Банер"
+
+
+class HomeBannerText(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Текст банера"
+        verbose_name_plural = "Текст банера"
+
+
+class HomeHeroBlock(HomeBlock):
+    """Legacy proxy name; admin uses HomeBannerText / HomeBannerMedia."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Текст банера"
+        verbose_name_plural = "Текст банера"
 
 
 class HomeCategoriesBlock(HomeBlock):
@@ -16,11 +32,18 @@ class HomeCategoriesBlock(HomeBlock):
         verbose_name_plural = "Категорії"
 
 
+class HomeMidBanner(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Банер середній"
+        verbose_name_plural = "Банер середній"
+
+
 class HomeVideoBlock(HomeBlock):
     class Meta:
         proxy = True
-        verbose_name = "Відео"
-        verbose_name_plural = "Відео"
+        verbose_name = "Банер середній"
+        verbose_name_plural = "Банер середній"
 
 
 class HomePopularBlock(HomeBlock):
@@ -33,15 +56,22 @@ class HomePopularBlock(HomeBlock):
 class HomeAdvantagesBlock(HomeBlock):
     class Meta:
         proxy = True
-        verbose_name = "Переваги"
-        verbose_name_plural = "Переваги"
+        verbose_name = "Чому обирають"
+        verbose_name_plural = "Чому обирають"
+
+
+class HomeBottomBanner(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Банер нижній"
+        verbose_name_plural = "Банер нижній"
 
 
 class HomeVideo2Block(HomeBlock):
     class Meta:
         proxy = True
-        verbose_name = "Відео 2"
-        verbose_name_plural = "Відео 2"
+        verbose_name = "Банер нижній"
+        verbose_name_plural = "Банер нижній"
 
 
 class HomeReviewsBlock(HomeBlock):
@@ -54,8 +84,43 @@ class HomeReviewsBlock(HomeBlock):
 class HomeCallbackBlock(HomeBlock):
     class Meta:
         proxy = True
-        verbose_name = "Зворотний дзвінок"
-        verbose_name_plural = "Зворотний дзвінок"
+        verbose_name = "Зворотній дзвінок"
+        verbose_name_plural = "Зворотній дзвінок"
+
+
+class AboutIntro(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Інтро"
+        verbose_name_plural = "Інтро"
+
+
+class AboutGallery(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Галерея"
+        verbose_name_plural = "Галерея"
+
+
+class AboutStory(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Історія"
+        verbose_name_plural = "Історія"
+
+
+class AboutBanner(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Банер"
+        verbose_name_plural = "Банер"
+
+
+class AboutPicksBlock(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Картки під відгуками"
+        verbose_name_plural = "Картки під відгуками"
 
 
 class OfferPage(LegalPage):

@@ -9,7 +9,7 @@
     {% if adv_text %}<div class="benefits__lead benefits__lead--desk">{{ adv_text|richhtml }}</div>{% endif %}
     {% if adv_mob %}<div class="benefits__lead benefits__lead--mob">{{ adv_mob|richhtml }}</div>{% endif %}
   </header>
-  <div class="benefit-list">
+  <div class="benefit-list{% if advantages|length > 4 %} benefit-list--scroll{% endif %}">
     {% for item in advantages %}
       <article class="benefit">
         <span class="benefit__media">

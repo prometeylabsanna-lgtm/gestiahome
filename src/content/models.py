@@ -213,6 +213,14 @@ class HomeBlock(MediaChoice):
 
 class Advantage(models.Model):
     rich_text_fields = ("text_uk", "text_en")
+    block = models.ForeignKey(
+        "content.HomeBlock",
+        related_name="advantage_cards",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Блок",
+    )
     title_uk = models.CharField("Заголовок", max_length=160)
     title_en = models.CharField("Заголовок (EN)", max_length=160, blank=True)
     text_uk = models.TextField("Текст", blank=True)
@@ -438,6 +446,7 @@ class ContactForms(SingletonModel):
 
 from src.content import models_about as _about_models  # noqa: E402,F401
 from src.content import models_discount as _discount_models  # noqa: E402,F401
+from src.content import models_home_slots as _home_slots  # noqa: E402,F401
 from src.content import models_legal as _legal_models  # noqa: E402,F401
 from src.content import models_styles as _style_models  # noqa: E402,F401
 from src.content import proxies as _home_proxies  # noqa: E402,F401

@@ -46,6 +46,8 @@ function initNpShip() {
 
   const cityInput = root.querySelector("[data-np-city]");
   const branchInput = root.querySelector("[data-np-branch]");
+  const houseWrap = root.querySelector("[data-np-house]");
+  const houseInput = root.querySelector("[data-np-house-input]");
   const aptWrap = root.querySelector("[data-np-apt]");
   const aptInput = root.querySelector("[data-np-apartment]");
   const cityList = root.querySelector("#np-city-listbox");
@@ -83,6 +85,7 @@ function initNpShip() {
   let streetRequest = 0;
   let cityRef = "";
   let warehouses = [];
+  let manualMode = false;
 
   function syncSecondField() {
     const courier = isCourier();
@@ -105,12 +108,25 @@ function initNpShip() {
     if (streetLine) {
       streetLine.classList.toggle("is-courier", courier);
     }
+    if (houseWrap) {
+      houseWrap.hidden = !courier;
+    }
+    if (houseInput && !courier) {
+      houseInput.value = "";
+    }
     if (aptWrap) {
       aptWrap.hidden = !courier;
     }
     if (aptInput && !courier) {
       aptInput.value = "";
     }
+  }
+
+  function enterManualMode(message) {
+    manualMode = true;
+    closeList(cityList, cityInput);
+    closeList(branchList, branchInput);
+    setHint(message || hints.npOff);
   }
 
   function setHint(text) {
@@ -181,13 +197,13 @@ function initNpShip() {
         return;
       }
       if (response.status === 503 || payload.error === "not_configured") {
-        closeList(cityList, cityInput);
-        setHint(hints.npOff);
+        enterManualMode(hints.npOff);
         return;
       }
       if (!response.ok) {
         throw new Error(`cities ${response.status}`);
       }
+      manualMode = false;
       setHint("");
       const items = Array.isArray(payload.items) ? payload.items : [];
       openList(
@@ -211,13 +227,12 @@ function initNpShip() {
       if (current !== cityRequest) {
         return;
       }
-      closeList(cityList, cityInput);
-      setHint(hints.citiesFail);
+      enterManualMode(hints.citiesFail);
     }
   }
 
   async function loadWarehouses() {
-    if (isCourier() || !warehousesUrl || !cityRef) {
+    if (isCourier() || !warehousesUrl || !cityRef || manualMode) {
       warehouses = [];
       closeList(branchList, branchInput);
       return;
@@ -258,10 +273,17 @@ function initNpShip() {
   }
 
   async function loadStreets() {
-    const { street, house } = splitStreetQuery(branchInput.value);
-    if (!isCourier() || !streetsUrl || !cityRef || street.length < minChars) {
+    const street = (branchInput.value || "").trim();
+    if (!isCourier() || !streetsUrl || street.length < minChars) {
       if (isCourier()) {
         closeList(branchList, branchInput);
+      }
+      return;
+    }
+    if (manualMode || !cityRef) {
+      closeList(branchList, branchInput);
+      if (!cityRef && !manualMode) {
+        setHint(hints.pickCity);
       }
       return;
     }
@@ -281,8 +303,7 @@ function initNpShip() {
         return;
       }
       if (response.status === 503 || payload.error === "not_configured") {
-        closeList(branchList, branchInput);
-        setHint(hints.streetsOff);
+        enterManualMode(hints.streetsOff);
         return;
       }
       if (!response.ok) {
@@ -295,9 +316,11 @@ function initNpShip() {
         branchInput,
         items.map((item) => ({ label: item.label, ref: item.ref })),
         (row) => {
-          branchInput.value = house ? `${row.label}, ${house}` : row.label;
+          branchInput.value = row.label;
           closeList(branchList, branchInput);
-          if (aptInput) {
+          if (houseInput) {
+            houseInput.focus();
+          } else if (aptInput) {
             aptInput.focus();
           }
         }
@@ -309,8 +332,7 @@ function initNpShip() {
       if (current !== streetRequest) {
         return;
       }
-      closeList(branchList, branchInput);
-      setHint(hints.streetsFail);
+      enterManualMode(hints.streetsFail);
     }
   }
 
@@ -363,16 +385,24 @@ function initNpShip() {
   });
   branchInput.addEventListener("focus", () => {
     if (isCourier()) {
+      if (manualMode) {
+        setHint(hints.streetFormat);
+        return;
+      }
       if (!cityRef) {
         setHint(hints.pickCity);
         return;
       }
-      const { street } = splitStreetQuery(branchInput.value);
+      const street = (branchInput.value || "").trim();
       if (street.length >= minChars) {
         scheduleStreets();
       } else {
         setHint(hints.streetFormat);
       }
+      return;
+    }
+    if (manualMode) {
+      setHint(hints.npOff);
       return;
     }
     if (warehouses.length) {
@@ -391,13 +421,16 @@ function initNpShip() {
     const input = event.target;
     if (input && input.name === "delivery_method") {
       branchInput.value = "";
+      if (houseInput) {
+        houseInput.value = "";
+      }
       if (aptInput) {
         aptInput.value = "";
       }
       warehouses = [];
       closeList(branchList, branchInput);
       syncSecondField();
-      if (!isCourier() && cityRef) {
+      if (!isCourier() && cityRef && !manualMode) {
         loadWarehouses();
       }
     }

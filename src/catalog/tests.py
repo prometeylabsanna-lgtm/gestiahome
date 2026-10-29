@@ -246,20 +246,17 @@ class MenuNameEnTests(TestCase):
         defaults.update(extra)
         return Product.objects.create(**defaults)
 
-    def test_menu_name_uses_localized_then_name(self):
-        with translation.override("uk"):
-            self.assertEqual(self.cones.menu_name, "Бокс Різдвяний Шишки")
-        with translation.override("en"):
-            self.assertEqual(self.cones.menu_name, "Бокс Різдвяний Шишки")
-        self.cones.menu_name_en = "Christmas box “Pine Cones”"
-        with translation.override("en"):
-            self.assertEqual(self.cones.menu_name, "Christmas box “Pine Cones”")
-        self.cones.menu_name_uk = ""
-        self.cones.menu_name_en = ""
-        with translation.override("en"):
-            self.assertEqual(self.cones.menu_name, "Christmas box “Pine Cones”")
+    def test_menu_name_always_uses_product_name(self):
         with translation.override("uk"):
             self.assertEqual(self.cones.menu_name, "Бокс «Різдвяний Шишки»")
+        with translation.override("en"):
+            self.assertEqual(self.cones.menu_name, "Christmas box “Pine Cones”")
+        self.cones.menu_name_uk = "Інша в меню"
+        self.cones.menu_name_en = "Other menu"
+        with translation.override("uk"):
+            self.assertEqual(self.cones.menu_name, "Бокс «Різдвяний Шишки»")
+        with translation.override("en"):
+            self.assertEqual(self.cones.menu_name, "Christmas box “Pine Cones”")
 
     def test_fill_copies_same_name_and_translates_by_sku(self):
         same = self._product(
@@ -293,8 +290,7 @@ class MenuNameEnTests(TestCase):
         self.assertEqual(kept.menu_name_en, "Custom menu")
         self.assertEqual(blank.menu_name_en, "")
 
-    def test_english_menu_shows_menu_name_en(self):
-        self.copy.fill_menu_name_en(apps, None)
+    def test_english_menu_shows_product_name_en(self):
         page = self.client.get("/en/")
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "Christmas box “Pine Cones”")
@@ -302,24 +298,17 @@ class MenuNameEnTests(TestCase):
 
 
 class EnglishFrameLabelTests(TestCase):
-    def test_filter_label_uses_english_name_when_the_words_match(self):
+    def test_filter_label_always_uses_category_name(self):
         textiles = Category.objects.create(
             slug="tekstyl-en",
-            name_uk="Текстиль ",
+            name_uk="Текстиль",
             name_en="Textiles",
-            filter_name_uk="Текстиль",
-        )
-        custom = Category.objects.create(
-            slug="custom-filter",
-            name_uk="Свічки",
-            name_en="Candles",
-            filter_name_uk="Інша назва",
+            filter_name_uk="Інша мітка",
         )
         with translation.override("uk"):
             self.assertEqual(textiles.filter_label, "Текстиль")
         with translation.override("en"):
             self.assertEqual(textiles.filter_label, "Textiles")
-            self.assertEqual(custom.filter_label, "Інша назва")
 
     def test_cell_stamp_gets_english_label(self):
         copy = importlib.import_module("src.catalog.migrations.0013_fill_catalogcell_label_en")

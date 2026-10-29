@@ -12,17 +12,17 @@ from src.catalog.admin import (
     ProductSetAdmin,
 )
 from src.catalog.models import Category, Product, ProductAttribute, ProductAttributeGroup, ProductSet
-from src.content.admin import AdvantageAdmin, FooterLinkAdmin, HomeBlockAdmin, ReviewAdmin, SiteSettingsAdmin
+from src.content.admin import AdvantageAdmin, HomeBlockAdmin, ReviewAdmin, SiteSettingsAdmin
 from src.content.admin_about import (
     AboutBannerAdmin,
     AboutGalleryAdmin,
     AboutIntroAdmin,
-    AboutPicksAdmin,
+    AboutPopularAdmin,
+    AboutReviewsAdmin,
     AboutStoryAdmin,
     FooterChromeAdmin,
 )
 from src.content.admin_blocks import (
-    ContactFormsAdmin,
     HomeAdvantagesAdmin,
     HomeCallbackAdmin,
     HomeCategoriesAdmin,
@@ -37,7 +37,7 @@ from src.content.admin_home_banners import (
     HomeMidBannerAdmin,
 )
 from src.content.admin_legal import LegalPageAdmin
-from src.content.models import Advantage, FooterLink, HomeBlock, Review, SiteSettings
+from src.content.models import Advantage, HomeBlock, Review, SiteSettings
 from src.content.models_discount import DiscountModal
 from src.core.admin_lang import assert_language_tab_fieldsets, language_tabs
 from src.core.html_sanitize import (
@@ -91,7 +91,8 @@ class AdminLanguageTabFieldsetTests(TestCase):
             AboutGalleryAdmin,
             AboutStoryAdmin,
             AboutBannerAdmin,
-            AboutPicksAdmin,
+            AboutPopularAdmin,
+            AboutReviewsAdmin,
             FooterChromeAdmin,
             HomeBannerMediaAdmin,
             HomeBannerTextAdmin,
@@ -102,12 +103,10 @@ class AdminLanguageTabFieldsetTests(TestCase):
             HomeAdvantagesAdmin,
             HomeReviewsAdmin,
             HomeCallbackAdmin,
-            ContactFormsAdmin,
             SiteSettingsAdmin,
             HomeBlockAdmin,
             AdvantageAdmin,
             ReviewAdmin,
-            FooterLinkAdmin,
             CategoryAdmin,
             ProductAdmin,
             ProductAttributeGroupAdmin,
@@ -173,7 +172,8 @@ class AdminLanguageTabRenderTests(TestCase):
         self.assertContains(callback_page, "data-mce-conf")
         self.assertContains(callback_page, 'name="text_uk"')
         self.assertContains(callback_page, 'name="text_en"')
-        self.assertContains(callback_page, 'name="text_mobile_uk"')
+        self.assertNotContains(callback_page, 'name="text_mobile_uk"')
+        self.assertNotContains(callback_page, 'name="image_mobile"')
         self.assertContains(callback_page, "data-gestia-visible-count")
         self.assertIn('class="tinymce"', body)
         self.assertIn("django_tinymce/init_tinymce.js", body)

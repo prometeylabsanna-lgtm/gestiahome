@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
-from django.utils.translation import get_language, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from src.core.models import TimeStampedModel
 from src.core.seo import category_meta_description, product_meta_description
@@ -100,15 +100,7 @@ class Category(TimeStampedModel):
 
     @property
     def filter_label(self):
-        custom = (self.filter_name_uk or "").strip()
-        if not custom:
-            return self.name
-        if custom == (self.name_uk or "").strip():
-            lang = (get_language() or "uk").split("-")[0]
-            if lang != "uk":
-                return self.name
-            return self.filter_name_uk
-        return self.filter_name_uk
+        return self.name
 
     def chain(self):
         nodes = []
@@ -122,11 +114,11 @@ class Category(TimeStampedModel):
 
 
 class ProductAttributeGroup(models.Model):
-    class Slug(models.TextChoices):
-        STYLE = "style", "Стиль"
-        COLOR = "color", "Колір"
+    class Slug:
+        STYLE = "style"
+        COLOR = "color"
 
-    slug = models.CharField("Слаг", max_length=32, choices=Slug.choices, unique=True)
+    slug = models.SlugField("Слаг", max_length=32, unique=True)
     name_uk = models.CharField("Назва", max_length=80)
     name_en = models.CharField("Назва (EN)", max_length=80, blank=True)
 
@@ -266,16 +258,17 @@ class Product(TimeStampedModel):
     sort = models.PositiveIntegerField("Порядок", default=0)
     filter_attrs = models.ManyToManyField(
         ProductAttribute,
-        verbose_name="Стиль і колір",
+        verbose_name="Фільтри",
         blank=True,
         related_name="products",
     )
     related_manual = models.ManyToManyField(
         "self",
-        verbose_name="Схожі вручну",
+        verbose_name="Схожі",
         blank=True,
         symmetrical=False,
         related_name="related_from",
+        help_text="Товари для блоку «Схожі» на сторінці цього товару. Почніть вводити назву.",
     )
     seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
     seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
@@ -319,7 +312,7 @@ class Product(TimeStampedModel):
 
     @property
     def menu_name(self):
-        return localized(self, "menu_name") or self.name
+        return self.name
 
     @property
     def description(self):

@@ -51,6 +51,15 @@ NAV_TREE = [
                 "title": "Чому обирають",
                 "icon": "verified",
                 "url_name": "admin:content_homeadvantagesblock_changelist",
+                "items": [
+                    {
+                        "key": "home_advantages_list",
+                        "title": "Список переваг",
+                        "icon": "format_list_bulleted",
+                        "url_name": "admin:content_advantage_changelist",
+                    },
+                ],
+                "dynamic": "advantages",
             },
             {
                 "key": "home_bottom_banner",
@@ -63,12 +72,14 @@ NAV_TREE = [
                 "title": "Відгуки",
                 "icon": "reviews",
                 "url_name": "admin:content_homereviewsblock_changelist",
-            },
-            {
-                "key": "home_review_list",
-                "title": "Список відгуків",
-                "icon": "format_quote",
-                "url_name": "admin:content_review_changelist",
+                "items": [
+                    {
+                        "key": "home_review_list",
+                        "title": "Список відгуків",
+                        "icon": "format_quote",
+                        "url_name": "admin:content_homereview_changelist",
+                    },
+                ],
             },
             {
                 "key": "home_callback",
@@ -109,13 +120,21 @@ NAV_TREE = [
                 "key": "about_reviews",
                 "title": "Відгуки",
                 "icon": "reviews",
-                "url_name": "admin:content_homereviewsblock_changelist",
+                "url_name": "admin:content_aboutreviewsblock_changelist",
+                "items": [
+                    {
+                        "key": "about_review_list",
+                        "title": "Список відгуків",
+                        "icon": "format_quote",
+                        "url_name": "admin:content_aboutreview_changelist",
+                    },
+                ],
             },
             {
-                "key": "about_picks",
-                "title": "Картки під відгуками",
-                "icon": "style",
-                "url_name": "admin:content_aboutpicksblock_changelist",
+                "key": "about_popular",
+                "title": "Популярні товари",
+                "icon": "star",
+                "url_name": "admin:content_aboutpopularblock_changelist",
             },
         ],
     },
@@ -142,23 +161,17 @@ NAV_TREE = [
             },
             {
                 "key": "catalog_attributes",
-                "title": "Атрибути",
+                "title": "Фільтри",
                 "icon": "tune",
                 "url_name": "admin:catalog_productattribute_changelist",
                 "items": [
                     {
                         "key": "catalog_attribute_groups",
-                        "title": "Групи атрибутів",
+                        "title": "Групи фільтрів",
                         "icon": "account_tree",
                         "url_name": "admin:catalog_productattributegroup_changelist",
                     },
                 ],
-            },
-            {
-                "key": "catalog_frames",
-                "title": "Фрейми каталогу",
-                "icon": "grid_on",
-                "url_name": "admin:catalog_catalogcell_changelist",
             },
         ],
     },
@@ -217,18 +230,6 @@ NAV_TREE = [
                 "icon": "notes",
                 "url_name": "admin:content_footerchrome_changelist",
             },
-            {
-                "key": "chrome_footer_links",
-                "title": "Посилання футера",
-                "icon": "link",
-                "url_name": "admin:content_footerlink_changelist",
-            },
-            {
-                "key": "home_cta",
-                "title": "CTA та контактні форми",
-                "icon": "mail",
-                "url_name": "admin:content_contactforms_changelist",
-            },
         ],
     },
     {
@@ -239,56 +240,6 @@ NAV_TREE = [
                 "title": "Стилі",
                 "icon": "palette",
                 "url_name": "admin:content_globalpagestyle_changelist",
-                "items": [
-                    {
-                        "key": "style_global",
-                        "title": "Увесь сайт",
-                        "icon": "public",
-                        "url_name": "admin:content_globalpagestyle_changelist",
-                    },
-                    {
-                        "key": "style_home",
-                        "title": "Головна",
-                        "icon": "home",
-                        "url_name": "admin:content_homepagestyle_changelist",
-                    },
-                    {
-                        "key": "style_catalog",
-                        "title": "Каталог",
-                        "icon": "grid_view",
-                        "url_name": "admin:content_catalogpagestyle_changelist",
-                    },
-                    {
-                        "key": "style_product",
-                        "title": "Товар",
-                        "icon": "inventory_2",
-                        "url_name": "admin:content_productpagestyle_changelist",
-                    },
-                    {
-                        "key": "style_cart",
-                        "title": "Кошик",
-                        "icon": "shopping_cart",
-                        "url_name": "admin:content_cartpagestyle_changelist",
-                    },
-                    {
-                        "key": "style_checkout",
-                        "title": "Оформлення",
-                        "icon": "payments",
-                        "url_name": "admin:content_checkoutpagestyle_changelist",
-                    },
-                    {
-                        "key": "style_about",
-                        "title": "Про нас",
-                        "icon": "info",
-                        "url_name": "admin:content_aboutpagestyle_changelist",
-                    },
-                    {
-                        "key": "style_legal",
-                        "title": "Юридичні",
-                        "icon": "gavel",
-                        "url_name": "admin:content_legalpagestyle_changelist",
-                    },
-                ],
             },
         ],
     },
@@ -326,6 +277,17 @@ NAV_TREE = [
             },
         ],
     },
+    {
+        "title": "Система",
+        "items": [
+            {
+                "key": "recent_actions",
+                "title": "Недавні дії",
+                "icon": "history",
+                "url_name": "admin:admin_logentry_changelist",
+            },
+        ],
+    },
 ]
 
 
@@ -339,7 +301,7 @@ def build_navigation(request=None):
     for spec in NAV_TREE:
         items = []
         for entry in spec.get("items") or []:
-            visible = _visible_item(entry)
+            visible = _visible_item(_with_dynamic_children(entry))
             if visible:
                 items.append(visible)
         if not items:
@@ -361,33 +323,72 @@ def _walk(entries):
         yield from _walk(entry.get("items") or [])
 
 
-def _safe_reverse(url_name):
+def _with_dynamic_children(entry):
+    kind = entry.get("dynamic") or ""
+    if kind != "advantages":
+        return entry
+    children = list(entry.get("items") or [])
+    children.extend(_advantage_nav_items())
+    expanded = dict(entry)
+    expanded["items"] = children
+    return expanded
+
+
+def _advantage_nav_items():
+    try:
+        from src.content.models import Advantage
+    except Exception:
+        return []
+    try:
+        rows = list(Advantage.objects.order_by("sort", "id").only("id", "title_uk"))
+    except Exception:
+        return []
+    items = []
+    for row in rows:
+        title = (row.title_uk or "").strip() or f"Перевага #{row.pk}"
+        items.append(
+            {
+                "key": f"home_advantage_{row.pk}",
+                "title": title[:48],
+                "icon": "workspace_premium",
+                "url_name": "admin:content_advantage_change",
+                "url_args": (row.pk,),
+            }
+        )
+    return items
+
+
+def _safe_reverse(url_name, url_args=None):
     if not url_name:
         return None
+    args = tuple(url_args or ())
     try:
-        reverse(url_name)
+        reverse(url_name, args=args)
     except NoReverseMatch:
         return None
+    if args:
+        return reverse_lazy(url_name, args=args)
     return reverse_lazy(url_name)
 
 
-def _link(url_name, query):
-    lazy_link = _safe_reverse(url_name)
+def _link(url_name, query, url_args=None):
+    lazy_link = _safe_reverse(url_name, url_args=url_args)
     if lazy_link is None:
         return None
     if not query:
         return lazy_link
 
-    def href(request=None, name=url_name, extra=query):
-        return f"{reverse(name)}?{extra}"
+    def href(request=None, name=url_name, extra=query, args=tuple(url_args or ())):
+        return f"{reverse(name, args=args)}?{extra}"
 
     return href
 
 
-def _active(url_name, query):
+def _active(url_name, query, url_args=None):
     def active(request):
+        args = tuple(url_args or ())
         try:
-            path = reverse(url_name)
+            path = reverse(url_name, args=args)
         except NoReverseMatch:
             return False
         current = request.path.rstrip("/")
@@ -408,12 +409,13 @@ def _active(url_name, query):
 def _visible_item(entry):
     children = []
     for child in entry.get("items") or []:
-        visible = _visible_item(child)
+        visible = _visible_item(_with_dynamic_children(child))
         if visible:
             children.append(visible)
     url_name = entry.get("url_name") or ""
     query = entry.get("query") or ""
-    link = _link(url_name, query)
+    url_args = entry.get("url_args")
+    link = _link(url_name, query, url_args=url_args)
     if link is None and not children:
         return None
     if link is None:
@@ -424,7 +426,7 @@ def _visible_item(entry):
         "link": link,
     }
     if url_name:
-        item["active"] = _active(url_name, query)
+        item["active"] = _active(url_name, query, url_args=url_args)
     if children:
         item["items"] = children
     return item

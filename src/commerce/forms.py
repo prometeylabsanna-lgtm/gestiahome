@@ -80,6 +80,7 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
     )
     city = forms.CharField(label=_("Місто"), max_length=120, required=False)
     branch = forms.CharField(label=_("Відділення"), max_length=255, required=False)
+    house = forms.CharField(label=_("Будинок"), max_length=24, required=False)
     apartment = forms.CharField(label=_("Квартира"), max_length=16, required=False)
     address = forms.CharField(label=_("Адреса доставки"), max_length=255, required=False)
     payment_method = forms.ChoiceField(
@@ -94,13 +95,29 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
     def clean(self):
         cleaned = super().clean()
         address = (cleaned.get("address") or "").strip()
-        if not address:
-            city = (cleaned.get("city") or "").strip()
-            branch = (cleaned.get("branch") or "").strip()
-            address = ", ".join(part for part in (city, branch) if part)
+        method = cleaned.get("delivery_method")
+        city = (cleaned.get("city") or "").strip()
+        branch = (cleaned.get("branch") or "").strip()
+        house = (cleaned.get("house") or "").strip()
         apartment = (cleaned.get("apartment") or "").strip()
-        if apartment and cleaned.get("delivery_method") == Order.Delivery.COURIER:
-            address = f"{address}, кв. {apartment}" if address else f"кв. {apartment}"
+        if not address:
+            if method == Order.Delivery.COURIER:
+                parts = [city, branch]
+                if house:
+                    parts.append(f"буд. {house}")
+                if apartment:
+                    parts.append(f"кв. {apartment}")
+                address = ", ".join(part for part in parts if part)
+            else:
+                address = ", ".join(part for part in (city, branch) if part)
+        elif method == Order.Delivery.COURIER:
+            extras = []
+            if house and f"буд. {house}" not in address:
+                extras.append(f"буд. {house}")
+            if apartment and f"кв. {apartment}" not in address:
+                extras.append(f"кв. {apartment}")
+            if extras:
+                address = f"{address}, {', '.join(extras)}"
         if not address:
             self.add_error("city", MSG_REQUIRED)
         cleaned["address"] = address

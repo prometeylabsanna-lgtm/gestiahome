@@ -4,12 +4,13 @@ from django.urls import reverse
 
 from src.content.admin_limits import tighten
 from src.content.models import AboutPage
-from src.content.models_about import AboutGalleryItem, AboutPick
+from src.content.models_about import AboutGalleryItem, AboutPopularSlot
 from src.content.proxies import (
     AboutBanner,
     AboutGallery,
     AboutIntro,
-    AboutPicksBlock,
+    AboutPopularBlock,
+    AboutReviewsBlock,
     AboutStory,
     FooterChrome,
 )
@@ -38,17 +39,19 @@ class AboutGalleryInline(GestiaTabularInline):
     model = AboutGalleryItem
     extra = 0
     max_num = 3
-    fields = ("slot", "sort", "media_kind", "image", "image_mobile", "video", "poster")
+    fields = ("slot", "sort", "media_kind", "image", "video", "poster")
 
 
-class AboutPickInline(GestiaStackedInline):
-    model = AboutPick
+class AboutPopularSlotInline(GestiaTabularInline):
+    model = AboutPopularSlot
     extra = 0
-    max_num = 2
-    fieldsets = language_tabs(
-        uk_fields=("sort", "title_uk", "price", "slug", "modifier", "image"),
-        en_fields=("title_en",),
-    )
+    tab = True
+    verbose_name = "Товар"
+    verbose_name_plural = "Товари"
+    ordering_field = "sort"
+    hide_ordering_field = True
+    autocomplete_fields = ("product",)
+    fields = ("product", "sort")
 
 
 @admin.register(AboutIntro)
@@ -108,33 +111,70 @@ class AboutStoryAdmin(_OpenSingleton):
 
 @admin.register(AboutBanner)
 class AboutBannerAdmin(_OpenSingleton):
+    image_hints = {
+        "image": "Одна картинка для десктопу і мобільного, у макеті 1442×871. JPG або PNG.",
+    }
     fieldsets = language_tabs(
-        uk_fields=("media_kind", "image", "image_mobile", "video", "poster"),
+        uk_fields=("media_kind", "image", "video", "poster"),
         en_fields=(),
     )
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        hint = self.image_hints.get(db_field.name, "")
+        if formfield is not None and hint:
+            formfield.help_text = hint
+        return formfield
 
-@admin.register(AboutPicksBlock)
-class AboutPicksAdmin(_OpenSingleton):
-    inlines = (AboutPickInline,)
+
+@admin.register(AboutReviewsBlock)
+class AboutReviewsAdmin(_OpenSingleton):
+    text_limits = {"reviews_title_uk": 16, "reviews_title_en": 16}
     fieldsets = language_tabs(
-        uk_fields=(),
-        en_fields=(),
-        uk_description="Дві картки під відгуками. Адреса має збігатися зі слагом товару.",
+        uk_fields=("reviews_title_uk",),
+        en_fields=("reviews_title_en",),
+        uk_description="Заголовок блоку відгуків на сторінці «Про нас». Список — окремим підменю.",
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return tighten(formfield, self.text_limits.get(db_field.name))
+
+
+@admin.register(AboutPopularBlock)
+class AboutPopularAdmin(_OpenSingleton):
+    inlines = (AboutPopularSlotInline,)
+    text_limits = {
+        "popular_title_uk": 24,
+        "popular_title_en": 24,
+        "popular_cta_uk": 28,
+        "popular_cta_en": 28,
+    }
+    fieldsets = language_tabs(
+        uk_fields=("popular_title_uk", "popular_cta_uk"),
+        en_fields=("popular_title_en", "popular_cta_en"),
+        uk_description="Оберіть товари для блоку популярних на «Про нас» (як на головній).",
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return tighten(formfield, self.text_limits.get(db_field.name))
+
+
+# Сумісність зі старими тестами/імпортами.
+AboutPicksAdmin = AboutPopularAdmin
 
 
 @admin.register(FooterChrome)
 class FooterChromeAdmin(_OpenSingleton):
     fieldsets = language_tabs(
-        uk_fields=("footer_note_uk", "credit_uk", "developer_note_uk"),
-        en_fields=("footer_note_en", "credit_en", "developer_note_en"),
+        uk_fields=("footer_note_uk", "credit_uk"),
+        en_fields=("footer_note_en", "credit_en"),
     )
 
 
-# Legacy single-page admin kept unregistered; proxies cover the page.
 class AboutPageAdmin(_OpenSingleton):
-    inlines = (AboutGalleryInline, AboutPickInline)
+    inlines = (AboutGalleryInline, AboutPopularSlotInline)
     text_limits = {"title_uk": 24, "title_en": 24}
     tiny_fields = ("body_uk", "body_en")
     fieldsets = language_tabs(
@@ -146,7 +186,6 @@ class AboutPageAdmin(_OpenSingleton):
             "body_uk",
             "media_kind",
             "image",
-            "image_mobile",
             "video",
             "poster",
             "seo_title_uk",

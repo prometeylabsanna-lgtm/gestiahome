@@ -73,7 +73,9 @@ class RateLimitHelperTests(SimpleTestCase):
     def test_honeypot_ignores_blank(self):
         factory = RequestFactory()
         self.assertFalse(honeypot_filled(factory.post("/", {})))
+        self.assertFalse(honeypot_filled(factory.post("/", {"gestia_hp": "   "})))
         self.assertFalse(honeypot_filled(factory.post("/", {"website": "   "})))
+        self.assertTrue(honeypot_filled(factory.post("/", {"gestia_hp": "https://spam.example"})))
         self.assertTrue(honeypot_filled(factory.post("/", {"website": "https://spam.example"})))
 
 

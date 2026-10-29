@@ -2,11 +2,12 @@ from django import forms
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from unfold.widgets import UnfoldAdminTextInputWidget
 
 from src.content.admin_keyed import KeyedBlockAdmin
 from src.content.admin_limits import tighten
 from src.content.home_slots import sync_category_home_sort, sync_popular_flags
-from src.content.models import Advantage, ContactForms, HomeBlock
+from src.content.models import ContactForms, HomeBlock
 from src.content.models_home_slots import HomeCategorySlot, HomePopularSlot
 from src.content.proxies import (
     HomeAdvantagesBlock,
@@ -19,7 +20,7 @@ from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTab
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
-CARD_PHOTO = "303×197 px. Спільне фото для всіх карток. JPG або PNG."
+CARD_PHOTO = "303×197 px. Спільне фото для всіх карток (десктоп і мобільний). JPG або PNG."
 CAT_PHOTO = "Плитка категорії. JPG або PNG, довга сторона до 2560 px."
 
 
@@ -55,6 +56,9 @@ class HomeCategorySlotInline(GestiaTabularInline):
     model = HomeCategorySlot
     form = HomeCategorySlotForm
     extra = 0
+    tab = True
+    verbose_name = "Категорія"
+    verbose_name_plural = "Категорії"
     ordering_field = "sort"
     hide_ordering_field = True
     autocomplete_fields = ("category",)
@@ -64,49 +68,37 @@ class HomeCategorySlotInline(GestiaTabularInline):
 class HomePopularSlotInline(GestiaTabularInline):
     model = HomePopularSlot
     extra = 0
+    tab = True
+    verbose_name = "Товар"
+    verbose_name_plural = "Товари"
     ordering_field = "sort"
     hide_ordering_field = True
     autocomplete_fields = ("product",)
     fields = ("product", "sort")
 
 
-class AdvantageInline(GestiaStackedInline):
-    model = Advantage
-    extra = 0
-    ordering_field = "sort"
-    hide_ordering_field = True
-    tiny_fields = ("text_uk", "text_en")
-    text_limits = {"title_uk": 24, "title_en": 24, "text_uk": 80, "text_en": 80}
-    fieldsets = language_tabs(
-        uk_fields=("sort", "title_uk", "text_uk", "image"),
-        en_fields=("title_en", "text_en"),
-    )
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in self.tiny_fields:
-            kwargs["widget"] = tinymce_widget(short=True)
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        hint = ""
-        if db_field.name == "image":
-            hint = "303×197 px. Якщо порожньо — лишається фото блоку. JPG або PNG."
-        return tighten(formfield, self.text_limits.get(db_field.name), hint)
-
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        force_tinymce(formset.form, self.tiny_fields, short=True)
-        for name, limit in self.text_limits.items():
-            if name in formset.form.base_fields:
-                tighten(formset.form.base_fields[name], limit)
-        return formset
-
-
 class HomeCallbackForm(forms.ModelForm):
-    ph_name_uk = forms.CharField(label="Підказка імені", max_length=24, required=False)
-    ph_name_en = forms.CharField(label="Підказка імені (EN)", max_length=24, required=False)
-    ph_phone_uk = forms.CharField(label="Підказка телефону", max_length=24, required=False)
-    ph_phone_en = forms.CharField(label="Підказка телефону (EN)", max_length=24, required=False)
-    ph_message_uk = forms.CharField(label="Підказка повідомлення", max_length=24, required=False)
-    ph_message_en = forms.CharField(label="Підказка повідомлення (EN)", max_length=24, required=False)
+    ph_name_uk = forms.CharField(
+        label="Підказка імені", max_length=24, required=False, widget=UnfoldAdminTextInputWidget
+    )
+    ph_name_en = forms.CharField(
+        label="Підказка імені (EN)", max_length=24, required=False, widget=UnfoldAdminTextInputWidget
+    )
+    ph_phone_uk = forms.CharField(
+        label="Підказка телефону", max_length=24, required=False, widget=UnfoldAdminTextInputWidget
+    )
+    ph_phone_en = forms.CharField(
+        label="Підказка телефону (EN)", max_length=24, required=False, widget=UnfoldAdminTextInputWidget
+    )
+    ph_message_uk = forms.CharField(
+        label="Підказка повідомлення", max_length=24, required=False, widget=UnfoldAdminTextInputWidget
+    )
+    ph_message_en = forms.CharField(
+        label="Підказка повідомлення (EN)",
+        max_length=24,
+        required=False,
+        widget=UnfoldAdminTextInputWidget,
+    )
 
     class Meta:
         model = HomeCallbackBlock
@@ -115,8 +107,6 @@ class HomeCallbackForm(forms.ModelForm):
             "title_en",
             "text_uk",
             "text_en",
-            "text_mobile_uk",
-            "text_mobile_en",
             "note_uk",
             "note_en",
             "link_uk",
@@ -127,15 +117,13 @@ class HomeCallbackForm(forms.ModelForm):
         widgets = {
             "text_uk": tinymce_widget(short=True),
             "text_en": tinymce_widget(short=True),
-            "text_mobile_uk": tinymce_widget(short=True),
-            "text_mobile_en": tinymce_widget(short=True),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         force_tinymce(
             self,
-            ("text_uk", "text_en", "text_mobile_uk", "text_mobile_en"),
+            ("text_uk", "text_en"),
             short=True,
         )
         uk = _lines(self.instance.lines_uk)
@@ -212,37 +200,20 @@ class HomePopularAdmin(KeyedBlockAdmin):
 class HomeAdvantagesAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.ADVANTAGES
     default_sort = 5
-    inlines = (AdvantageInline,)
+    inlines = ()
     text_limits = {
         "title_uk": 36,
         "title_en": 36,
         "text_uk": 110,
         "text_en": 110,
-        "text_mobile_uk": 110,
-        "text_mobile_en": 110,
         "cta_uk": 28,
         "cta_en": 28,
     }
     image_hints = {"image": CARD_PHOTO}
     fieldsets = language_tabs(
-        uk_fields=("title_uk", "text_uk", "text_mobile_uk", "cta_uk", "image"),
-        en_fields=("title_en", "text_en", "text_mobile_en", "cta_en"),
+        uk_fields=("title_uk", "text_uk", "cta_uk", "image"),
+        en_fields=("title_en", "text_en", "cta_en"),
     )
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        if db_field.name == "text_mobile_uk" and formfield is not None:
-            formfield.help_text = "Для телефона. Якщо порожньо — текст із комп’ютера."
-        return formfield
-
-    def save_formset(self, request, form, formset, change):
-        instances = formset.save(commit=False)
-        for obj in formset.deleted_objects:
-            obj.delete()
-        for obj in instances:
-            obj.block = form.instance
-            obj.save()
-        formset.save_m2m()
 
 
 @admin.register(HomeReviewsBlock)
@@ -267,8 +238,6 @@ class HomeCallbackAdmin(KeyedBlockAdmin):
         "title_en": 32,
         "text_uk": 100,
         "text_en": 100,
-        "text_mobile_uk": 100,
-        "text_mobile_en": 100,
         "note_uk": 72,
         "note_en": 72,
         "link_uk": 40,
@@ -286,7 +255,6 @@ class HomeCallbackAdmin(KeyedBlockAdmin):
         uk_fields=(
             "title_uk",
             "text_uk",
-            "text_mobile_uk",
             "ph_name_uk",
             "ph_phone_uk",
             "ph_message_uk",
@@ -297,7 +265,6 @@ class HomeCallbackAdmin(KeyedBlockAdmin):
         en_fields=(
             "title_en",
             "text_en",
-            "text_mobile_en",
             "ph_name_en",
             "ph_phone_en",
             "ph_message_en",
@@ -332,20 +299,11 @@ class _SingletonAdmin(GestiaModelAdmin):
         return HttpResponseRedirect(url)
 
 
-@admin.register(ContactForms)
 class ContactFormsAdmin(_SingletonAdmin):
+    """Сховано з меню; literals покривають підписи форм."""
+
     fieldsets = language_tabs(
         uk_fields=(
-            "waitlist_title_uk",
-            "waitlist_p1_uk",
-            "waitlist_p2_uk",
-            "waitlist_p3_uk",
-            "waitlist_email_uk",
-            "waitlist_consent_uk",
-            "waitlist_privacy_uk",
-            "waitlist_button_uk",
-            "waitlist_thanks_title_uk",
-            "waitlist_thanks_text_uk",
             "contact_button_uk",
             "callback_button_uk",
             "buy_button_uk",
@@ -358,16 +316,6 @@ class ContactFormsAdmin(_SingletonAdmin):
             "label_email_uk",
         ),
         en_fields=(
-            "waitlist_title_en",
-            "waitlist_p1_en",
-            "waitlist_p2_en",
-            "waitlist_p3_en",
-            "waitlist_email_en",
-            "waitlist_consent_en",
-            "waitlist_privacy_en",
-            "waitlist_button_en",
-            "waitlist_thanks_title_en",
-            "waitlist_thanks_text_en",
             "contact_button_en",
             "callback_button_en",
             "buy_button_en",

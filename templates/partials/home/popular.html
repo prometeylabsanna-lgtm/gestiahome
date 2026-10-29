@@ -20,33 +20,16 @@
   </div>
   {% if pop_nav %}
     <div class="about-picks" data-about-pop>
-      {% for pick in page.picks.all %}
-        <a class="about-pick about-pick--{{ pick.modifier }}" href="{% url 'product' pick.slug %}">
+      {% for product in popular %}
+        <a class="about-pick about-pick--{% if forloop.counter0|divisibleby:2 %}shift{% else %}cover{% endif %}" href="{{ product.get_absolute_url }}">
           <span class="about-pick__media">
-            {% if pick.image %}<img src="{{ pick.image.url }}" alt="" width="200" height="226">{% endif %}
+            {% with cover=product.cover %}
+              {% if cover %}<img src="{{ cover.image.url }}" alt="" width="200" height="226">{% endif %}
+            {% endwith %}
           </span>
           <span class="about-pick__meta">
-            <span class="about-pick__name">{{ pick.title }}</span>
-            <span class="about-pick__price">{{ pick.price }}</span>
-          </span>
-        </a>
-      {% empty %}
-        <a class="about-pick about-pick--shift" href="{% url 'product' 'boks-rizdvyanyi-shyshky' %}">
-          <span class="about-pick__media">
-            <img src="{% static 'figma/about/m/bfdf6aac-8cff-41e2-b3a3-19b970728ef9.png' %}" alt="" width="200" height="226">
-          </span>
-          <span class="about-pick__meta">
-            <span class="about-pick__name">{% trans "Бокс «Різдвяний Шишки»" %}</span>
-            <span class="about-pick__price">8 990 UAH</span>
-          </span>
-        </a>
-        <a class="about-pick about-pick--cover" href="{% url 'product' 'velykodnii-ukrainskyi' %}">
-          <span class="about-pick__media">
-            <img src="{% static 'figma/about/m/1742e033-b97d-4401-9130-0bb28c2e9e4a.png' %}" alt="" width="200" height="226">
-          </span>
-          <span class="about-pick__meta">
-            <span class="about-pick__name">{% trans "Бокс Великодній «Український»" %}</span>
-            <span class="about-pick__price">8 990 UAH</span>
+            <span class="about-pick__name">{{ product.name }}</span>
+            <span class="about-pick__price">{% home_price product %}</span>
           </span>
         </a>
       {% endfor %}

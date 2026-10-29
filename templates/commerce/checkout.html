@@ -69,16 +69,16 @@
               data-np-streets-url="{% url 'np_streets' %}"
               data-label-branch="{% trans 'Відділення' %}"
               data-label-locker="{% trans 'Поштомат' %}"
-              data-label-street="{% trans 'Вулиця, будинок' %}"
-              data-hint-np-off="{% trans 'Підказки Нової пошти тимчасово недоступні. Додайте API-ключ.' %}"
-              data-hint-cities-fail="{% trans 'Не вдалося завантажити міста. Спробуйте ще раз.' %}"
-              data-hint-no-branches="{% trans 'Для цього міста відділень не знайдено.' %}"
-              data-hint-branches-fail="{% trans 'Не вдалося завантажити відділення.' %}"
-              data-hint-streets-off="{% trans 'Підказки вулиць тимчасово недоступні.' %}"
-              data-hint-no-streets="{% trans 'Вулиць не знайдено. Уточніть назву.' %}"
-              data-hint-streets-fail="{% trans 'Не вдалося завантажити вулиці.' %}"
-              data-hint-pick-city="{% trans 'Спочатку оберіть місто зі списку.' %}"
-              data-hint-street-format="{% trans 'Вулиця зі списку, потім номер будинку. Квартиру — окремо.' %}"
+              data-label-street="{% trans 'Вулиця' %}"
+              data-hint-np-off="{% trans 'Підказки недоступні — вкажіть місто і відділення вручну.' %}"
+              data-hint-cities-fail="{% trans 'Не вдалося завантажити міста. Спробуйте ще раз або введіть вручну.' %}"
+              data-hint-no-branches="{% trans 'Для цього міста відділень не знайдено — введіть вручну.' %}"
+              data-hint-branches-fail="{% trans 'Не вдалося завантажити відділення — введіть вручну.' %}"
+              data-hint-streets-off="{% trans 'Підказки вулиць недоступні — введіть вручну.' %}"
+              data-hint-no-streets="{% trans 'Вулиць не знайдено. Уточніть назву або введіть вручну.' %}"
+              data-hint-streets-fail="{% trans 'Не вдалося завантажити вулиці — введіть вручну.' %}"
+              data-hint-pick-city="{% trans 'Оберіть місто зі списку або введіть назву.' %}"
+              data-hint-street-format="{% trans 'Вулиця окремо; будинок і квартиру — у полях праворуч.' %}"
             >
               <div class="co-suggest">
                 <label class="co-field{% if form.city.errors %} is-invalid{% endif %}" data-field-wrap>
@@ -126,6 +126,19 @@
                   </label>
                   <ul id="np-branch-listbox" class="co-suggest__list" role="listbox" hidden></ul>
                 </div>
+                <label class="co-field co-field--house" data-np-house hidden>
+                  <span class="visually-hidden">{% trans "Будинок" %}</span>
+                  <input
+                    name="house"
+                    type="text"
+                    maxlength="24"
+                    inputmode="text"
+                    autocomplete="off"
+                    data-np-house-input
+                    placeholder="{% trans 'буд.' %}"
+                    value="{{ form.house.value|default_if_none:'' }}"
+                  >
+                </label>
                 <label class="co-field co-field--apt" data-np-apt hidden>
                   <span class="visually-hidden">{% trans "Квартира" %}</span>
                   <input
@@ -142,6 +155,7 @@
               </div>
               <p class="co-hint" data-np-hint hidden></p>
               <p class="co-error" id="co-branch-error" data-error-for="branch"{% if not form.branch.errors %} hidden{% endif %}>{% if form.branch.errors %}{{ form.branch.errors|striptags }}{% endif %}</p>
+              {% if form.house.errors %}<p class="co-error">{{ form.house.errors|striptags }}</p>{% endif %}
               {% if form.apartment.errors %}<p class="co-error">{{ form.apartment.errors|striptags }}</p>{% endif %}
               {% if form.address.errors %}<p class="co-error">{{ form.address.errors|striptags }}</p>{% endif %}
             </div>

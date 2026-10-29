@@ -7,8 +7,6 @@ from django.core.mail import send_mail
 from django.utils import translation
 from django.utils.translation import gettext as _
 
-from src.content.models import SiteSettings
-
 logger = logging.getLogger("src.commerce")
 REQUEST_TIMEOUT = 5
 
@@ -43,22 +41,20 @@ def notify_order(order_id: int):
         order = Order.objects.prefetch_related("items").get(pk=order_id)
     except Order.DoesNotExist:
         return
-    site = SiteSettings.load()
-    if site.telegram_notify_orders:
-        lines = [
-            f"<b>Замовлення {_esc(order.number)}</b>",
-            _esc(order.get_source_display()),
-            f"{_esc(order.customer_name)} · {_esc(order.phone)}",
-        ]
-        if order.email:
-            lines.append(_esc(order.email))
-        for item in order.items.all():
-            lines.append(f"{_esc(item.name)} ({_esc(item.sku)}) × {item.qty}")
-        lines.append(f"{order.total} {order.currency}")
-        lines.append(_esc(order.get_delivery_method_display()))
-        lines.append(_esc(order.delivery_address))
-        lines.append(_esc(order.get_payment_status_display()))
-        send_telegram_message("\n".join(lines))
+    lines = [
+        f"<b>Замовлення {_esc(order.number)}</b>",
+        _esc(order.get_source_display()),
+        f"{_esc(order.customer_name)} · {_esc(order.phone)}",
+    ]
+    if order.email:
+        lines.append(_esc(order.email))
+    for item in order.items.all():
+        lines.append(f"{_esc(item.name)} ({_esc(item.sku)}) × {item.qty}")
+    lines.append(f"{order.total} {order.currency}")
+    lines.append(_esc(order.get_delivery_method_display()))
+    lines.append(_esc(order.delivery_address))
+    lines.append(_esc(order.get_payment_status_display()))
+    send_telegram_message("\n".join(lines))
     if settings.ORDER_NOTIFY_EMAIL:
         send_mail(
             subject=f"Замовлення {order.number}",
@@ -96,9 +92,6 @@ def notify_inquiry(inquiry_id: int):
     try:
         inquiry = Inquiry.objects.get(pk=inquiry_id)
     except Inquiry.DoesNotExist:
-        return
-    site = SiteSettings.load()
-    if not site.telegram_notify_leads:
         return
     lines = [
         f"<b>{_esc(inquiry.get_kind_display())}</b>",

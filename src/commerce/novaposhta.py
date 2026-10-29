@@ -100,7 +100,8 @@ def configured() -> bool:
 
 
 def demo_mode() -> bool:
-    return (not configured()) and bool(getattr(settings, "DEBUG", False))
+    """Підказки без API-ключа (локальний список), щоб checkout працював без НП."""
+    return not configured()
 
 
 def _demo_cities(query: str, *, limit: int = 8) -> list[dict[str, str]]:

@@ -27,6 +27,21 @@
     {% endif %}
     <span>Pinterest</span>
   </a>
+  {% if site_settings.telegram_url %}
+    <a
+      class="social-row__item"
+      href="{{ site_settings.telegram_url }}"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {% if tone == "cream" %}
+        <img src="{% static 'figma/desktop/telegram.svg' %}" width="15" height="15" alt="">
+      {% else %}
+        <img src="{% static 'figma/megamenu/telegram.svg' %}" width="15" height="15" alt="">
+      {% endif %}
+      <span>Telegram</span>
+    </a>
+  {% endif %}
   {% if site_settings.phone %}
     <a class="social-row__item" href="tel:{{ site_settings.phone|cut:' ' }}">
       {% if tone == "cream" %}

@@ -26,11 +26,11 @@ class AboutGalleryItem(MediaChoice):
         help_text=GALLERY_HINT,
     )
     image_mobile = WebPImageField(
-        "Фото для телефона",
+        "Фото (застаріле)",
         upload_to="about/gallery/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
-        help_text="Те саме фото для вузького екрана. У третього кадру можна лишити порожнім.",
+        help_text="Не використовується. Залишено для сумісності.",
     )
     video = models.FileField(
         "Відео",
@@ -53,7 +53,35 @@ class AboutGalleryItem(MediaChoice):
         return self.get_slot_display()
 
 
+class AboutPopularSlot(models.Model):
+    page = models.ForeignKey(
+        "content.AboutPage",
+        related_name="popular_slots",
+        on_delete=models.CASCADE,
+    )
+    product = models.ForeignKey(
+        "catalog.Product",
+        related_name="about_popular_slots",
+        on_delete=models.CASCADE,
+        verbose_name="Товар",
+    )
+    sort = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["sort", "id"]
+        constraints = [
+            models.UniqueConstraint(fields=["page", "product"], name="about_popular_slot_uniq"),
+        ]
+        verbose_name = "Популярний товар (Про нас)"
+        verbose_name_plural = "Популярні товари (Про нас)"
+
+    def __str__(self):
+        return str(self.product)
+
+
 class AboutPick(models.Model):
+    """Застарілі ручні картки; адмінка використовує AboutPopularSlot."""
+
     class Modifier(models.TextChoices):
         SHIFT = "shift", "Зі зсувом"
         COVER = "cover", "Звичайне"

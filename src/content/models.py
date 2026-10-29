@@ -38,6 +38,7 @@ class SiteSettings(SingletonModel):
     address_en = models.CharField("Адреса (EN)", max_length=255, blank=True)
     instagram_url = models.URLField("Instagram", blank=True)
     pinterest_url = models.URLField("Pinterest", blank=True)
+    telegram_url = models.URLField("Telegram", blank=True, help_text="Посилання t.me/… у соцряді.")
     developer_note_uk = models.CharField("Підпис розробника", max_length=160, blank=True)
     developer_note_en = models.CharField("Підпис розробника (EN)", max_length=160, blank=True)
     logo = models.ImageField(
@@ -135,7 +136,7 @@ class HomeBlock(MediaChoice):
         PDP_SET = "pdp_set", "Товари сету"
         PDP_RELATED = "pdp_related", "Схожі товари"
 
-    rich_text_fields = ("text_uk", "text_en", "text_mobile_uk", "text_mobile_en")
+    rich_text_fields = ("text_uk", "text_en")
     key = models.CharField("Ключ", max_length=32, choices=Key.choices, unique=True)
     title_uk = models.CharField("Заголовок", max_length=200, blank=True)
     title_en = models.CharField("Заголовок (EN)", max_length=200, blank=True)
@@ -146,12 +147,14 @@ class HomeBlock(MediaChoice):
         upload_to="home/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
+        help_text="Одна картинка для десктопу і мобільного.",
     )
     image_mobile = models.ImageField(
-        "Зображення (мобільне)",
+        "Зображення (застаріле)",
         upload_to="home/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
+        help_text="Не використовується. Залишено для сумісності.",
     )
     video = models.FileField(
         "Відео",
@@ -159,8 +162,12 @@ class HomeBlock(MediaChoice):
         blank=True,
         validators=[VIDEO_VALIDATOR],
     )
-    text_mobile_uk = models.TextField("Текст (мобільний)", blank=True)
-    text_mobile_en = models.TextField("Текст (мобільний, EN)", blank=True)
+    text_mobile_uk = models.TextField("Текст (застаріле)", blank=True)
+    text_mobile_en = models.TextField("Текст (застаріле, EN)", blank=True)
+    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
     cta_uk = models.CharField("Текст кнопки", max_length=200, blank=True)
     cta_en = models.CharField("Текст кнопки (EN)", max_length=200, blank=True)
     link_uk = models.CharField("Другий підпис", max_length=160, blank=True)
@@ -193,7 +200,7 @@ class HomeBlock(MediaChoice):
 
     @property
     def text_mobile(self):
-        return localized(self, "text_mobile") or self.text
+        return self.text
 
     @property
     def link_label(self):
@@ -202,6 +209,14 @@ class HomeBlock(MediaChoice):
     @property
     def note(self):
         return localized(self, "note")
+
+    @property
+    def seo_title(self):
+        return localized(self, "seo_title")
+
+    @property
+    def seo_description(self):
+        return localized(self, "seo_description")
 
     @property
     def field_labels(self):
@@ -264,18 +279,18 @@ class AboutPage(MediaChoice, SingletonModel):
     body_uk = models.TextField("Текст", blank=True)
     body_en = models.TextField("Текст (EN)", blank=True)
     image = models.ImageField(
-        "Фото для комп’ютера",
+        "Фото",
         upload_to="about/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
-        help_text="Банер, у макеті 1442×871. JPG або PNG.",
+        help_text="Одна картинка для десктопу і мобільного, у макеті 1442×871. JPG або PNG.",
     )
     image_mobile = WebPImageField(
-        "Фото для телефона",
+        "Фото (застаріле)",
         upload_to="about/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
-        help_text="Банер, у макеті 393×735. JPG або PNG.",
+        help_text="Не використовується. Залишено для сумісності.",
     )
     video = models.FileField(
         "Відео",
@@ -287,6 +302,12 @@ class AboutPage(MediaChoice, SingletonModel):
     seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
     seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
     seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
+    reviews_title_uk = models.CharField("Заголовок відгуків", max_length=64, blank=True)
+    reviews_title_en = models.CharField("Заголовок відгуків (EN)", max_length=64, blank=True)
+    popular_title_uk = models.CharField("Заголовок популярних", max_length=64, blank=True)
+    popular_title_en = models.CharField("Заголовок популярних (EN)", max_length=64, blank=True)
+    popular_cta_uk = models.CharField("Кнопка популярних", max_length=40, blank=True)
+    popular_cta_en = models.CharField("Кнопка популярних (EN)", max_length=40, blank=True)
 
     class Meta:
         verbose_name = "Сторінка «Про нас»"
@@ -311,13 +332,36 @@ class AboutPage(MediaChoice, SingletonModel):
     def seo_description(self):
         return localized(self, "seo_description")
 
+    @property
+    def reviews_title(self):
+        return localized(self, "reviews_title")
+
+    @property
+    def popular_title(self):
+        return localized(self, "popular_title")
+
+    @property
+    def popular_cta(self):
+        return localized(self, "popular_cta")
+
 
 class Review(models.Model):
+    class Placement(models.TextChoices):
+        HOME = "home", "Головна"
+        ABOUT = "about", "Про нас"
+
     class Rating(models.TextChoices):
         GOLD_FOUR = "gold4", "4 золоті"
         BLACK_FIVE = "black5", "5 чорних"
 
     rich_text_fields = ("text_uk", "text_en")
+    placement = models.CharField(
+        "Сторінка",
+        max_length=16,
+        choices=Placement.choices,
+        default=Placement.HOME,
+        db_index=True,
+    )
     author_uk = models.CharField("Ім'я", max_length=80)
     author_en = models.CharField("Ім'я (EN)", max_length=80, blank=True)
     text_uk = models.TextField("Текст")

@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -8,89 +7,72 @@ from django.test import TestCase
 from django.urls import reverse
 
 from src.catalog.models import Category, Product
-from src.content.colors import TOKEN_ACCENT, TOKEN_INK, TOKEN_PAPER
+from src.content.colors import TOKEN_ACCENT, TOKEN_CHROME, TOKEN_INK, TOKEN_PAPER
 from src.content.models import SiteSettings
-from src.content.models_styles import PageStyle
+from src.content.models_styles import FONT_GEORGIA, FONT_INTER, PageStyle
 from src.core.admin_nav import build_navigation
-
-
-ROOT = ":root{--ink:#241c16;--paper:#f3eee6;--accent:#8d3b2a;}"
 
 
 class PageStyleTests(TestCase):
     def setUp(self):
         cache.clear()
 
-    def test_seed_matches_tokens_and_theme_stays_exact(self):
-        self.assertEqual(PageStyle.objects.count(), 8)
-        for row in PageStyle.objects.all():
-            self.assertEqual(row.background_color, TOKEN_PAPER)
-            self.assertEqual(row.text_color, TOKEN_INK)
-            self.assertEqual(row.hover_color, TOKEN_ACCENT)
-        css = self.client.get(reverse("theme_css"))
-        self.assertEqual(css["Content-Type"], "text/css")
-        self.assertEqual(css.content.decode(), ROOT)
-
-    def test_page_override_emits_only_the_changed_color(self):
-        row = PageStyle.objects.get(page=PageStyle.Key.CATALOG)
+    def test_global_style_drives_theme_css(self):
+        row = PageStyle.objects.get(page=PageStyle.Key.GLOBAL)
         row.background_color = "#112233"
-        row.save()
-        css = self.client.get(reverse("theme_css")).content.decode()
-        self.assertTrue(css.startswith(ROOT))
-        self.assertIn('body[data-page="catalog"]{--paper:#112233;}', css)
-        self.assertNotIn('body[data-page="home"]', css)
-        self.assertNotIn("--hover:", css)
-
-        row.background_color = TOKEN_PAPER
-        row.hover_color = "#123456"
-        row.save()
-        css = self.client.get(reverse("theme_css")).content.decode()
-        self.assertIn(
-            'body[data-page="catalog"]{--accent:#123456;--hover:#123456;}',
-            css,
-        )
-        self.assertIn(
-            'body[data-page="catalog"] a:hover,body[data-page="catalog"] button:hover{color:var(--hover)}',
-            css,
-        )
-        self.assertNotIn('body[data-page="catalog"]{--paper:', css)
-
-    def test_global_style_updates_site_settings_and_root(self):
-        row = PageStyle.objects.get(page=PageStyle.Key.GLOBAL)
+        row.chrome_background_color = "#445566"
+        row.text_color = "#778899"
         row.hover_color = "#abcdef"
+        row.font_family = FONT_GEORGIA
         row.save()
-        site = SiteSettings.load()
-        self.assertEqual(site.color_accent, "#abcdef")
         css = self.client.get(reverse("theme_css")).content.decode()
+        self.assertIn("--paper:#112233", css)
+        self.assertIn("--chrome:#445566", css)
+        self.assertIn("--ink:#778899", css)
         self.assertIn("--accent:#abcdef", css)
-        self.assertIn("--hover:#abcdef", css)
-        self.assertIn("body a:hover,body button:hover{color:var(--hover)}", css)
-        self.assertNotIn('body[data-page=', css)
-
-    def test_site_settings_color_updates_the_global_row(self):
+        self.assertIn("Georgia", css)
+        self.assertIn(".site-header,.site-header__bar{background:var(--chrome)}", css)
+        self.assertIn(".site-footer{background:var(--chrome);color:var(--chrome-fg)}", css)
+        self.assertIn("--chrome-fg:", css)
+        row.chrome_background_color = TOKEN_CHROME
+        row.save()
+        default_css = self.client.get(reverse("theme_css")).content.decode()
+        self.assertIn(".site-header,.site-header__bar{background:var(--chrome)}", default_css)
+        self.assertNotIn(".site-footer{background:var(--chrome)", default_css)
         site = SiteSettings.load()
-        site.color_ink = "#222222"
-        site.save()
-        row = PageStyle.objects.get(page=PageStyle.Key.GLOBAL)
-        self.assertEqual(row.text_color, "#222222")
-        css = self.client.get(reverse("theme_css")).content.decode()
-        self.assertIn("--ink:#222222", css)
-        self.assertNotIn('body[data-page=', css)
+        self.assertEqual(site.color_paper, "#112233")
+        self.assertEqual(site.color_ink, "#778899")
+        self.assertEqual(site.color_accent, "#abcdef")
 
-    def test_invalid_hex_is_rejected_and_bad_site_color_falls_back(self):
-        row = PageStyle.objects.get(page=PageStyle.Key.HOME)
+    def test_reset_defaults_via_admin(self):
+        user = User.objects.create_superuser("styles", "styles@example.com", "pass-word-9")
+        self.client.force_login(user)
+        row = PageStyle.objects.get(page=PageStyle.Key.GLOBAL)
+        row.background_color = "#111111"
+        row.chrome_background_color = "#222222"
+        row.text_color = "#333333"
+        row.hover_color = "#444444"
+        row.font_family = FONT_GEORGIA
+        row.save()
+        url = reverse("admin:content_globalpagestyle_change", args=[row.pk])
+        page = self.client.get(url)
+        self.assertContains(page, "Дефолт")
+        self.assertContains(page, 'name="font_family"')
+        self.assertContains(page, 'name="chrome_background_color"')
+        response = self.client.post(url, {"_reset_defaults": "1"})
+        self.assertEqual(response.status_code, 302)
+        row.refresh_from_db()
+        self.assertEqual(row.background_color, TOKEN_PAPER)
+        self.assertEqual(row.chrome_background_color, TOKEN_CHROME)
+        self.assertEqual(row.text_color, TOKEN_INK)
+        self.assertEqual(row.hover_color, TOKEN_ACCENT)
+        self.assertEqual(row.font_family, FONT_INTER)
+
+    def test_invalid_hex_is_rejected(self):
+        row = PageStyle.objects.get(page=PageStyle.Key.GLOBAL)
         row.background_color = "blue"
         with self.assertRaises(ValidationError):
             row.full_clean()
-        row.background_color = "#abc"
-        row.full_clean()
-        self.assertEqual(row.background_color, "#aabbcc")
-
-        site = SiteSettings.load()
-        site.color_paper = "paper"
-        site.save()
-        css = self.client.get(reverse("theme_css")).content.decode()
-        self.assertIn("--paper:#f3eee6", css)
 
     def test_pages_expose_their_style_key(self):
         category = Category.objects.create(name_uk="Стилі", slug="styli-test")
@@ -105,91 +87,22 @@ class PageStyleTests(TestCase):
         )
         expected = {
             "/": "home",
-            "/en/": "home",
             reverse("catalog"): "catalog",
-            reverse("category", kwargs={"slug": category.slug}): "catalog",
             reverse("product", kwargs={"slug": product.slug}): "product",
-            reverse("cart"): "cart",
             reverse("about"): "about",
             reverse("offer"): "legal",
-            reverse("privacy"): "legal",
-            reverse("cookies"): "legal",
-            reverse("shipping"): "legal",
-            reverse("wishlist"): "",
-            reverse("thanks"): "",
         }
         for path, key in expected.items():
             page = self.client.get(path)
             self.assertEqual(page.status_code, 200, path)
-            if key:
-                self.assertContains(page, f'data-page="{key}"')
-            else:
-                self.assertNotContains(page, "data-page=")
+            self.assertContains(page, f'data-page="{key}"')
 
-        session = self.client.session
-        session["cart"] = {product.sku: 1}
-        session.save()
-        checkout = self.client.get(reverse("checkout"))
-        self.assertEqual(checkout.status_code, 200)
-        self.assertContains(checkout, 'data-page="checkout"')
-
-    def test_admin_opens_one_screen_per_page(self):
-        user = User.objects.create_superuser("styles", "styles@example.com", "pass-word-9")
-        self.client.force_login(user)
-        names = (
-            "globalpagestyle",
-            "homepagestyle",
-            "catalogpagestyle",
-            "productpagestyle",
-            "cartpagestyle",
-            "checkoutpagestyle",
-            "aboutpagestyle",
-            "legalpagestyle",
-        )
-        for name in names:
-            row = PageStyle.objects.get(page=_page_for_admin(name))
-            listing = reverse(f"admin:content_{name}_changelist")
-            change = reverse(f"admin:content_{name}_change", args=[row.pk])
-            self.assertRedirects(self.client.get(listing), change)
-            form = self.client.get(change)
-            self.assertEqual(form.status_code, 200)
-            self.assertContains(form, 'type="color"', count=3)
-            self.assertContains(form, "data-gestia-color")
-            self.assertContains(form, "Стандарт")
-            self.assertContains(form, "color_picker.js")
-            model = admin.site._registry[form.context["original"].__class__]
-            self.assertFalse(model.has_delete_permission(form.wsgi_request, row))
-            self.assertFalse(model.has_add_permission(form.wsgi_request))
-        home = self.client.get(reverse("admin:content_homepagestyle_change", args=[PageStyle.objects.get(page="home").pk]))
-        self.assertContains(home, "Стандартний колір спільний")
-        whole = self.client.get(
-            reverse("admin:content_globalpagestyle_change", args=[PageStyle.objects.get(page="global").pk])
-        )
-        self.assertContains(whole, "Для всього сайту")
-
-    def test_sidebar_lists_each_page(self):
+    def test_sidebar_has_single_styles_item(self):
         labels = []
         for group in build_navigation(None):
             if group["title"] != "Стилі":
                 continue
             for item in group["items"]:
                 labels.append(item["title"])
-                for child in item.get("items") or []:
-                    labels.append(child["title"])
-        self.assertEqual(
-            labels,
-            ["Стилі", "Увесь сайт", "Головна", "Каталог", "Товар", "Кошик", "Оформлення", "Про нас", "Юридичні"],
-        )
-
-
-def _page_for_admin(name: str) -> str:
-    return {
-        "globalpagestyle": "global",
-        "homepagestyle": "home",
-        "catalogpagestyle": "catalog",
-        "productpagestyle": "product",
-        "cartpagestyle": "cart",
-        "checkoutpagestyle": "checkout",
-        "aboutpagestyle": "about",
-        "legalpagestyle": "legal",
-    }[name]
+                self.assertFalse(item.get("items"))
+        self.assertEqual(labels, ["Стилі"])

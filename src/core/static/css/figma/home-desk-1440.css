@@ -185,8 +185,7 @@
     margin-left: 0;
     margin-right: 0;
     padding: 0 0 0 49px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
   }
 
   .reviews h2 {
@@ -195,6 +194,18 @@
 
   .review-rail {
     width: 1562px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .review-rail::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .review-card p {

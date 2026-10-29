@@ -36,6 +36,20 @@ body.waitlist-modal-open {
   display: none;
 }
 
+.waitlist-modal__panel--photo {
+  background-color: #fff;
+  background-image: var(--waitlist-bg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.waitlist-modal__panel--photo .waitlist-modal__body {
+  padding: 0.85rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .waitlist-modal__scrim {
   position: fixed;
   inset: 0;

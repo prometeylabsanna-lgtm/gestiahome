@@ -5,7 +5,7 @@ from unfold.admin import ModelAdmin, StackedInline, TabularInline
 from unfold.widgets import UnfoldAdminImageFieldWidget
 
 IMAGE_HELP = "JPG або PNG, довша сторона до 2560 px."
-_PREVIEW_ORDER = ("image", "card_image", "logo", "image_mobile")
+_PREVIEW_ORDER = ("image", "card_image", "logo")
 
 
 class AdminImagePreviewWidget(UnfoldAdminImageFieldWidget):
@@ -28,6 +28,10 @@ class ImagePreviewMixin:
 
 
 class GestiaModelAdmin(ImagePreviewMixin, ModelAdmin):
+    formfield_overrides = {
+        models.ImageField: {"widget": AdminImagePreviewWidget},
+    }
+
     def get_list_display(self, request):
         display = list(super().get_list_display(request))
         if _image_fields(self.model) and "image_thumb" not in display:

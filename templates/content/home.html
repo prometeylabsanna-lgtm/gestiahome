@@ -8,8 +8,8 @@
   <link rel="stylesheet" href="{% static 'css/figma/home-desk-1440.css' %}">
 {% endblock %}
 
-{% block title %}{% if home_blocks.hero %}{% cms home_blocks.hero.title "hero_title" %}{% else %}Gestia Home{% endif %}{% endblock %}
-{% block description %}{% if home_blocks.hero %}{{ home_blocks.hero.text|striptags }}{% endif %}{% endblock %}
+{% block title %}{% if home_blocks.hero.seo_title %}{{ home_blocks.hero.seo_title }}{% elif home_blocks.hero %}{% cms home_blocks.hero.title "hero_title" %}{% else %}Gestia Home{% endif %}{% endblock %}
+{% block description %}{% if home_blocks.hero.seo_description %}{{ home_blocks.hero.seo_description }}{% elif home_blocks.hero %}{{ home_blocks.hero.text|striptags }}{% endif %}{% endblock %}
 
 {% block content %}
   {% if not home_blocks.hero %}

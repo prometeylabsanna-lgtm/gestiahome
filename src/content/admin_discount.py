@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+from src.content.admin_limits import tighten
 from src.content.models_discount import DiscountModal
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_lang import language_tabs
@@ -12,18 +13,20 @@ _EN_HINT = "Якщо порожньо — на сайті лишається у�
 
 class DiscountModalAdmin(GestiaModelAdmin):
     tiny_fields = ("text_uk", "text_en")
+    text_limits = {"text_uk": 600, "text_en": 600}
     fieldsets = language_tabs(
         uk_fields=(
             "enabled",
             "delay_seconds",
             "shows_per_session",
-            "title_uk",
             "text_uk",
-            "button_uk",
-            "link",
             "image",
         ),
-        en_fields=("title_en", "text_en", "button_en"),
+        en_fields=("text_en",),
+        uk_description=(
+            "Попап зі збором email. Текст — один блок. Підписи форми фіксовані. "
+            "Зображення — фон вікна (необов’язково)."
+        ),
     )
 
     def has_add_permission(self, request):
@@ -44,15 +47,17 @@ class DiscountModalAdmin(GestiaModelAdmin):
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
-            kwargs["widget"] = tinymce_widget(short=True)
+            kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        if formfield is not None and db_field.name in {"title_en", "text_en", "button_en"}:
+        if formfield is not None and db_field.name == "text_en":
             formfield.help_text = _EN_HINT
-        return formfield
+        if formfield is not None and db_field.name == "image":
+            formfield.help_text = "Фон вікна. JPG або PNG."
+        return tighten(formfield, self.text_limits.get(db_field.name))
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
-        force_tinymce(form, self.tiny_fields, short=True)
+        force_tinymce(form, self.tiny_fields, short=False)
         return form
 
 

@@ -7,11 +7,9 @@ from django.utils import translation
 from src.catalog.models import Category, Product
 from src.commerce.models import Inquiry, Order
 from src.content.models import HomeBlock
+from src.core.ratelimit import HONEYPOT_FIELD
 
-HONEYPOT = (
-    'class="visually-hidden" type="text" name="website" value="" '
-    'tabindex="-1" autocomplete="off" aria-hidden="true"'
-)
+HONEYPOT_MARK = f'name="{HONEYPOT_FIELD}"'
 LIMIT_ONE = {"default": {"limit": 1, "window": 600}}
 TOO_MANY = "Забагато спроб. Спробуйте трохи пізніше."
 
@@ -54,38 +52,43 @@ class PublicFormGuardTests(TestCase):
 
     def test_honeypot_is_rendered_on_personal_forms(self):
         home = self.client.get("/")
-        self.assertContains(home, HONEYPOT)
-        self.assertGreaterEqual(home.content.decode().count('name="website"'), 2)
+        self.assertContains(home, HONEYPOT_MARK)
+        self.assertGreaterEqual(home.content.decode().count(HONEYPOT_MARK), 2)
         product = self.client.get(self.product.get_absolute_url())
-        self.assertContains(product, HONEYPOT)
+        self.assertContains(product, HONEYPOT_MARK)
         product_html = product.content.decode()
         cart_form = product_html.split('action="/koshik/dodaty/"', 1)[1].split("</form>", 1)[0]
-        self.assertNotIn('name="website"', cart_form)
+        self.assertNotIn(HONEYPOT_MARK, cart_form)
         self._cart()
         checkout = self.client.get("/zamovlennia/")
         checkout_form = checkout.content.decode().split('action="/zamovlennia/"', 1)[1].split("</form>", 1)[0]
-        self.assertIn(HONEYPOT, checkout_form)
+        self.assertIn(HONEYPOT_MARK, checkout_form)
         contact = self.client.post("/zvorotnyi-zvyazok/", {})
-        self.assertContains(contact, HONEYPOT)
+        self.assertContains(contact, HONEYPOT_MARK)
 
     def test_callback_honeypot_pretends_success(self):
-        payload = _person(sku="GUARD", website="https://spam.example")
+        payload = _person(sku="GUARD", **{HONEYPOT_FIELD: "https://spam.example"})
         response = self.client.post("/zayavka/", payload)
         self.assertContains(response, "Дякуємо")
         self.assertEqual(Inquiry.objects.count(), 0)
-        saved = self.client.post("/zayavka/", _person(sku="GUARD", website="   "))
+        saved = self.client.post("/zayavka/", _person(sku="GUARD", **{HONEYPOT_FIELD: "   "}))
         self.assertContains(saved, "Дякуємо")
         self.assertEqual(Inquiry.objects.count(), 1)
 
+    def test_legacy_website_honeypot_still_blocks(self):
+        response = self.client.post("/zayavka/", _person(sku="GUARD", website="bot"))
+        self.assertContains(response, "Дякуємо")
+        self.assertEqual(Inquiry.objects.count(), 0)
+
     def test_contact_honeypot_pretends_success(self):
-        payload = _person(message="Привіт", website="bot")
+        payload = _person(message="Привіт", **{HONEYPOT_FIELD: "bot"})
         response = self.client.post("/zvorotnyi-zvyazok/", payload)
         self.assertContains(response, "Дякуємо")
         self.assertNotContains(response, "найближчим часом")
         self.assertEqual(Inquiry.objects.count(), 0)
 
     def test_home_honeypot_pretends_success(self):
-        response = self.client.post("/", _person(message="Привіт", website="bot"))
+        response = self.client.post("/", _person(message="Привіт", **{HONEYPOT_FIELD: "bot"}))
         self.assertEqual(response.status_code, 302)
         self.assertIn("kind=contact", response["Location"])
         self.assertEqual(Inquiry.objects.count(), 0)
@@ -96,14 +99,14 @@ class PublicFormGuardTests(TestCase):
     def test_waitlist_honeypot_pretends_success(self):
         response = self.client.post(
             "/svyatkovi-boksy/",
-            {"email": "guest@example.com", "consent": "on", "website": "bot"},
+            {"email": "guest@example.com", "consent": "on", HONEYPOT_FIELD: "bot"},
             HTTP_HX_REQUEST="true",
         )
         self.assertContains(response, "data-waitlist-success")
         self.assertEqual(Inquiry.objects.count(), 0)
 
     def test_buy_now_honeypot_pretends_success(self):
-        payload = _person(address="Київ", sku="GUARD", website="bot")
+        payload = _person(address="Київ", sku="GUARD", **{HONEYPOT_FIELD: "bot"})
         response = self.client.post("/zamovyty-odrazu/", payload)
         self.assertEqual(response.status_code, 302)
         self.assertIn("/thank-you/", response["Location"])
@@ -123,7 +126,7 @@ class PublicFormGuardTests(TestCase):
                 delivery_method=Order.Delivery.BRANCH,
                 address="Відділення 12",
                 payment_method=Order.Payment.ON_DELIVERY,
-                website="bot",
+                **{HONEYPOT_FIELD: "bot"},
             ),
         )
         self.assertEqual(response.status_code, 302)

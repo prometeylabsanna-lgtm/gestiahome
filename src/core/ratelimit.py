@@ -2,7 +2,9 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import gettext as _
 
-HONEYPOT_FIELD = "website"
+# Не "website"/"url" — Safari/автозаповнення часто заповнюють їх і глушать заявки.
+HONEYPOT_FIELD = "gestia_hp"
+_LEGACY_HONEYPOT = "website"
 _FALLBACK = {"limit": 5, "window": 600}
 
 
@@ -18,7 +20,11 @@ def client_ip(request) -> str:
 
 
 def honeypot_filled(request, field: str = HONEYPOT_FIELD) -> bool:
-    return bool((request.POST.get(field) or "").strip())
+    if bool((request.POST.get(field) or "").strip()):
+        return True
+    if field == HONEYPOT_FIELD:
+        return bool((request.POST.get(_LEGACY_HONEYPOT) or "").strip())
+    return False
 
 
 def _quota(form_name: str) -> tuple[int, int]:

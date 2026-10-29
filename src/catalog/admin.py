@@ -7,8 +7,8 @@ from src.catalog.admin_filters import (
     CatalogChoicesFilter,
     CatalogRelatedFilter,
 )
+from src.catalog.admin_product_form import ProductAdminForm, filter_field_names
 from src.catalog.models import (
-    CatalogCell,
     Category,
     Product,
     ProductAttribute,
@@ -25,7 +25,7 @@ GALLERY_HINT = "1272×1540 px. JPG або PNG."
 
 class ProductImageInline(GestiaStackedInline):
     model = ProductImage
-    fields = ("image", "frame_height", "frame_top", "sort")
+    fields = ("image", "sort")
     extra = 1
     ordering_field = "sort"
     hide_ordering_field = True
@@ -69,7 +69,6 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
             "menu_featured",
             "filter_sort",
             "name_uk",
-            "filter_name_uk",
             "seo_title_uk",
             "seo_description_uk",
         ),
@@ -85,6 +84,7 @@ class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
     fieldsets = language_tabs(
         uk_fields=("slug", "name_uk"),
         en_fields=("name_en",),
+        uk_description="Нова група (наприклад «Розмір») з’явиться окремим полем у вкладці «Фільтри» товару.",
     )
 
 
@@ -96,6 +96,7 @@ class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
     fieldsets = language_tabs(
         uk_fields=("group", "slug", "is_filterable", "show_on_pdp", "sort", "name_uk"),
         en_fields=("name_en",),
+        uk_description="Значення фільтра (наприклад «Білий» у групі «Колір»).",
     )
 
 
@@ -109,23 +110,15 @@ class ProductSetAdmin(SlugAdminMixin, GestiaModelAdmin):
     )
 
 
-@admin.register(CatalogCell)
-class CatalogCellAdmin(GestiaModelAdmin):
-    list_display = ("product", "surface", "band", "layout", "role", "slot", "sort", "price_uah", "crop")
-    list_filter = ("surface", "band", "layout", "role", "slot")
-    autocomplete_fields = ("product",)
-    ordering = ("band", "sort")
-
-
 @admin.register(Product)
 class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
+    form = ProductAdminForm
     list_display = (
         "name_uk",
         "sku",
         "category",
         "price_uah",
         "price_eur",
-        "price_weight",
         "is_popular",
         "stock_status",
         "stock_qty",
@@ -157,8 +150,7 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         "unset_sale",
     )
     search_fields = ("name_uk", "name_en", "sku", "slug")
-    autocomplete_fields = ("category", "product_set")
-    filter_horizontal = ("filter_attrs", "related_manual")
+    autocomplete_fields = ("category", "product_set", "related_manual")
     inlines = [ProductImageInline]
     ordering = ("sort", "name_uk")
     fieldsets = language_tabs(
@@ -174,22 +166,18 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
             "is_active",
             "is_sale",
             "is_popular",
-            "price_weight",
             "card_crop",
             "name_width",
             "card_image",
             "sort",
-            "filter_attrs",
             "related_manual",
             "name_uk",
-            "menu_name_uk",
             "description_uk",
             "seo_title_uk",
             "seo_description_uk",
         ),
         en_fields=(
             "name_en",
-            "menu_name_en",
             "description_en",
             "seo_title_en",
             "seo_description_en",
@@ -198,12 +186,33 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
 
     tiny_fields = ("description_uk", "description_en")
 
+    def get_fieldsets(self, request, obj=None):
+        filter_fields = tuple(filter_field_names())
+        extra = ()
+        if filter_fields:
+            extra = (
+                (
+                    "Фільтри",
+                    {
+                        "classes": ("tab",),
+                        "fields": filter_fields,
+                        "description": "Окреме поле на кожну групу. Нові групи — у розділі «Фільтри» каталогу.",
+                    },
+                ),
+            )
+        return self.fieldsets + extra
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
+        fields = kwargs.get("fields")
+        if fields is not None:
+            kwargs["fields"] = tuple(
+                name for name in fields if not str(name).startswith("attr_group_")
+            )
         form = super().get_form(request, obj, change=change, **kwargs)
         force_tinymce(form, self.tiny_fields, short=False)
         return form

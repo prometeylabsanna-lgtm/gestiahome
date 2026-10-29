@@ -8,7 +8,7 @@ from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 VIDEO_HINT = "MP4 або WEBM."
-_TINY = frozenset({"text_uk", "text_en", "text_mobile_uk", "text_mobile_en"})
+_TINY = frozenset({"text_uk", "text_en"})
 
 
 class KeyedBlockAdmin(GestiaModelAdmin):

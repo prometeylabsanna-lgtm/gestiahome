@@ -1,7 +1,6 @@
 {% load static content_tags richtext %}
 {% cms block.title "callback_title" as cb_title %}
 {% cms block.text "callback_text" as cb_text %}
-{% cms block.text_mobile "callback_text_mobile" as cb_mob %}
 {% cms block.cta "callback_cta" as cb_cta %}
 {% cms "" "contact_button" as cb_send %}
 {% cms block.note "callback_note" as cb_note %}
@@ -12,8 +11,7 @@
 <section class="callback" id="callback">
   <header class="callback__head">
     {% if cb_title %}<h2>{{ cb_title }}</h2>{% endif %}
-    {% if cb_text %}<div class="only-desk">{{ cb_text|richhtml }}</div>{% endif %}
-    {% if cb_mob %}<div class="only-mob">{{ cb_mob|richhtml }}</div>{% endif %}
+    {% if cb_text %}<div class="callback__lead">{{ cb_text|richhtml }}</div>{% endif %}
   </header>
   <form class="callback__form" method="post" action="{% url 'home' %}" {% include "commerce/_validate_attrs.html" %}>
     {% csrf_token %}

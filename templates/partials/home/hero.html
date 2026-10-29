@@ -17,9 +17,6 @@
     </video>
   {% elif block.image %}
     <picture class="hero__picture">
-      {% if block.image_mobile %}
-        <source media="(max-width: 767px)" srcset="{{ block.image_mobile.url }}">
-      {% endif %}
       <img class="hero__img" src="{{ block.image.url }}" alt="" width="1442" height="871">
     </picture>
   {% endif %}

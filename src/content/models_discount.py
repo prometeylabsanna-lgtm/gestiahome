@@ -30,16 +30,39 @@ def validate_public_link(value: str) -> None:
 
 
 class DiscountModal(SingletonModel):
+    """Попап знижки / waitlist (email) на сайті."""
+
     cache_key = "discount_modal_v1"
     rich_text_fields = ("text_uk", "text_en")
 
     enabled = models.BooleanField("Показувати вікно", default=False)
+    waitlist_title_uk = models.CharField("Заголовок вікна", max_length=56, blank=True)
+    waitlist_title_en = models.CharField("Заголовок вікна (EN)", max_length=56, blank=True)
+    waitlist_p1_uk = models.CharField("Перший абзац", max_length=160, blank=True)
+    waitlist_p1_en = models.CharField("Перший абзац (EN)", max_length=160, blank=True)
+    waitlist_p2_uk = models.CharField("Другий абзац", max_length=120, blank=True)
+    waitlist_p2_en = models.CharField("Другий абзац (EN)", max_length=120, blank=True)
+    waitlist_p3_uk = models.CharField("Третій абзац", max_length=140, blank=True)
+    waitlist_p3_en = models.CharField("Третій абзац (EN)", max_length=140, blank=True)
+    waitlist_email_uk = models.CharField("Підказка email", max_length=20, blank=True)
+    waitlist_email_en = models.CharField("Підказка email (EN)", max_length=20, blank=True)
+    waitlist_consent_uk = models.CharField("Текст згоди", max_length=72, blank=True)
+    waitlist_consent_en = models.CharField("Текст згоди (EN)", max_length=72, blank=True)
+    waitlist_privacy_uk = models.CharField("Посилання на політику", max_length=36, blank=True)
+    waitlist_privacy_en = models.CharField("Посилання на політику (EN)", max_length=36, blank=True)
+    waitlist_button_uk = models.CharField("Кнопка", max_length=24, blank=True)
+    waitlist_button_en = models.CharField("Кнопка (EN)", max_length=24, blank=True)
+    waitlist_thanks_title_uk = models.CharField("Заголовок після надсилання", max_length=16, blank=True)
+    waitlist_thanks_title_en = models.CharField("Заголовок після надсилання (EN)", max_length=16, blank=True)
+    waitlist_thanks_text_uk = models.CharField("Текст після надсилання", max_length=90, blank=True)
+    waitlist_thanks_text_en = models.CharField("Текст після надсилання (EN)", max_length=90, blank=True)
+    # Legacy CTA fields (застарілі; лишаються для сумісності).
     title_uk = models.CharField("Заголовок", max_length=80, blank=True)
     title_en = models.CharField("Заголовок (EN)", max_length=80, blank=True)
     text_uk = models.TextField("Текст", blank=True)
     text_en = models.TextField("Текст (EN)", blank=True)
-    button_uk = models.CharField("Кнопка", max_length=40, blank=True)
-    button_en = models.CharField("Кнопка (EN)", max_length=40, blank=True)
+    button_uk = models.CharField("Кнопка CTA", max_length=40, blank=True)
+    button_en = models.CharField("Кнопка CTA (EN)", max_length=40, blank=True)
     link = models.CharField(
         "Посилання кнопки",
         max_length=300,
@@ -48,11 +71,11 @@ class DiscountModal(SingletonModel):
         help_text=_LINK_HINT,
     )
     image = WebPImageField(
-        "Зображення",
+        "Фон вікна",
         upload_to="discount/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
-        help_text="Необов’язково. JPG або PNG, довша сторона до 2560 px.",
+        help_text="Необов’язково. Фонове зображення попапа. JPG або PNG.",
     )
     delay_seconds = models.PositiveSmallIntegerField(
         "Затримка перед показом, с",
@@ -79,15 +102,24 @@ class DiscountModal(SingletonModel):
 
     @property
     def title(self):
-        return localized(self, "title")
+        return localized(self, "waitlist_title") or localized(self, "title")
 
     @property
     def text(self):
-        return localized(self, "text")
+        body = localized(self, "text")
+        if body:
+            return body
+        chunks = [
+            localized(self, "waitlist_title"),
+            localized(self, "waitlist_p1"),
+            localized(self, "waitlist_p2"),
+            localized(self, "waitlist_p3"),
+        ]
+        return "\n\n".join(part.strip() for part in chunks if (part or "").strip())
 
     @property
     def button(self):
-        return localized(self, "button")
+        return localized(self, "waitlist_button") or localized(self, "button")
 
     @property
     def public_url(self) -> str:

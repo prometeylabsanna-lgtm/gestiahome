@@ -34,9 +34,7 @@
             {% else %}
               {% if item.image %}
                 <img class="about-gallery__desk" src="{{ item.image.url }}" alt="" {% if item.slot == "b" %}width="414" height="543"{% elif item.slot == "c" %}width="414" height="545"{% else %}width="414" height="547"{% endif %}>
-              {% endif %}
-              {% if item.image_mobile %}
-                <img class="about-gallery__mob" src="{{ item.image_mobile.url }}" alt="" {% if item.slot == "b" %}width="174" height="228"{% else %}width="174" height="227"{% endif %}>
+                <img class="about-gallery__mob" src="{{ item.image.url }}" alt="" {% if item.slot == "b" %}width="174" height="228"{% else %}width="174" height="227"{% endif %}>
               {% endif %}
             {% endif %}
           </div>
@@ -96,7 +94,7 @@
           <source src="{{ page.video.url }}" type="{% if '.webm' in page.video.name %}video/webm{% else %}video/mp4{% endif %}">
         </video>
       {% elif page.image %}
-        <img class="vbanner__img vbanner__img--mob" src="{% if page.image_mobile %}{{ page.image_mobile.url }}{% else %}{{ page.image.url }}{% endif %}" alt="" width="393" height="735">
+        <img class="vbanner__img vbanner__img--mob" src="{{ page.image.url }}" alt="" width="393" height="735">
         <img class="vbanner__img vbanner__img--desk" src="{{ page.image.url }}" alt="" width="1442" height="871">
       {% else %}
         <img class="vbanner__img vbanner__img--mob" src="{% static 'figma/about/m/1c65c9d9-7443-4409-aeec-78269a2a6038.png' %}" alt="" width="393" height="735">

@@ -396,10 +396,19 @@ class Command(BaseCommand):
     def _reviews(self):
         for sort in range(1, 5):
             Review.objects.create(
+                placement=Review.Placement.HOME,
                 sort=sort,
                 author_uk=nb("Марія К."),
                 text_uk=REVIEW,
                 rating_kind=Review.Rating.BLACK_FIVE if sort == 4 else Review.Rating.GOLD_FOUR,
+            )
+        for sort in range(1, 3):
+            Review.objects.create(
+                placement=Review.Placement.ABOUT,
+                sort=sort,
+                author_uk=nb("Олена П."),
+                text_uk=REVIEW,
+                rating_kind=Review.Rating.GOLD_FOUR,
             )
 
     def _footer(self):

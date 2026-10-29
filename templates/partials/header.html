@@ -11,7 +11,7 @@
       <button class="head-nav__catalog" type="button" data-catalog aria-expanded="false" aria-controls="mega-panel">
         {% trans "Каталог" %}
       </button>
-      <a class="head-nav__about" href="{% url 'about' %}">{% cms_field site_settings "nav_about" %}</a>
+      <a class="head-nav__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
       <a class="icon-btn" href="{% url 'catalog' %}" aria-label="{% trans 'Пошук' %}">
         <img src="{% static 'figma/desktop/d595f.svg' %}" width="22" height="22" alt="">
       </a>
@@ -52,7 +52,7 @@
       <div class="mega__inner">
         <div class="mega__nav">
           <div class="mega__cats">
-            <a href="{% url 'catalog' %}">{% cms_field site_settings "nav_all" %}</a>
+            <a href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
             <div class="mega__list">
               {% for cat in menu_categories %}
                 <a class="{% if cat.menu_featured %}is-feature{% endif %}" href="{{ cat.get_absolute_url }}">
@@ -104,17 +104,17 @@
     </form>
     <div class="burger__catalog" data-burger-catalog>
       <button class="burger__catalog-head" type="button" data-burger-catalog-toggle aria-expanded="true" aria-controls="burger-cats">
-        <span>{% cms_field site_settings "menu_title" %}</span>
+        <span>{% cms "" "menu_title" %}</span>
         <img src="{% static 'figma/mobile_burger/fed4e.svg' %}" width="15" height="15" alt="">
       </button>
       <div class="burger__cats" id="burger-cats" data-burger-cats>
-        <a href="{% url 'catalog' %}">{% cms_field site_settings "nav_all" %}</a>
+        <a href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
         {% for cat in menu_categories %}
           <a class="{% if cat.menu_featured %}is-feature{% endif %}" href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
         {% endfor %}
       </div>
       <img class="burger__rule" src="{% static 'figma/mobile_burger/e4369.svg' %}" width="362" height="1" alt="">
-      <a class="burger__about" href="{% url 'about' %}">{% cms_field site_settings "nav_about" %}</a>
+      <a class="burger__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
     </div>
     <div class="burger__foot">
       {% include "partials/social_row.html" with tone="dark" %}

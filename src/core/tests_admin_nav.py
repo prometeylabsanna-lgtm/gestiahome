@@ -17,7 +17,8 @@ class SidebarTreeTests(TestCase):
         self.client.force_login(self.user)
 
     def test_home_items_follow_page_order(self):
-        keys = [entry["key"] for entry in next(g["items"] for g in NAV_TREE if g["title"] == "Головна")]
+        home = next(g["items"] for g in NAV_TREE if g["title"] == "Головна")
+        keys = [entry["key"] for entry in home]
         self.assertEqual(
             keys,
             [
@@ -29,24 +30,32 @@ class SidebarTreeTests(TestCase):
                 "home_advantages",
                 "home_bottom_banner",
                 "home_reviews",
-                "home_review_list",
                 "home_callback",
             ],
+        )
+        reviews = next(entry for entry in home if entry["key"] == "home_reviews")
+        self.assertEqual(
+            [child["key"] for child in reviews.get("items") or []],
+            ["home_review_list"],
         )
         self.assertNotIn("home_advantage_cards", keys)
         self.assertNotIn("home_cta", keys)
 
     def test_pending_entries_stay_in_the_tree(self):
         keys = {entry["key"] for entry in iter_nav_entries(NAV_TREE)}
-        self.assertIn("home_cta", keys)
         self.assertIn("discount", keys)
         self.assertIn("styles", keys)
+        self.assertIn("recent_actions", keys)
         self.assertIn("legal_offer", keys)
         self.assertIn("about_intro", keys)
         self.assertIn("about_gallery", keys)
         self.assertIn("about_story", keys)
         self.assertIn("about_banner", keys)
-        self.assertIn("about_picks", keys)
+        self.assertIn("about_popular", keys)
+        self.assertIn("about_reviews", keys)
+        self.assertIn("about_review_list", keys)
+        self.assertNotIn("home_cta", keys)
+        self.assertNotIn("chrome_footer_links", keys)
         self.assertNotIn("home_video", keys)
         self.assertNotIn("home_video_2", keys)
 
@@ -58,20 +67,28 @@ class SidebarTreeTests(TestCase):
         self.assertIn("Юридичні сторінки", titles)
         self.assertIn("Знижка", titles)
         self.assertIn("Стилі", titles)
+        self.assertIn("Система", titles)
         labels = _labels(groups)
+        self.assertIn("Недавні дії", labels)
         self.assertIn("Банер", labels)
         self.assertIn("Текст банера", labels)
         self.assertIn("Банер середній", labels)
         self.assertIn("Банер нижній", labels)
         self.assertIn("Чому обирають", labels)
+        self.assertIn("Список переваг", labels)
         self.assertIn("Зворотній дзвінок", labels)
+        self.assertIn("Відгуки", labels)
+        self.assertIn("Список відгуків", labels)
         self.assertIn("Інтро", labels)
         self.assertIn("Галерея", labels)
         self.assertIn("Історія", labels)
-        self.assertIn("Картки під відгуками", labels)
-        self.assertIn("CTA та контактні форми", labels)
+        self.assertIn("Популярні товари", labels)
+        self.assertNotIn("CTA та контактні форми", labels)
+        self.assertNotIn("Посилання футера", labels)
         self.assertNotIn("Головний банер", labels)
         self.assertNotIn("Картки переваг", labels)
+        self.assertNotIn("Увесь сайт", labels)
+        self.assertEqual(labels.count("Стилі"), 1)
 
     def test_admin_index_renders_ukrainian_tree(self):
         self.client.cookies["django_language"] = "en"
@@ -82,8 +99,15 @@ class SidebarTreeTests(TestCase):
         self.assertContains(response, "Текст банера")
         self.assertContains(response, reverse("admin:content_homebannertext_changelist"))
         self.assertContains(response, reverse("admin:content_homemidbanner_changelist"))
-        self.assertContains(response, reverse("admin:content_contactforms_changelist"))
+        self.assertContains(response, reverse("admin:content_globalpagestyle_changelist"))
+        self.assertContains(response, reverse("admin:admin_logentry_changelist"))
+        self.assertContains(response, "Недавні дії")
+        self.assertNotContains(response, "id=\"content-related\"")
         self.assertContains(response, "Про нас")
+        with self.assertRaises(NoReverseMatch):
+            reverse("admin:content_contactforms_changelist")
+        with self.assertRaises(NoReverseMatch):
+            reverse("admin:content_footerlink_changelist")
         self.assertContains(response, "Інтро")
         self.assertContains(response, reverse("admin:content_aboutintro_changelist"))
         self.assertContains(response, "Замовлення і заявки")

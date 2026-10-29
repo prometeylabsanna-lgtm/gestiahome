@@ -103,7 +103,7 @@ def product_detail(request, slug):
             "set_block": blocks.get("pdp_set"),
             "related_block": blocks.get("pdp_related"),
             "reviews_block": blocks.get("reviews"),
-            "reviews": Review.objects.all(),
+            "reviews": Review.objects.filter(placement=Review.Placement.HOME),
             "callback_form": apply_labels(
                 style_form(CallbackForm(initial={"sku": product.sku})),
                 ContactForms.load(),

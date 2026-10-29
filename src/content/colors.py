@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 TOKEN_INK = "#241c16"
 TOKEN_PAPER = "#f3eee6"
 TOKEN_ACCENT = "#8d3b2a"
+TOKEN_CHROME = "#ffffff"
 
 _HEX6 = re.compile(r"^#[0-9a-fA-F]{6}$")
 _HEX3 = re.compile(r"^#[0-9a-fA-F]{3}$")

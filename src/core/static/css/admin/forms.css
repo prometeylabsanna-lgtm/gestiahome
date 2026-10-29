@@ -1,0 +1,166 @@
+/* Visible edit frames — Unfold uses very light border-base-200 */
+html body #main input[type="text"],
+html body #main input[type="search"],
+html body #main input[type="url"],
+html body #main input[type="email"],
+html body #main input[type="tel"],
+html body #main input[type="number"],
+html body #main input[type="password"],
+html body #main select,
+html body #main textarea,
+html body #content-main input[type="text"],
+html body #content-main input[type="search"],
+html body #content-main input[type="url"],
+html body #content-main input[type="email"],
+html body #content-main input[type="tel"],
+html body #content-main input[type="number"],
+html body #content-main input[type="password"],
+html body #content-main select,
+html body #content-main textarea,
+html body .change-form input[type="text"],
+html body .change-form input[type="search"],
+html body .change-form input[type="url"],
+html body .change-form input[type="email"],
+html body .change-form input[type="tel"],
+html body .change-form input[type="number"],
+html body .change-form input[type="password"],
+html body .change-form select,
+html body .change-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #171717;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  color: #171717;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html body #main textarea,
+html body #content-main textarea,
+html body .change-form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+html body #main input:focus,
+html body #main select:focus,
+html body #main textarea:focus,
+html body #content-main input:focus,
+html body #content-main select:focus,
+html body #content-main textarea:focus,
+html body .change-form input:focus,
+html body .change-form select:focus,
+html body .change-form textarea:focus {
+  outline: 1px solid #000;
+  outline-offset: 1px;
+  border-color: #000;
+}
+
+html body #main .tox-tinymce,
+html body #content-main .tox-tinymce,
+html body .change-form .tox-tinymce {
+  border: 1px solid #171717;
+  border-radius: 0.375rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html body #main .tox .tox-edit-area::before,
+html body #content-main .tox .tox-edit-area::before {
+  border: 0;
+}
+
+html body #main .gestia-char-count,
+html body #content-main .gestia-char-count {
+  display: block;
+  margin-top: 0.35rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Значення поля на всю ширину колонки; лічильник під інпутом. */
+html body #main .form-row .grow.relative,
+html body #content-main .form-row .grow.relative,
+html body .change-form .form-row .grow.relative {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+html body #main .form-row .grow.relative > input,
+html body #content-main .form-row .grow.relative > input,
+html body .change-form .form-row .grow.relative > input,
+html body #main .form-row .grow.relative > select,
+html body #content-main .form-row .grow.relative > select,
+html body .change-form .form-row .grow.relative > select,
+html body #main .form-row .grow.relative > textarea,
+html body #content-main .form-row .grow.relative > textarea,
+html body .change-form .form-row .grow.relative > textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+html.dark body #main input[type="text"],
+html.dark body #main input[type="search"],
+html.dark body #main input[type="url"],
+html.dark body #main input[type="email"],
+html.dark body #main input[type="tel"],
+html.dark body #main input[type="number"],
+html.dark body #main input[type="password"],
+html.dark body #main select,
+html.dark body #main textarea,
+html.dark body #content-main input[type="text"],
+html.dark body #content-main input[type="search"],
+html.dark body #content-main input[type="url"],
+html.dark body #content-main input[type="email"],
+html.dark body #content-main input[type="tel"],
+html.dark body #content-main input[type="number"],
+html.dark body #content-main input[type="password"],
+html.dark body #content-main select,
+html.dark body #content-main textarea,
+html.dark body .change-form input[type="text"],
+html.dark body .change-form select,
+html.dark body .change-form textarea {
+  border-color: #a3a3a3;
+  background-color: #171717;
+  color: #f5f5f5;
+}
+
+html.dark body #main .tox-tinymce,
+html.dark body #content-main .tox-tinymce,
+html.dark body .change-form .tox-tinymce {
+  border-color: #a3a3a3;
+}
+
+@media (max-width: 767px) {
+  html body #main input[type="text"],
+  html body #main input[type="search"],
+  html body #main input[type="url"],
+  html body #main input[type="email"],
+  html body #main input[type="tel"],
+  html body #main input[type="number"],
+  html body #main input[type="password"],
+  html body #main select,
+  html body #main textarea,
+  html body #content-main input[type="text"],
+  html body #content-main select,
+  html body #content-main textarea,
+  html body .change-form input[type="text"],
+  html body .change-form select,
+  html body .change-form textarea {
+    font-size: 16px;
+  }
+}

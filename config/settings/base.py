@@ -244,6 +244,7 @@ UNFOLD = {
         _admin_asset("css/admin/image_preview.css"),
         _admin_asset("css/admin/color_picker.css"),
         _admin_asset("css/admin/brand.css"),
+        _admin_asset("css/admin/forms.css"),
     ],
     "SCRIPTS": [
         _admin_asset("js/admin/char_counter.js"),

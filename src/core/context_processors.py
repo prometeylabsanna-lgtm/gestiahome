@@ -3,7 +3,7 @@ from django.db.utils import OperationalError, ProgrammingError
 
 from src.commerce.forms import ContactForm, WaitlistForm, style_form
 from src.content.form_labels import apply_labels
-from src.content.theme import page_style_key
+from src.content.theme import page_style_key, theme_font_family
 from src.core.i18n import localize_path
 from src.core.middleware import language_enabled
 from src.core.seo import build_head
@@ -28,7 +28,8 @@ def shop(request):
         from src.catalog.selectors import nav_categories as load_nav
         from src.commerce.cart import item_count
         from src.commerce.wishlist import item_count as wish_count
-        from src.content.models import ContactForms, FooterLink, HomeBlock, SiteSettings
+        from src.content.footer_nav import build_footer_columns
+        from src.content.models import ContactForms, HomeBlock, SiteSettings
 
         site = SiteSettings.load()
         form_copy = ContactForms.load()
@@ -40,8 +41,7 @@ def shop(request):
         featured = Product.objects.filter(slug="boks-rizdvyanyi-shyshky", is_active=True).prefetch_related("images").first()
         if featured is not None:
             menu_cards = [featured, featured, featured]
-        for link in FooterLink.objects.all():
-            footer_columns.setdefault(link.column, []).append(link)
+        footer_columns = build_footer_columns()
         cart_count = item_count(request)
         wishlist_count = wish_count(request)
     except (OperationalError, ProgrammingError):
@@ -74,6 +74,7 @@ def shop(request):
         "form_copy": form_copy,
         "discount_modal": discount_modal,
         "page_style_key": page_style_key(request),
+        "theme_font": theme_font_family(),
         "contact_form": apply_labels(style_form(ContactForm()), form_copy),
         "waitlist_form": apply_labels(style_form(WaitlistForm()), form_copy),
         "seo": build_head(request, site),

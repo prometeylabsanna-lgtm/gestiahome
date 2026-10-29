@@ -4,11 +4,28 @@ from django.db.utils import OperationalError, ProgrammingError
 
 from src.content.colors import (
     TOKEN_ACCENT,
+    TOKEN_CHROME,
     TOKEN_INK,
     TOKEN_PAPER,
     normalize_hex,
     validate_hex_color,
 )
+
+FONT_INTER = "inter"
+FONT_SYSTEM = "system"
+FONT_GEORGIA = "georgia"
+
+FONT_CHOICES = (
+    (FONT_INTER, "Inter"),
+    (FONT_SYSTEM, "System UI"),
+    (FONT_GEORGIA, "Georgia"),
+)
+
+FONT_STACKS = {
+    FONT_INTER: '"Inter", sans-serif',
+    FONT_SYSTEM: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    FONT_GEORGIA: 'Georgia, "Times New Roman", serif',
+}
 
 
 class HexColorField(models.CharField):
@@ -36,14 +53,25 @@ class PageStyle(models.Model):
         LEGAL = "legal", "Юридичні"
 
     page = models.CharField("Сторінка", max_length=16, choices=Key.choices, unique=True)
-    background_color = HexColorField("Колір тла", default=TOKEN_PAPER, blank=True)
+    background_color = HexColorField("Колір фону сторінок", default=TOKEN_PAPER, blank=True)
+    chrome_background_color = HexColorField(
+        "Колір фону хедера і футера",
+        default=TOKEN_CHROME,
+        blank=True,
+    )
     text_color = HexColorField("Колір тексту", default=TOKEN_INK, blank=True)
-    hover_color = HexColorField("Колір при наведенні", default=TOKEN_ACCENT, blank=True)
+    hover_color = HexColorField("Колір підсвітки", default=TOKEN_ACCENT, blank=True)
+    font_family = models.CharField(
+        "Шрифт",
+        max_length=16,
+        choices=FONT_CHOICES,
+        default=FONT_INTER,
+    )
 
     class Meta:
         ordering = ["page"]
-        verbose_name = "Стиль сторінки"
-        verbose_name_plural = "Стилі сторінок"
+        verbose_name = "Стиль"
+        verbose_name_plural = "Стилі"
 
     def __str__(self):
         return self.get_page_display()
@@ -53,6 +81,14 @@ class PageStyle(models.Model):
         if self.page != self.Key.GLOBAL:
             return
         self._sync_site_settings()
+
+    def reset_to_defaults(self):
+        self.background_color = TOKEN_PAPER
+        self.chrome_background_color = TOKEN_CHROME
+        self.text_color = TOKEN_INK
+        self.hover_color = TOKEN_ACCENT
+        self.font_family = FONT_INTER
+        self.save()
 
     def _sync_site_settings(self):
         from src.content.models import SiteSettings
@@ -67,12 +103,16 @@ class PageStyle(models.Model):
             return
         cache.delete(SiteSettings.cache_key)
 
+    @property
+    def font_stack(self) -> str:
+        return FONT_STACKS.get(self.font_family, FONT_STACKS[FONT_INTER])
+
 
 class GlobalPageStyle(PageStyle):
     class Meta:
         proxy = True
-        verbose_name = "Увесь сайт"
-        verbose_name_plural = "Увесь сайт"
+        verbose_name = "Стилі"
+        verbose_name_plural = "Стилі"
 
 
 class HomePageStyle(PageStyle):

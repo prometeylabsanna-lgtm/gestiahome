@@ -178,6 +178,7 @@
 .pop-rail {
   display: flex;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
 }
@@ -441,7 +442,7 @@
   margin: 0;
   font-size: 20px;
   font-weight: 400;
-  line-height: 1;
+  line-height: 1.2;
   letter-spacing: -1.4px;
   white-space: nowrap;
 }

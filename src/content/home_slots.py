@@ -62,3 +62,19 @@ def sync_popular_flags(block):
     )
     if ids:
         Product.objects.filter(pk__in=ids).update(is_popular=True)
+
+
+def about_popular():
+    from src.content.models import AboutPage
+    from src.content.models_about import AboutPopularSlot
+
+    page = AboutPage.load()
+    slots = list(
+        AboutPopularSlot.objects.filter(page=page, product__is_active=True)
+        .select_related("product")
+        .prefetch_related("product__images")
+        .order_by("sort", "id")
+    )
+    if slots:
+        return [slot.product for slot in slots]
+    return home_popular()

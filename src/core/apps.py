@@ -7,6 +7,7 @@ class CoreConfig(AppConfig):
     verbose_name = "Спільне"
 
     def ready(self):
+        from src.core import admin_log  # noqa: F401
         from src.core.images import connect as connect_images
         from src.core.richtext import connect as connect_richtext
 

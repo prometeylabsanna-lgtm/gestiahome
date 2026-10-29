@@ -13,11 +13,10 @@ from src.content.models import HomeBlock
 from src.core.admin_base import AdminImagePreviewWidget
 from src.core.admin_lang import UK_TAB
 
-VIDEO_FIELDS = ("media_kind", "image", "image_mobile", "video", "poster")
+VIDEO_FIELDS = ("media_kind", "image", "video", "poster")
 FIELD_PREFIX = "page_video_"
 HINTS = {
-    "image": "1442×871 px. JPG або PNG.",
-    "image_mobile": "390×735 px. JPG або PNG.",
+    "image": "1442×871 px. Одна картинка для десктопу і мобільного. JPG або PNG.",
     "video": "MP4 або WEBM.",
 }
 

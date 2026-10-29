@@ -97,7 +97,7 @@
       {% trans "Схожі товари" as related_title %}
       {% trans "Перейти до каталогу" as catalog_cta %}
       {% if set_products %}
-        {% include "catalog/_pdp_band.html" with band_class="pdp-set" title=set_block.title|default:set_title mobile_title=set_block.text_mobile|default:set_mobile_title products=set_products cta=set_block.cta|default:catalog_cta %}
+        {% include "catalog/_pdp_band.html" with band_class="pdp-set" title=set_block.title|default:set_title mobile_title=set_block.title|default:set_mobile_title products=set_products cta=set_block.cta|default:catalog_cta %}
       {% endif %}
       {% if related %}
         {% include "catalog/_pdp_band.html" with band_class="pdp-related" title=related_block.title|default:related_title mobile_title=related_block.title|default:related_title products=related cta=related_block.cta|default:catalog_cta %}

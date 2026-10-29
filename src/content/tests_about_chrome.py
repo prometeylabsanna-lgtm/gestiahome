@@ -35,8 +35,9 @@ class AboutRenderTests(TestCase):
         page = self.client.get("/en/pro-nas/")
         self.assertContains(page, "A modern woman can do anything.")
         self.assertContains(page, "She builds a career")
-        self.assertContains(page, "Christmas box")
         self.assertContains(page, "About Gestia Home")
+        self.assertContains(page, "All products")
+        self.assertContains(page, "Privacy Policy")
         self.assertNotContains(page, "Сучасна жінка може все.")
 
 
@@ -46,43 +47,46 @@ class HeaderFooterRenderTests(TestCase):
         translation.activate("uk")
         self.site = SiteSettings.load()
 
-    def test_nav_label_and_english(self):
+    def test_nav_labels_use_fixed_literals(self):
         self.site.nav_about_uk = "Історія"
         self.site.nav_about_en = "Story"
+        self.site.nav_all_uk = "Все"
+        self.site.menu_title_uk = "Бокси"
+        self.site.menu_title_en = "Boxes"
         self.site.save()
-        self.assertContains(self.client.get("/"), 'class="head-nav__about"')
-        self.assertContains(self.client.get("/"), ">Історія</a>")
+        page = self.client.get("/")
+        self.assertContains(page, 'class="head-nav__about"')
+        self.assertContains(page, ">Про нас</a>")
+        self.assertContains(page, ">Усі товари</a>")
+        self.assertContains(page, "<span>Каталог</span>")
+        self.assertContains(page, 'class="head-nav__catalog"')
+        self.assertNotContains(page, ">Історія</a>")
+        self.assertNotContains(page, "<span>Бокси</span>")
         english = self.client.get("/en/")
-        self.assertContains(english, ">Story</a>")
-        self.assertNotContains(english, ">Історія</a>")
+        self.assertContains(english, ">About</a>")
+        self.assertContains(english, ">All products</a>")
+        self.assertContains(english, "<span>Catalogue</span>")
+        self.assertContains(english, "Catalogue")
+        self.assertNotContains(english, ">Story</a>")
 
-    def test_empty_nav_and_credit_fall_back(self):
-        self.site.nav_all_uk = ""
-        self.site.nav_all_en = ""
+    def test_credit_and_logo_fall_back(self):
         self.site.credit_uk = ""
         self.site.credit_en = ""
         self.site.logo = ""
         self.site.save()
         page = self.client.get("/")
-        self.assertContains(page, ">Усі товари</a>")
         self.assertContains(page, "Вітрину зібрано в")
         self.assertContains(page, "figma/desktop/5493c.png")
         english = self.client.get("/en/")
-        self.assertContains(english, ">All products</a>")
         self.assertContains(english, "Storefront assembled by")
 
-    def test_menu_heading_does_not_replace_the_header_button(self):
-        self.site.menu_title_uk = "Бокси"
-        self.site.menu_title_en = "Boxes"
+    def test_telegram_url_in_social_row(self):
+        self.site.telegram_url = "https://t.me/gestia_home"
         self.site.save()
         page = self.client.get("/")
-        self.assertContains(page, "<span>Бокси</span>")
-        self.assertContains(page, 'class="head-nav__catalog"')
-        self.assertContains(page, "Каталог")
-        english = self.client.get("/en/")
-        self.assertContains(english, "<span>Boxes</span>")
-        self.assertContains(english, 'class="head-nav__catalog"')
-        self.assertContains(english, "Catalogue")
+        self.assertContains(page, 'href="https://t.me/gestia_home"')
+        self.assertContains(page, ">Telegram</span>")
+
 
 
 class MediaChoiceTests(TestCase):

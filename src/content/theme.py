@@ -2,7 +2,8 @@ import re
 
 from django.db.utils import OperationalError, ProgrammingError
 
-from src.content.colors import TOKEN_ACCENT, TOKEN_INK, TOKEN_PAPER, normalize_hex
+from src.content.colors import TOKEN_ACCENT, TOKEN_CHROME, TOKEN_INK, TOKEN_PAPER, normalize_hex
+from src.content.models_styles import FONT_INTER, FONT_STACKS
 
 _HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
@@ -20,8 +21,6 @@ URL_PAGE = {
     "shipping": "legal",
 }
 
-_PAGE_KEYS = frozenset(URL_PAGE.values())
-
 
 def page_style_key(request) -> str:
     match = getattr(request, "resolver_match", None)
@@ -36,11 +35,38 @@ def _site_color(value: str | None, fallback: str) -> str:
     return fallback
 
 
-def _override(value: str | None, root: str, token: str) -> str:
-    color = normalize_hex(value)
-    if not color or color == token or color == root.lower():
-        return ""
-    return color
+def global_style():
+    from src.content.models_styles import PageStyle
+
+    try:
+        return PageStyle.objects.filter(page=PageStyle.Key.GLOBAL).first()
+    except (OperationalError, ProgrammingError):
+        return None
+
+
+def theme_font_family() -> str:
+    row = global_style()
+    if row is None:
+        return FONT_INTER
+    return row.font_family or FONT_INTER
+
+
+def theme_font_stack() -> str:
+    return FONT_STACKS.get(theme_font_family(), FONT_STACKS[FONT_INTER])
+
+
+def _chrome_fg(chrome: str) -> str:
+    raw = (chrome or TOKEN_CHROME).lstrip("#")
+    if len(raw) != 6:
+        return TOKEN_INK
+    try:
+        r, g, b = int(raw[0:2], 16), int(raw[2:4], 16), int(raw[4:6], 16)
+    except ValueError:
+        return TOKEN_INK
+    # Світлий фон хедера/футера — темний текст; темний — кремовий як у макеті.
+    if (0.299 * r + 0.587 * g + 0.114 * b) > 160:
+        return TOKEN_INK
+    return "#feedda"
 
 
 def build_theme_css() -> str:
@@ -50,43 +76,36 @@ def build_theme_css() -> str:
     ink = _site_color(site.color_ink, TOKEN_INK)
     paper = _site_color(site.color_paper, TOKEN_PAPER)
     accent = _site_color(site.color_accent, TOKEN_ACCENT)
-    if accent.lower() == TOKEN_ACCENT:
-        css = f":root{{--ink:{ink};--paper:{paper};--accent:{accent};}}"
+    row = global_style()
+    chrome = TOKEN_CHROME
+    font = FONT_STACKS[FONT_INTER]
+    if row is not None:
+        chrome = normalize_hex(row.chrome_background_color) or TOKEN_CHROME
+        font = row.font_stack
+        ink = normalize_hex(row.text_color) or ink
+        paper = normalize_hex(row.background_color) or paper
+        accent = normalize_hex(row.hover_color) or accent
+
+    chrome_fg = _chrome_fg(chrome)
+    root = (
+        f":root{{--ink:{ink};--paper:{paper};--accent:{accent};"
+        f"--chrome:{chrome};--chrome-fg:{chrome_fg};--font:{font};}}"
+    )
+    # Дефолтний білий = як у макеті: біла шапка, темний підвал із footer.css.
+    # Будь-який інший chrome — спільний фон шапки і підвалу.
+    chrome_rule = ".site-header,.site-header__bar{background:var(--chrome)}"
+    if chrome.lower() != TOKEN_CHROME.lower():
+        chrome_rule += (
+            ".site-footer{background:var(--chrome);color:var(--chrome-fg)}"
+            ".site-footer a,.site-footer__col a,.site-footer__legal,"
+            ".site-footer__credit,.site-footer__lead,.site-footer__tail,"
+            ".site-footer__credit-link,.site-footer__credit-name{color:var(--chrome-fg)}"
+        )
+    if accent.lower() == TOKEN_ACCENT.lower():
+        hover = ""
     else:
-        css = (
-            f":root{{--ink:{ink};--paper:{paper};--accent:{accent};--hover:{accent.lower()};}}"
+        hover = (
+            f":root{{--hover:{accent.lower()};}}"
             "body a:hover,body button:hover{color:var(--hover)}"
         )
-    return css + _page_rules(ink, paper, accent)
-
-
-def _page_rules(ink: str, paper: str, accent: str) -> str:
-    from src.content.models_styles import PageStyle
-
-    try:
-        rows = list(PageStyle.objects.exclude(page=PageStyle.Key.GLOBAL))
-    except (OperationalError, ProgrammingError):
-        return ""
-    chunks = []
-    for row in rows:
-        if row.page not in _PAGE_KEYS:
-            continue
-        decls = []
-        background = _override(row.background_color, paper, TOKEN_PAPER)
-        text = _override(row.text_color, ink, TOKEN_INK)
-        hover = _override(row.hover_color, accent, TOKEN_ACCENT)
-        if background:
-            decls.append(f"--paper:{background}")
-        if text:
-            decls.append(f"--ink:{text}")
-        if hover:
-            decls.append(f"--accent:{hover}")
-            decls.append(f"--hover:{hover}")
-        if not decls:
-            continue
-        chunks.append(f'body[data-page="{row.page}"]{{{";".join(decls)};}}')
-        if hover:
-            chunks.append(
-                f'body[data-page="{row.page}"] a:hover,body[data-page="{row.page}"] button:hover{{color:var(--hover)}}'
-            )
-    return "".join(chunks)
+    return root + hover + chrome_rule

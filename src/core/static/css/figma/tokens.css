@@ -1,5 +1,5 @@
 :root {
-  --font: "Inter", sans-serif;
+  --font: "Inter", sans-serif; /* override via theme.css --font */
   --header-h: calc(69.211px + env(safe-area-inset-top, 0px));
   --brown: #251008;
   --cream: #feedda;

@@ -1,13 +1,11 @@
 {% load shop_tags content_tags richtext %}
 {% cms block.title "advantages_title" as adv_title %}
 {% cms block.text "advantages_text" as adv_text %}
-{% cms block.text_mobile "advantages_text_mobile" as adv_mob %}
 {% cms block.cta "advantages_cta" as adv_cta %}
 <section class="benefits">
   <header class="benefits__head">
     {% if adv_title %}<h2>{{ adv_title }}</h2>{% endif %}
-    {% if adv_text %}<div class="benefits__lead benefits__lead--desk">{{ adv_text|richhtml }}</div>{% endif %}
-    {% if adv_mob %}<div class="benefits__lead benefits__lead--mob">{{ adv_mob|richhtml }}</div>{% endif %}
+    {% if adv_text %}<div class="benefits__lead">{{ adv_text|richhtml }}</div>{% endif %}
   </header>
   <div class="benefit-list{% if advantages|length > 4 %} benefit-list--scroll{% endif %}">
     {% for item in advantages %}
@@ -16,8 +14,7 @@
           {% if item.image %}<img src="{{ item.image.url }}" alt="" width="303" height="197">{% elif block.image %}<img src="{{ block.image.url }}" alt="" width="303" height="197">{% endif %}
         </span>
         <h3>{{ item.title }}</h3>
-        <div class="only-mob">{{ item.text|richhtml }}</div>
-        <div class="only-desk">{{ item.text|richhtml }}</div>
+        <div class="benefit__text">{{ item.text|richhtml }}</div>
       </article>
     {% endfor %}
   </div>

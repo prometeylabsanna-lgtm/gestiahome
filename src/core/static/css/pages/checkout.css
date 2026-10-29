@@ -150,6 +150,7 @@ img.co-arrow {
   min-width: 0;
 }
 
+.co-field--house,
 .co-field--apt {
   flex: 0 0 72px;
   box-sizing: border-box;
@@ -159,10 +160,12 @@ img.co-arrow {
   padding-right: 10px;
 }
 
+.co-field--house[hidden],
 .co-field--apt[hidden] {
   display: none;
 }
 
+.co-field--house input,
 .co-field--apt input {
   width: 100%;
   text-align: center;
@@ -173,6 +176,7 @@ img.co-arrow {
     gap: 6px;
   }
 
+  .co-field--house,
   .co-field--apt {
     flex-basis: 64px;
     width: 64px;
@@ -183,6 +187,7 @@ img.co-arrow {
 }
 
 @supports (-webkit-touch-callout: none) {
+  .co-field--house input,
   .co-field--apt input {
     font-size: 16px;
   }

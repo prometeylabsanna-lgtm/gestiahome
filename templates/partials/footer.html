@@ -13,11 +13,6 @@
           {% endif %}
         {% endfor %}
       </div>
-      <div class="site-footer__col">
-        {% for link in footer_columns.info %}
-          {% if link.href %}<a href="{{ link.href }}">{{ link.label }}</a>{% else %}<span>{{ link.label }}</span>{% endif %}
-        {% endfor %}
-      </div>
       <div class="site-footer__col site-footer__col--legal">
         {% for link in footer_columns.legal %}
           {% if link.href %}<a href="{{ link.href }}">{{ link.label }}</a>{% else %}<span>{{ link.label }}</span>{% endif %}

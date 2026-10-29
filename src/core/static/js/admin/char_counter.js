@@ -57,11 +57,7 @@
         return;
       }
     }
-    var parent = field.parentNode;
-    if (parent && parent !== document.body && parent.children.length <= 3) {
-      parent.insertAdjacentElement("afterend", counter);
-      return;
-    }
+    // Завжди під полем у тому ж контейнері — інакше Unfold flex стискає інпут.
     field.insertAdjacentElement("afterend", counter);
   }
 
@@ -138,9 +134,16 @@
     counter.className = "gestia-char-count";
     counter.setAttribute("aria-live", "polite");
     var host = editor.getContainer ? editor.getContainer() : null;
-    // Keep counter inside the Unfold field column (.grow.relative), under the editor.
+    // Stack editor + counter in a full-width column so Unfold flex cannot squeeze TinyMCE.
     if (host && host.parentNode) {
-      host.insertAdjacentElement("afterend", counter);
+      var stack = host.parentNode;
+      if (!stack.classList || !stack.classList.contains("gestia-tiny-stack")) {
+        stack = document.createElement("div");
+        stack.className = "gestia-tiny-stack";
+        host.parentNode.insertBefore(stack, host);
+        stack.appendChild(host);
+      }
+      stack.appendChild(counter);
     } else {
       place(field, counter);
     }
@@ -148,6 +151,7 @@
       if (host) {
         host.style.width = "100%";
         host.style.maxWidth = "100%";
+        host.style.minWidth = "0";
       }
       if (editor.iframeElement) editor.iframeElement.style.width = "100%";
     } catch (err) {}
@@ -208,6 +212,12 @@
           if (host) {
             host.style.width = "100%";
             host.style.maxWidth = "100%";
+            host.style.minWidth = "0";
+            if (typeof ed.theme !== "undefined" && ed.theme && typeof ed.theme.resizeTo === "function") {
+              try {
+                ed.theme.resizeTo("100%");
+              } catch (resizeErr) {}
+            }
           }
         }
         if (ed.targetElm && ed.targetElm._gestiaPaint) ed.targetElm._gestiaPaint();

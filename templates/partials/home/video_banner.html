@@ -14,9 +14,6 @@
     </video>
   {% elif block.image %}
     <picture>
-      {% if block.image_mobile %}
-        <source media="(max-width: 767px)" srcset="{{ block.image_mobile.url }}">
-      {% endif %}
       <img class="vbanner__img" src="{{ block.image.url }}" alt="" width="1442" height="871">
     </picture>
   {% endif %}

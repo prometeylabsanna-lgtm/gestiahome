@@ -1,36 +1,30 @@
-{% load i18n content_tags %}
-{% cms_field form_copy "waitlist_title" as wl_title %}
-{% cms_field form_copy "waitlist_p1" as wl_p1 %}
-{% cms_field form_copy "waitlist_p2" as wl_p2 %}
-{% cms_field form_copy "waitlist_p3" as wl_p3 %}
+{% load i18n richtext %}
+{% if discount_modal and discount_modal.enabled %}
 <div
   class="waitlist-modal"
   id="waitlist-modal"
   hidden
   data-waitlist-modal
-  data-delay-ms="15000"
+  data-delay-ms="{{ discount_modal.delay_ms }}"
   data-storage-key="gestia_waitlist_modal_seen"
   data-started-key="gestia_waitlist_site_started_at"
 >
   <div class="waitlist-modal__scrim" data-waitlist-close tabindex="-1" aria-hidden="true"></div>
   <div
-    class="waitlist-modal__panel"
+    class="waitlist-modal__panel{% if discount_modal.image %} waitlist-modal__panel--photo{% endif %}"
     role="dialog"
     aria-modal="true"
     aria-labelledby="waitlist-modal-title"
     aria-describedby="waitlist-modal-text"
+    {% if discount_modal.image %}style="--waitlist-bg: url('{{ discount_modal.image.url }}')"{% endif %}
   >
     <button class="waitlist-modal__close" type="button" data-waitlist-close aria-label="{% trans 'Закрити' %}">
       <span aria-hidden="true">×</span>
     </button>
     <div class="waitlist-modal__body" id="waitlist-modal-body">
-      <h2 class="waitlist-modal__title" id="waitlist-modal-title">
-        {{ wl_title }} 🎁
-      </h2>
       <div class="waitlist-modal__text" id="waitlist-modal-text">
-        <p>{{ wl_p1 }}</p>
-        <p>{{ wl_p2 }}</p>
-        <p>{{ wl_p3 }}</p>
+        <div id="waitlist-modal-title" class="visually-hidden">{% trans "Знижка" %}</div>
+        {{ discount_modal.text|richhtml }}
       </div>
       <div id="waitlist-form-slot">
         {% include "partials/home/_waitlist_form.html" with waitlist_form=waitlist_form %}
@@ -38,3 +32,4 @@
     </div>
   </div>
 </div>
+{% endif %}

@@ -1,4 +1,4 @@
-from src.content.models import AboutPage, HomeBlock, SiteSettings
+from src.content.models import AboutPage, HomeBlock, Review, SiteSettings
 from src.content.models_legal import LegalPage
 
 
@@ -116,11 +116,36 @@ class AboutBanner(AboutPage):
         verbose_name_plural = "Банер"
 
 
-class AboutPicksBlock(AboutPage):
+class AboutReviewsBlock(AboutPage):
     class Meta:
         proxy = True
-        verbose_name = "Картки під відгуками"
-        verbose_name_plural = "Картки під відгуками"
+        verbose_name = "Відгуки (Про нас)"
+        verbose_name_plural = "Відгуки (Про нас)"
+
+
+class AboutPopularBlock(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Популярні товари (Про нас)"
+        verbose_name_plural = "Популярні товари (Про нас)"
+
+
+# Сумісність зі старими імпортами адмінки.
+AboutPicksBlock = AboutPopularBlock
+
+
+class HomeReview(Review):
+    class Meta:
+        proxy = True
+        verbose_name = "Відгук (головна)"
+        verbose_name_plural = "Список відгуків"
+
+
+class AboutReview(Review):
+    class Meta:
+        proxy = True
+        verbose_name = "Відгук (Про нас)"
+        verbose_name_plural = "Список відгуків (Про нас)"
 
 
 class OfferPage(LegalPage):

@@ -1,7 +1,5 @@
-[project]
-name = "gestia"
-version = "0.1.0"
-requires-python = ">=3.12"
+# Лише метадані Vercel. Залежності — у requirements.txt
+# (наявність [project].dependencies змушує uv ігнорувати requirements.txt).
 
 [tool.vercel]
 entrypoint = "config.wsgi:app"

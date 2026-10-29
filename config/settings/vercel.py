@@ -14,7 +14,7 @@ from decouple import Csv, config
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F403
-from .base import BASE_DIR, MIDDLEWARE
+from .base import BASE_DIR, MIDDLEWARE, _normalize_admin_url
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +99,7 @@ if not _site:
         _site = _https_origin(_runtime_host)
 SITE_URL = _site
 
-ADMIN_URL = _normalize_admin_url(config("ADMIN_URL", default="admin/"))  # noqa: F405
+ADMIN_URL = _normalize_admin_url(config("ADMIN_URL", default="admin/"))
 
 _database_url = (config("DATABASE_URL", default="") or "").strip()
 if _database_url:

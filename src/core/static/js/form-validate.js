@@ -100,32 +100,38 @@
     return input.getAttribute("data-validate") || "";
   }
 
-  function uaPhoneDigits(value) {
+  function phoneBodyDigits(value) {
     let digits = String(value || "").replace(/\D/g, "");
+    if (!digits) {
+      return "";
+    }
     if (digits.startsWith("380")) {
       digits = digits.slice(3);
     } else if (digits.startsWith("38")) {
       digits = digits.slice(2);
     }
-    if (digits.startsWith("0")) {
-      digits = digits.slice(1);
+    if (!digits) {
+      return "";
     }
-    return digits.slice(0, 9);
+    if (!digits.startsWith("0")) {
+      digits = "0" + digits;
+    }
+    return digits.slice(0, 10);
+  }
+
+  function uaPhoneDigits(value) {
+    const body = phoneBodyDigits(value);
+    if (body.startsWith("0")) {
+      return body.slice(1);
+    }
+    return body;
   }
 
   function formatUaPhone(value) {
-    const raw = String(value || "").replace(/\D/g, "");
-    const national = uaPhoneDigits(value);
-    if (!national) {
-      if (raw === "0" || raw === "38" || raw === "380") {
-        return "+38 (0";
-      }
-      if (raw === "3") {
-        return "+38";
-      }
+    const body = phoneBodyDigits(value);
+    if (!body) {
       return "";
     }
-    const body = ("0" + national).slice(0, 10);
     let out = "+38 (" + body.slice(0, Math.min(3, body.length));
     if (body.length >= 3) {
       out += ")";
@@ -148,6 +154,72 @@
       return false;
     }
     return UA_MOBILE_CODES.indexOf(national.slice(0, 2)) !== -1;
+  }
+
+  function setPhoneCaretEnd(input) {
+    if (typeof input.setSelectionRange !== "function" || input.type === "number") {
+      return;
+    }
+    const end = String(input.value || "").length;
+    try {
+      input.setSelectionRange(end, end);
+    } catch (_err) {
+      /* iOS Safari can ignore caret moves on type=tel */
+    }
+  }
+
+  function syncPhoneField(input) {
+    applyPhoneMask(input);
+    const form = formOf(input);
+    if (!form) {
+      return;
+    }
+    if (input.dataset.touched === "1" || form.dataset.submitted === "1") {
+      setState(form, input, validateInput(form, input));
+    }
+  }
+
+  function onPhoneKeyDown(event) {
+    if (event.key !== "Backspace" && event.key !== "Delete") {
+      return;
+    }
+    const input = event.target;
+    if (!input || kindOf(input) !== "phone") {
+      return;
+    }
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start == null || end == null || start !== end) {
+      return;
+    }
+    const value = String(input.value || "");
+    if (!value) {
+      return;
+    }
+    if (event.key === "Backspace") {
+      if (start === 0) {
+        return;
+      }
+      const prev = value.charAt(start - 1);
+      if (/\d/.test(prev)) {
+        return;
+      }
+      event.preventDefault();
+      const body = phoneBodyDigits(value).slice(0, -1);
+      input.value = formatUaPhone(body);
+      setPhoneCaretEnd(input);
+      syncPhoneField(input);
+      return;
+    }
+    const next = value.charAt(start);
+    if (!next || /\d/.test(next)) {
+      return;
+    }
+    event.preventDefault();
+    const body = phoneBodyDigits(value).slice(0, -1);
+    input.value = formatUaPhone(body);
+    setPhoneCaretEnd(input);
+    syncPhoneField(input);
   }
 
   function normalizeName(value) {
@@ -196,14 +268,7 @@
       return;
     }
     input.value = next;
-    if (typeof input.setSelectionRange === "function" && input.type !== "number") {
-      const end = next.length;
-      try {
-        input.setSelectionRange(end, end);
-      } catch (_err) {
-        /* iOS Safari can ignore caret moves on type=tel */
-      }
-    }
+    setPhoneCaretEnd(input);
   }
 
   function clipboardText(event) {
@@ -360,6 +425,7 @@
     });
   }
 
+  document.addEventListener("keydown", onPhoneKeyDown, true);
   document.addEventListener("input", onInput, true);
   document.addEventListener("change", onInput, true);
   document.addEventListener("paste", onPaste, true);

@@ -1,17 +1,17 @@
-from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from tinymce.widgets import TinyMCE
 
 from src.content.models_discount import DiscountModal
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_lang import language_tabs
+from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 _EN_HINT = "Якщо порожньо — на сайті лишається український текст."
 
 
 class DiscountModalAdmin(GestiaModelAdmin):
+    tiny_fields = ("text_uk", "text_en")
     fieldsets = language_tabs(
         uk_fields=(
             "enabled",
@@ -43,12 +43,17 @@ class DiscountModalAdmin(GestiaModelAdmin):
         return HttpResponseRedirect(url)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"text_uk", "text_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_SHORT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         if formfield is not None and db_field.name in {"title_en", "text_en", "button_en"}:
             formfield.help_text = _EN_HINT
         return formfield
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
+        return form
 
 
 admin.site.register(DiscountModal, DiscountModalAdmin)

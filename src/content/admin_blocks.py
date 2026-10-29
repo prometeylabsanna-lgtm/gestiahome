@@ -1,9 +1,7 @@
 from django import forms
-from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from tinymce.widgets import TinyMCE
 
 from src.content.admin_limits import tighten
 from src.content.admin_home_video import PageVideoMixin
@@ -18,6 +16,7 @@ from src.content.proxies import (
 )
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_lang import language_tabs
+from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 PHOTO_DESK = "1442×871 px. JPG або PNG."
 PHOTO_MOBILE = "390×735 px. JPG або PNG."
@@ -65,12 +64,17 @@ class KeyedBlockAdmin(GestiaModelAdmin):
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_SHORT_CONFIG)
+            kwargs["widget"] = tinymce_widget(short=True)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         hint = self.image_hints.get(db_field.name, "")
         if db_field.name == "video":
             hint = VIDEO_HINT
         return tighten(formfield, self.text_limits.get(db_field.name), hint)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
+        return form
 
 
 class HomeCallbackForm(forms.ModelForm):
@@ -97,9 +101,20 @@ class HomeCallbackForm(forms.ModelForm):
             "cta_uk",
             "cta_en",
         )
+        widgets = {
+            "text_uk": tinymce_widget(short=True),
+            "text_en": tinymce_widget(short=True),
+            "text_mobile_uk": tinymce_widget(short=True),
+            "text_mobile_en": tinymce_widget(short=True),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        force_tinymce(
+            self,
+            ("text_uk", "text_en", "text_mobile_uk", "text_mobile_en"),
+            short=True,
+        )
         uk = _lines(self.instance.lines_uk)
         en = _lines(self.instance.lines_en)
         self.fields["ph_name_uk"].initial = uk[0]
@@ -283,6 +298,7 @@ class HomeCallbackAdmin(KeyedBlockAdmin):
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
         for name, limit in self.text_limits.items():
             if name in form.base_fields:
                 tighten(form.base_fields[name], limit)

@@ -153,11 +153,18 @@ class AdminLanguageTabRenderTests(TestCase):
         callback_page = self.client.get(
             reverse("admin:content_homecallbackblock_change", args=[self.callback.pk])
         )
+        body = callback_page.content.decode()
         self.assertContains(callback_page, "tinymce")
+        self.assertContains(callback_page, "data-mce-conf")
         self.assertContains(callback_page, 'name="text_uk"')
         self.assertContains(callback_page, 'name="text_en"')
+        self.assertContains(callback_page, 'name="text_mobile_uk"')
         self.assertContains(callback_page, "data-gestia-visible-count")
+        self.assertIn('class="tinymce"', body)
+        self.assertIn("django_tinymce/init_tinymce.js", body)
+        self.assertIn("char_counter.js", body)
 
         product_page = self.client.get(reverse("admin:catalog_product_change", args=[self.product.pk]))
         self.assertContains(product_page, 'name="description_uk"')
         self.assertContains(product_page, "tinymce")
+        self.assertContains(product_page, "data-mce-conf")

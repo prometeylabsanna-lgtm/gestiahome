@@ -1,13 +1,12 @@
-from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from tinymce.widgets import TinyMCE
 
 from src.content.models_legal import LegalPage
 from src.content.proxies import CookiePolicyPage, OfferPage, PrivacyPolicyPage, ShippingPage
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_lang import language_tabs
+from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 _BODY_HINT = "Розділи оформлюйте заголовком 2."
 _EN_HINT = "Якщо порожньо — на сайті лишається український текст."
@@ -43,9 +42,11 @@ class LegalPageAdmin(GestiaModelAdmin):
         obj.key = self.page_key
         super().save_model(request, obj, form, change)
 
+    tiny_fields = ("body_uk", "body_en")
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"body_uk", "body_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_DEFAULT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         if formfield is None:
             return formfield
@@ -54,6 +55,11 @@ class LegalPageAdmin(GestiaModelAdmin):
         elif db_field.name in {"body_en", "title_en"}:
             formfield.help_text = _EN_HINT
         return formfield
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        return form
 
 
 @admin.register(OfferPage)

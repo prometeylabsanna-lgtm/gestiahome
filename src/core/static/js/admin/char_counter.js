@@ -65,9 +65,19 @@
     field.insertAdjacentElement("afterend", counter);
   }
 
+  function isTinyTextarea(field) {
+    if (!field) return false;
+    if (field.dataset && field.dataset.mceConf) return true;
+    if (field.classList && field.classList.contains("tinymce")) return true;
+    return false;
+  }
+
   function bindField(field) {
     if (!field || field.dataset.gestiaCount === "1") return;
     if (field.closest && field.closest(".tox-tinymce")) return;
+    // TinyMCE textarea must not get a plain counter as a flex sibling —
+    // that squeezes .tox-tinymce to ~100px. Counters attach via bindTiny.
+    if (isTinyTextarea(field)) return;
     var type = (field.getAttribute("type") || "").toLowerCase();
     if (SKIP[type]) return;
     var max = maxOf(field);
@@ -128,11 +138,19 @@
     counter.className = "gestia-char-count";
     counter.setAttribute("aria-live", "polite");
     var host = editor.getContainer ? editor.getContainer() : null;
+    // Keep counter inside the Unfold field column (.grow.relative), under the editor.
     if (host && host.parentNode) {
       host.insertAdjacentElement("afterend", counter);
     } else {
       place(field, counter);
     }
+    try {
+      if (host) {
+        host.style.width = "100%";
+        host.style.maxWidth = "100%";
+      }
+      if (editor.iframeElement) editor.iframeElement.style.width = "100%";
+    } catch (err) {}
 
     function update() {
       var html = editor.getContent({ format: "html" }) || "";
@@ -147,29 +165,72 @@
     field._gestiaPaint = update;
   }
 
-  function bindTinies() {
-    if (!window.tinymce || !window.tinymce.editors) return;
-    window.tinymce.editors.forEach(function (ed) {
+  function eachEditor(fn) {
+    if (!window.tinymce) return;
+    var seen = {};
+    var list = window.tinymce.editors;
+    if (list && typeof list.forEach === "function") {
+      list.forEach(function (ed) {
+        if (!ed || !ed.id || seen[ed.id]) return;
+        seen[ed.id] = 1;
+        try {
+          fn(ed);
+        } catch (err) {}
+      });
+    }
+    document.querySelectorAll("textarea.tinymce, textarea[data-mce-conf]").forEach(function (el) {
+      if (!el.id || seen[el.id]) return;
+      var ed = null;
       try {
-        bindTiny(ed);
+        ed = window.tinymce.get(el.id);
+      } catch (err) {
+        ed = null;
+      }
+      if (!ed) return;
+      seen[el.id] = 1;
+      try {
+        fn(ed);
       } catch (err) {}
     });
   }
 
+  function bindTinies() {
+    eachEditor(bindTiny);
+  }
+
   function refreshTinyLayout() {
-    if (!window.tinymce || !window.tinymce.editors) return;
-    window.tinymce.editors.forEach(function (ed) {
+    eachEditor(function (ed) {
       try {
         ed.dispatch("ResizeEditor");
         if (ed.iframeElement) ed.iframeElement.style.width = "100%";
+        if (ed.getContainer) {
+          var host = ed.getContainer();
+          if (host) {
+            host.style.width = "100%";
+            host.style.maxWidth = "100%";
+          }
+        }
         if (ed.targetElm && ed.targetElm._gestiaPaint) ed.targetElm._gestiaPaint();
       } catch (err) {}
     });
   }
 
+  function hookTiny() {
+    if (!window.tinymce || !window.tinymce.on || window._gestiaTinyHooked) return !!window._gestiaTinyHooked;
+    window._gestiaTinyHooked = true;
+    window.tinymce.on("AddEditor", function (event) {
+      window.setTimeout(function () {
+        bindTiny(event.editor);
+        refreshTinyLayout();
+      }, 50);
+    });
+    return true;
+  }
+
   function bind(root) {
     var scope = root || document;
     scope.querySelectorAll("input[maxlength], textarea[maxlength]").forEach(bindField);
+    hookTiny();
     bindTinies();
   }
 
@@ -177,6 +238,8 @@
     bind(document);
     window.setTimeout(bindTinies, 400);
     window.setTimeout(bindTinies, 1200);
+    window.setTimeout(hookTiny, 0);
+    window.setTimeout(hookTiny, 400);
   }
 
   if (document.readyState === "loading") {
@@ -200,16 +263,4 @@
     }, 80);
     window.setTimeout(refreshTinyLayout, 250);
   });
-
-  if (window.tinymce) {
-    document.addEventListener("DOMContentLoaded", function () {
-      if (window.tinymce.on) {
-        window.tinymce.on("AddEditor", function (event) {
-          window.setTimeout(function () {
-            bindTiny(event.editor);
-          }, 50);
-        });
-      }
-    });
-  }
 })();

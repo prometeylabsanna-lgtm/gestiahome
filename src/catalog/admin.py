@@ -1,6 +1,6 @@
-from django.conf import settings
 from django.contrib import admin
-from tinymce.widgets import TinyMCE
+
+from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 from src.catalog.admin_filters import (
     CatalogBooleanFilter,
@@ -196,10 +196,17 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         ),
     )
 
+    tiny_fields = ("description_uk", "description_en")
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"description_uk", "description_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_DEFAULT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        return form
 
     @admin.action(description="Активувати")
     def activate_products(self, request, queryset):

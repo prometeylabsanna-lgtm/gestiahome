@@ -1,8 +1,6 @@
-from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from tinymce.widgets import TinyMCE
 
 from src.content.admin_limits import tighten
 from src.content.models import AboutPage
@@ -10,6 +8,7 @@ from src.content.models_about import AboutGalleryItem, AboutPick
 from src.content.proxies import FooterChrome
 from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
 from src.core.admin_lang import language_tabs
+from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 
 class _OpenSingleton(GestiaModelAdmin):
@@ -75,11 +74,21 @@ class AboutPageAdmin(_OpenSingleton):
         ),
     )
 
+    tiny_fields = ("body_uk", "body_en")
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"body_uk", "body_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_DEFAULT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         return tighten(formfield, self.text_limits.get(db_field.name))
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        for name, limit in self.text_limits.items():
+            if name in form.base_fields:
+                tighten(form.base_fields[name], limit)
+        return form
 
 
 @admin.register(FooterChrome)

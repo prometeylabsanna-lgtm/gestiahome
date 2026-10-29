@@ -98,6 +98,7 @@ class RichTextSanitizeTests(TestCase):
     def test_tinymce_is_configured_and_not_on_the_storefront(self):
         config = settings.TINYMCE_DEFAULT_CONFIG
         self.assertEqual(config["language"], "uk")
+        self.assertEqual(config["width"], "100%")
         self.assertFalse(config["menubar"])
         self.assertIn("blockquote", config["toolbar"])
         self.assertNotIn("image", config["toolbar"])
@@ -107,3 +108,25 @@ class RichTextSanitizeTests(TestCase):
         home = self.client.get("/")
         self.assertNotContains(home, "tinymce.min.js")
         self.assertNotContains(home, "char_counter.js")
+
+    def test_force_tinymce_overrides_custom_form_widgets(self):
+        from django import forms
+        from tinymce.widgets import TinyMCE
+
+        from src.content.models import HomeBlock
+        from src.core.admin_tinymce import force_tinymce
+
+        class WeirdForm(forms.ModelForm):
+            class Meta:
+                model = HomeBlock
+                fields = ("text_uk", "text_en")
+                widgets = {
+                    "text_uk": forms.Textarea(attrs={"rows": 2}),
+                    "text_en": forms.Textarea(attrs={"rows": 2}),
+                }
+
+        form = WeirdForm()
+        self.assertNotIsInstance(form.fields["text_uk"].widget, TinyMCE)
+        force_tinymce(form, ("text_uk", "text_en"), short=True)
+        self.assertIsInstance(form.fields["text_uk"].widget, TinyMCE)
+        self.assertIsInstance(form.fields["text_en"].widget, TinyMCE)

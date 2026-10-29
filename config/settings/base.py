@@ -180,6 +180,7 @@ def _admin_asset(path):
 
 TINYMCE_DEFAULT_CONFIG = {
     "height": 280,
+    "width": "100%",
     "menubar": False,
     "branding": False,
     "promotion": False,

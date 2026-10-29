@@ -1,11 +1,10 @@
-from django.conf import settings
 from django.contrib import admin
-from tinymce.widgets import TinyMCE
 
 from src.content.admin_limits import tighten
 from src.content.models import Advantage, FooterLink, HomeBlock, Review, SiteSettings
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_lang import language_tabs
+from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 # Реєстрація окремих блоків головної, форм, «Про нас» і підвалу.
 import src.content.admin_about  # noqa: F401, E402
@@ -78,10 +77,17 @@ class HomeBlockAdmin(GestiaModelAdmin):
         ),
     )
 
+    tiny_fields = ("text_uk", "text_en", "text_mobile_uk", "text_mobile_en")
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"text_uk", "text_en", "text_mobile_uk", "text_mobile_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_SHORT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
+        return form
 
 
 @admin.register(Advantage)
@@ -90,19 +96,28 @@ class AdvantageAdmin(GestiaModelAdmin):
     search_fields = ("title_uk", "title_en")
     ordering = ("sort",)
     text_limits = {"title_uk": 24, "title_en": 24, "text_uk": 80, "text_en": 80}
+    tiny_fields = ("text_uk", "text_en")
     fieldsets = language_tabs(
         uk_fields=("sort", "title_uk", "text_uk", "image"),
         en_fields=("title_en", "text_en"),
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"text_uk", "text_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_SHORT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         hint = ""
         if db_field.name == "image":
             hint = "303×197 px. Якщо порожньо — лишається фото блоку «Переваги». JPG або PNG."
         return tighten(formfield, self.text_limits.get(db_field.name), hint)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
+        for name, limit in self.text_limits.items():
+            if name in form.base_fields:
+                tighten(form.base_fields[name], limit)
+        return form
 
 
 @admin.register(Review)
@@ -111,16 +126,25 @@ class ReviewAdmin(GestiaModelAdmin):
     search_fields = ("author_uk", "text_uk")
     ordering = ("sort",)
     text_limits = {"author_uk": 24, "author_en": 24, "text_uk": 180, "text_en": 180}
+    tiny_fields = ("text_uk", "text_en")
     fieldsets = language_tabs(
         uk_fields=("sort", "rating_kind", "author_uk", "text_uk"),
         en_fields=("author_en", "text_en"),
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in {"text_uk", "text_en"}:
-            kwargs["widget"] = TinyMCE(mce_attrs=settings.TINYMCE_SHORT_CONFIG)
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         return tighten(formfield, self.text_limits.get(db_field.name))
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
+        for name, limit in self.text_limits.items():
+            if name in form.base_fields:
+                tighten(form.base_fields[name], limit)
+        return form
 
 
 @admin.register(FooterLink)

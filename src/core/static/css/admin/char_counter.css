@@ -11,6 +11,20 @@
   -webkit-text-size-adjust: 100%;
 }
 
+/* TinyMCE must fill the Unfold field column; never sit beside a 100%-wide counter. */
+.grow.relative > .tox-tinymce,
+.grow.relative .tox-tinymce {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.grow.relative > .gestia-char-count {
+  display: block;
+  width: 100%;
+  flex: none;
+}
+
 .gestia-char-count.is-warn {
   color: #8d3b2a;
 }

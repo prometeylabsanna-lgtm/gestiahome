@@ -121,7 +121,7 @@
                 <img class="rating rating--mob" src="{% static 'figma/mobile/b07a3.svg' %}" width="83" height="15" alt="">
               {% endif %}
             </header>
-            <p>{{ review.text }}</p>
+            <div>{{ review.text|richhtml }}</div>
           </article>
         {% endfor %}
       </div>

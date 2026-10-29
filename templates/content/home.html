@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block title %}{% if home_blocks.hero %}{% cms home_blocks.hero.title "hero_title" %}{% else %}Gestia Home{% endif %}{% endblock %}
-{% block description %}{% if home_blocks.hero %}{% cms home_blocks.hero.text "hero_text" %}{% endif %}{% endblock %}
+{% block description %}{% if home_blocks.hero %}{{ home_blocks.hero.text|striptags }}{% endif %}{% endblock %}
 
 {% block content %}
   {% if not home_blocks.hero %}

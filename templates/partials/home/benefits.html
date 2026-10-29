@@ -1,4 +1,4 @@
-{% load shop_tags content_tags %}
+{% load shop_tags content_tags richtext %}
 {% cms block.title "advantages_title" as adv_title %}
 {% cms block.text "advantages_text" as adv_text %}
 {% cms block.text_mobile "advantages_text_mobile" as adv_mob %}
@@ -6,8 +6,8 @@
 <section class="benefits">
   <header class="benefits__head">
     {% if adv_title %}<h2>{{ adv_title }}</h2>{% endif %}
-    {% if adv_text %}<p class="benefits__lead benefits__lead--desk">{{ adv_text }}</p>{% endif %}
-    {% if adv_mob %}<p class="benefits__lead benefits__lead--mob">{{ adv_mob|linebreaksbr }}</p>{% endif %}
+    {% if adv_text %}<div class="benefits__lead benefits__lead--desk">{{ adv_text|richhtml }}</div>{% endif %}
+    {% if adv_mob %}<div class="benefits__lead benefits__lead--mob">{{ adv_mob|richhtml }}</div>{% endif %}
   </header>
   <div class="benefit-list">
     {% for item in advantages %}
@@ -16,7 +16,8 @@
           {% if item.image %}<img src="{{ item.image.url }}" alt="" width="303" height="197">{% elif block.image %}<img src="{{ block.image.url }}" alt="" width="303" height="197">{% endif %}
         </span>
         <h3>{{ item.title }}</h3>
-        <p><span class="only-mob">{{ item.text|linebreaksbr }}</span><span class="only-desk">{{ item.text|figma_nbsp|linebreaksbr }}</span></p>
+        <div class="only-mob">{{ item.text|richhtml }}</div>
+        <div class="only-desk">{{ item.text|richhtml }}</div>
       </article>
     {% endfor %}
   </div>

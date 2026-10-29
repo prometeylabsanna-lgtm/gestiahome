@@ -1,4 +1,4 @@
-{% load static content_tags %}
+{% load static content_tags richtext %}
 {% cms block.title "hero_title" as hero_title %}
 {% cms block.text "hero_text" as hero_text %}
 {% cms block.cta "hero_cta" as hero_cta %}
@@ -42,7 +42,7 @@
   <div class="hero__copy">
     <div class="hero__intro">
       {% if hero_title %}<h1>{{ hero_title|linebreaksbr }}</h1>{% endif %}
-      {% if hero_text %}<p>{{ hero_text }}</p>{% endif %}
+      {% if hero_text %}{{ hero_text|richhtml }}{% endif %}
     </div>
     {% if hero_cta %}
       <a class="hero__cta" href="{% url 'catalog' %}">{{ hero_cta }}</a>

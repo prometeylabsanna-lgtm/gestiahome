@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n l10n shop_tags static %}
+{% load i18n l10n shop_tags static richtext %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/pages/catalog.css' %}">
@@ -46,11 +46,7 @@
               <p class="pdp-chip"><span>{% trans "Арт." %} {{ product.sku }}</span></p>
             </div>
             {% if product.description %}
-              <div class="pdp-desc">
-                {% for line in product.description.splitlines %}
-                  {% if line %}<p>{{ line }}</p>{% endif %}
-                {% endfor %}
-              </div>
+              <div class="pdp-desc">{{ product.description|richhtml }}</div>
             {% endif %}
             <p class="pdp-price">{% home_price product %}</p>
             <form class="pdp-controls" method="post" action="{% url 'cart_add' %}" hx-post="{% url 'cart_add' %}" hx-target="#cart-count" hx-swap="outerHTML" hx-sync="this:replace">
@@ -82,21 +78,13 @@
           {% if ship_block %}
             <section class="pdp-note">
               {% if ship_block.title %}<h2>{{ ship_block.title }}</h2>{% endif %}
-              <div>
-                {% for line in ship_block.text.splitlines %}
-                  {% if line %}<p>{{ line }}</p>{% endif %}
-                {% endfor %}
-              </div>
+              <div>{{ ship_block.text|richhtml }}</div>
             </section>
           {% endif %}
           {% if pay_block %}
             <section class="pdp-note">
               {% if pay_block.title %}<h2>{{ pay_block.title }}</h2>{% endif %}
-              <div>
-                {% for line in pay_block.text.splitlines %}
-                  {% if line %}<p>{{ line }}</p>{% endif %}
-                {% endfor %}
-              </div>
+              <div>{{ pay_block.text|richhtml }}</div>
             </section>
           {% endif %}
         </div>
@@ -131,7 +119,8 @@
                     <img class="rating rating--mob" src="{% static 'figma/mobile/b07a3.svg' %}" width="83" height="15" alt="">
                   {% endif %}
                 </header>
-                <p><span class="pdp-only-mob">{{ review.text }}</span><span class="pdp-only-desk">{{ review.text|figma_nbsp }}</span></p>
+                <div class="pdp-only-mob">{{ review.text|richhtml }}</div>
+                <div class="pdp-only-desk">{{ review.text|richhtml }}</div>
               </article>
             {% endfor %}
           </div>

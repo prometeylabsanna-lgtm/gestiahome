@@ -1,4 +1,4 @@
-{% load shop_tags static content_tags %}
+{% load shop_tags static content_tags richtext %}
 {% cms block.title "reviews_title" as reviews_title %}
 <section class="reviews">
   {% if reviews_title %}<h2>{{ reviews_title }}</h2>{% endif %}
@@ -15,7 +15,8 @@
             <img class="rating rating--mob" src="{% static 'figma/mobile/b07a3.svg' %}" width="83" height="15" alt="">
           {% endif %}
         </header>
-        <p><span class="only-mob">{{ review.text }}</span><span class="only-desk">{{ review.text|figma_nbsp }}</span></p>
+        <div class="only-mob">{{ review.text|richhtml }}</div>
+        <div class="only-desk">{{ review.text|richhtml }}</div>
       </article>
     {% endfor %}
   </div>

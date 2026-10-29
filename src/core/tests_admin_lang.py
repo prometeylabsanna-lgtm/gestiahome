@@ -13,17 +13,29 @@ from src.catalog.admin import (
 )
 from src.catalog.models import Category, Product, ProductAttribute, ProductAttributeGroup, ProductSet
 from src.content.admin import AdvantageAdmin, FooterLinkAdmin, HomeBlockAdmin, ReviewAdmin, SiteSettingsAdmin
-from src.content.admin_about import AboutPageAdmin, FooterChromeAdmin
+from src.content.admin_about import (
+    AboutBannerAdmin,
+    AboutGalleryAdmin,
+    AboutIntroAdmin,
+    AboutPicksAdmin,
+    AboutStoryAdmin,
+    FooterChromeAdmin,
+)
 from src.content.admin_blocks import (
     ContactFormsAdmin,
     HomeAdvantagesAdmin,
     HomeCallbackAdmin,
     HomeCategoriesAdmin,
-    HomeHeroAdmin,
     HomePopularAdmin,
     HomeReviewsAdmin,
 )
 from src.content.admin_discount import DiscountModalAdmin
+from src.content.admin_home_banners import (
+    HomeBannerMediaAdmin,
+    HomeBannerTextAdmin,
+    HomeBottomBannerAdmin,
+    HomeMidBannerAdmin,
+)
 from src.content.admin_legal import LegalPageAdmin
 from src.content.models import Advantage, FooterLink, HomeBlock, Review, SiteSettings
 from src.content.models_discount import DiscountModal
@@ -75,9 +87,16 @@ class AdminLanguageTabFieldsetTests(TestCase):
         for admin_cls in (
             DiscountModalAdmin,
             LegalPageAdmin,
-            AboutPageAdmin,
+            AboutIntroAdmin,
+            AboutGalleryAdmin,
+            AboutStoryAdmin,
+            AboutBannerAdmin,
+            AboutPicksAdmin,
             FooterChromeAdmin,
-            HomeHeroAdmin,
+            HomeBannerMediaAdmin,
+            HomeBannerTextAdmin,
+            HomeMidBannerAdmin,
+            HomeBottomBannerAdmin,
             HomeCategoriesAdmin,
             HomePopularAdmin,
             HomeAdvantagesAdmin,
@@ -97,19 +116,12 @@ class AdminLanguageTabFieldsetTests(TestCase):
         ):
             assert_language_tab_fieldsets(admin_cls.fieldsets)
 
-    def test_categories_video_fields_land_in_ukrainian_tab(self):
-        admin = HomeCategoriesAdmin(HomeBlock, None)
-        fieldsets = admin.get_fieldsets(request=None)
-        assert_language_tab_fieldsets(fieldsets)
-        uk_fields = fieldsets[0][1]["fields"]
-        self.assertIn("page_video_media_kind", uk_fields)
-        self.assertIn("page_video_video", uk_fields)
-
-    def test_advantages_video_fields_land_in_ukrainian_tab(self):
-        admin = HomeAdvantagesAdmin(HomeBlock, None)
-        fieldsets = admin.get_fieldsets(request=None)
-        assert_language_tab_fieldsets(fieldsets)
-        self.assertTrue(any(str(name).startswith("page_video_") for name in fieldsets[0][1]["fields"]))
+    def test_mid_and_bottom_banners_are_media_only(self):
+        for admin_cls in (HomeMidBannerAdmin, HomeBottomBannerAdmin, HomeBannerMediaAdmin):
+            uk_fields = admin_cls.fieldsets[0][1]["fields"]
+            self.assertIn("media_kind", uk_fields)
+            self.assertIn("video", uk_fields)
+            self.assertFalse(any(str(name).endswith("_en") for name in uk_fields))
 
 
 class AdminLanguageTabRenderTests(TestCase):
@@ -125,7 +137,10 @@ class AdminLanguageTabRenderTests(TestCase):
             price_uah=Decimal("10"),
             price_eur=Decimal("1"),
         )
-        self.callback = HomeBlock.objects.create(key=HomeBlock.Key.CALLBACK, sort=8, title_uk="Заявка")
+        self.callback, _ = HomeBlock.objects.get_or_create(
+            key=HomeBlock.Key.CALLBACK,
+            defaults={"sort": 8, "title_uk": "Заявка"},
+        )
         self.discount = DiscountModal.load()
         SiteSettings.load()
 

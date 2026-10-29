@@ -179,10 +179,10 @@ class WebPAndAdminMediaTests(TestCase):
         ):
             page = self.client.get(reverse(name))
             self.assertEqual(page.status_code, 200, name)
-        about = self.client.get(reverse("admin:content_aboutpage_changelist"))
+        about = self.client.get(reverse("admin:content_aboutintro_changelist"))
         self.assertRedirects(
             about,
-            reverse("admin:content_aboutpage_change", args=[AboutPage.objects.get().pk]),
+            reverse("admin:content_aboutintro_change", args=[AboutPage.objects.get().pk]),
         )
 
 

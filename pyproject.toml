@@ -1,5 +1,22 @@
-# Лише метадані Vercel. Залежності — у requirements.txt
-# (наявність [project].dependencies змушує uv ігнорувати requirements.txt).
+[project]
+name = "gestia"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "Django>=5.2,<5.3",
+  "python-decouple>=3.8",
+  "gunicorn>=23.0",
+  "psycopg[binary]>=3.2",
+  "Pillow>=11.0",
+  "requests>=2.32",
+  "django-unfold>=0.57",
+  "django-tinymce==4.1.0",
+  "nh3==0.3.7",
+  "whitenoise>=6.7,<7",
+  "dj-database-url>=2.3,<3",
+  "django-storages[s3]>=1.14,<2",
+  "boto3>=1.35,<2",
+]
 
 [tool.vercel]
 entrypoint = "config.wsgi:app"

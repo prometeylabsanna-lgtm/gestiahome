@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "django",
+  "buildCommand": "DJANGO_BUILD_PHASE=1 DJANGO_SETTINGS_MODULE=config.settings.vercel python build_vercel.py",
+  "rewrites": [
+    {
+      "source": "/media/:path*",
+      "destination": "/demo/media/:path*"
+    }
+  ],
+  "functions": {
+    "config/wsgi.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{media/**,demo/media/**,public/**,docs/**,docs/figma/**,db.sqlite3*,deploy/**,.venv/**,staticfiles/**,**/*tests*.py,**/tests/**,.git/**}"
+    }
+  }
+}

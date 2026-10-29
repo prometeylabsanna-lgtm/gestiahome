@@ -1,9 +1,14 @@
-"""Автопосилання футера: категорії каталогу + юридичні сторінки."""
+"""Автопосилання футера: категорії каталогу + юридичні сторінки.
+
+У макеті колонка категорій: «Усі товари» + 3 перші кореневі категорії.
+"""
 
 from types import SimpleNamespace
 
 from django.urls import reverse
 from django.utils.translation import gettext as _
+
+FOOTER_CATEGORY_LIMIT = 3
 
 
 def build_footer_columns():
@@ -13,9 +18,17 @@ def build_footer_columns():
     categories = [
         SimpleNamespace(label=_("Усі товари"), href=reverse("catalog"), underlined=False),
     ]
-    for cat in Category.objects.filter(parent__isnull=True, is_active=True).order_by("sort", "name_uk"):
+    qs = (
+        Category.objects.filter(parent__isnull=True, is_active=True)
+        .order_by("sort", "name_uk")[:FOOTER_CATEGORY_LIMIT]
+    )
+    for cat in qs:
         categories.append(
-            SimpleNamespace(label=cat.name, href=cat.get_absolute_url(), underlined=False)
+            SimpleNamespace(
+                label=cat.name,
+                href=cat.get_absolute_url(),
+                underlined=bool(cat.menu_featured),
+            )
         )
 
     legal = []

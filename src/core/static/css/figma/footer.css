@@ -222,7 +222,8 @@
 @media (min-width: 1440px) {
   .site-footer__bar {
     width: 1440px;
-    height: 346px;
+    min-height: 346px;
+    height: auto;
     margin-inline: auto;
     align-items: stretch;
     gap: 60px;
@@ -293,12 +294,13 @@
 
 @media (max-width: 767px) {
   .site-footer {
-    height: calc(832px + env(safe-area-inset-bottom, 0px));
+    min-height: calc(832px + env(safe-area-inset-bottom, 0px));
+    height: auto;
   }
 
   .site-footer__bar {
     box-sizing: border-box;
-    height: 100%;
+    height: auto;
     padding: 20px 15px calc(41px + env(safe-area-inset-bottom, 0px)) 16px;
   }
 

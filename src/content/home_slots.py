@@ -75,6 +75,15 @@ def about_popular():
         .prefetch_related("product__images")
         .order_by("sort", "id")
     )
-    if slots:
-        return [slot.product for slot in slots]
-    return home_popular()
+    products = [slot.product for slot in slots]
+    if len(products) >= 4:
+        return products[:4]
+    seen = {product.pk for product in products}
+    for product in home_popular():
+        if product.pk in seen:
+            continue
+        products.append(product)
+        seen.add(product.pk)
+        if len(products) >= 4:
+            break
+    return products[:4]

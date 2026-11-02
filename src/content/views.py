@@ -60,13 +60,16 @@ def about(request):
     popular_title = page.popular_title or "Популярні товари"
     popular_cta = page.popular_cta or "Перейти до каталогу"
     reviews_title = page.reviews_title or "Відгуки"
+    reviews = Review.objects.filter(placement=Review.Placement.ABOUT)
+    if not reviews.exists():
+        reviews = Review.objects.filter(placement=Review.Placement.HOME)
     return render(
         request,
         "content/about.html",
         {
             "page": page,
             "popular": about_popular(),
-            "reviews": Review.objects.filter(placement=Review.Placement.ABOUT),
+            "reviews": reviews,
             "popular_block": SimpleNamespace(title=popular_title, cta=popular_cta),
             "reviews_block": SimpleNamespace(title=reviews_title),
         },

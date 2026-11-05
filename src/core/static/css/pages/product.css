@@ -99,7 +99,7 @@
   display: block;
 }
 
-.pdp-shot img {
+.pdp-shot :is(img, video) {
   position: absolute;
   left: 0;
   top: calc(var(--pdp-shot-t, 0) * 1%);

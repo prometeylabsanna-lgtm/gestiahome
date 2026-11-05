@@ -1,7 +1,13 @@
 <a class="catalog-cell catalog-cell--{{ cell.role }} is-{{ cell.crop }}" href="{{ cell.product.get_absolute_url }}" style="--name-w: {{ cell.name_width }}px">
   <span class="catalog-cell__media">
-    {% if cell.photo_url %}
-      <img src="{{ cell.photo_url }}" alt="" width="{% if cell.role == 'feature' %}635{% else %}303{% endif %}" height="{% if cell.role == 'feature' %}770{% else %}342{% endif %}">
+    {% if cell.image %}
+      <img src="{{ cell.image.url }}" alt="" width="{% if cell.role == 'feature' %}635{% else %}303{% endif %}" height="{% if cell.role == 'feature' %}770{% else %}342{% endif %}">
+    {% elif cell.media_item %}
+      {% if cell.role == "feature" %}
+        {% include "partials/smart_media.html" with media=cell.media_item width=635 height=770 %}
+      {% else %}
+        {% include "partials/smart_media.html" with media=cell.media_item width=303 height=342 %}
+      {% endif %}
     {% endif %}
   </span>
   <span class="catalog-cell__meta">

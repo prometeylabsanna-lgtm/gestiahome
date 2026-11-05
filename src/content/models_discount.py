@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from src.content.media import IMAGE_VALIDATOR
+from src.content.media import IMAGE_VALIDATOR, VIDEO_VALIDATOR, MediaChoice
 from src.content.models import SingletonModel
 from src.core.fields import WebPImageField
 from src.core.utils import localized
@@ -29,7 +29,7 @@ def validate_public_link(value: str) -> None:
         raise ValidationError("Вкажіть адресу на сайті або посилання http(s).")
 
 
-class DiscountModal(SingletonModel):
+class DiscountModal(MediaChoice, SingletonModel):
     """Попап знижки / waitlist (email) на сайті."""
 
     cache_key = "discount_modal_v1"
@@ -76,6 +76,13 @@ class DiscountModal(SingletonModel):
         blank=True,
         validators=[IMAGE_VALIDATOR],
         help_text="Необов’язково. Фонове зображення попапа. JPG або PNG.",
+    )
+    video = models.FileField(
+        "Відео фону",
+        upload_to="discount/video/",
+        blank=True,
+        validators=[VIDEO_VALIDATOR],
+        help_text="MP4 або WEBM. Замість фото фону.",
     )
     delay_seconds = models.PositiveSmallIntegerField(
         "Затримка перед показом, с",

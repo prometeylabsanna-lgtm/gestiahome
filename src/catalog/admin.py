@@ -21,16 +21,18 @@ from src.core.admin_lang import language_tabs
 from src.core.admin_slug import SlugAdminMixin
 
 GALLERY_HINT = "1272×1540 px. JPG або PNG."
+GALLERY_VIDEO_HINT = "MP4 або WEBM."
+GALLERY_POSTER_HINT = "Кадр до старту відео. Якщо порожньо — основне фото."
 
 
 class ProductImageInline(GestiaStackedInline):
     model = ProductImage
-    fields = ("image", "sort")
+    fields = ("media_kind", "image", "video", "poster", "sort")
     extra = 1
     ordering_field = "sort"
     hide_ordering_field = True
     classes = ("gestia-product-gallery",)
-    verbose_name = "Фото"
+    verbose_name = "Фото / відео"
     verbose_name_plural = "Галерея"
 
     class Media:
@@ -38,8 +40,14 @@ class ProductImageInline(GestiaStackedInline):
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        if db_field.name == "image" and formfield is not None:
+        if formfield is None:
+            return formfield
+        if db_field.name == "image":
             formfield.help_text = GALLERY_HINT
+        elif db_field.name == "video":
+            formfield.help_text = GALLERY_VIDEO_HINT
+        elif db_field.name == "poster":
+            formfield.help_text = GALLERY_POSTER_HINT
         return formfield
 
 
@@ -62,7 +70,10 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         uk_fields=(
             "parent",
             "slug",
+            "media_kind",
             "image",
+            "video",
+            "poster",
             "is_active",
             "sort",
             "home_sort",
@@ -168,7 +179,10 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
             "is_popular",
             "card_crop",
             "name_width",
+            "media_kind",
             "card_image",
+            "video",
+            "poster",
             "sort",
             "related_manual",
             "name_uk",

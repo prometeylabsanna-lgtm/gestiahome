@@ -226,7 +226,7 @@ class HomeBlock(MediaChoice):
         return parts[:3]
 
 
-class Advantage(models.Model):
+class Advantage(MediaChoice):
     rich_text_fields = ("text_uk", "text_en")
     block = models.ForeignKey(
         "content.HomeBlock",
@@ -245,6 +245,13 @@ class Advantage(models.Model):
         upload_to="home/advantages/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
+    )
+    video = models.FileField(
+        "Відео",
+        upload_to="home/advantages/video/",
+        blank=True,
+        validators=[VIDEO_VALIDATOR],
+        help_text="MP4 або WEBM.",
     )
     sort = models.PositiveIntegerField("Порядок", default=0)
 

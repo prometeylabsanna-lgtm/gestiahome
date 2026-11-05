@@ -11,13 +11,23 @@
 >
   <div class="waitlist-modal__scrim" data-waitlist-close tabindex="-1" aria-hidden="true"></div>
   <div
-    class="waitlist-modal__panel{% if discount_modal.image %} waitlist-modal__panel--photo{% endif %}"
+    class="waitlist-modal__panel{% if discount_modal.shows_video or discount_modal.image %} waitlist-modal__panel--photo{% endif %}{% if discount_modal.shows_video %} waitlist-modal__panel--video{% endif %}"
     role="dialog"
     aria-modal="true"
     aria-labelledby="waitlist-modal-title"
     aria-describedby="waitlist-modal-text"
-    {% if discount_modal.image %}style="--waitlist-bg: url('{{ discount_modal.image.url }}')"{% endif %}
+    {% if discount_modal.image and not discount_modal.shows_video %}style="--waitlist-bg: url('{{ discount_modal.image.url }}')"{% endif %}
   >
+    {% if discount_modal.shows_video %}
+      <video
+        class="waitlist-modal__bg-video"
+        autoplay muted loop playsinline preload="metadata"
+        {% if discount_modal.poster_src %}poster="{{ discount_modal.poster_src }}"{% endif %}
+        aria-hidden="true"
+      >
+        <source src="{{ discount_modal.video.url }}" type="{% if '.webm' in discount_modal.video.name %}video/webm{% else %}video/mp4{% endif %}">
+      </video>
+    {% endif %}
     <button class="waitlist-modal__close" type="button" data-waitlist-close aria-label="{% trans 'Закрити' %}">
       <span aria-hidden="true">×</span>
     </button>

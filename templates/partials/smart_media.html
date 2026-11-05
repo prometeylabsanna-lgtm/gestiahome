@@ -1,0 +1,30 @@
+{% comment %}
+media — обʼєкт MediaChoice (shows_video, video, poster_src, still_image / image / card_image)
+class, width, height, alt, style, fetchpriority — опційно
+{% endcomment %}
+{% if media.shows_video %}
+  <video
+    {% if class %}class="{{ class }}"{% endif %}
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    {% if width %}width="{{ width }}"{% endif %}
+    {% if height %}height="{{ height }}"{% endif %}
+    {% if media.poster_src %}poster="{{ media.poster_src }}"{% endif %}
+    {% if style %}style="{{ style }}"{% endif %}
+  >
+    <source src="{{ media.video.url }}" type="{% if '.webm' in media.video.name %}video/webm{% else %}video/mp4{% endif %}">
+  </video>
+{% elif media.still_image %}
+  <img
+    {% if class %}class="{{ class }}"{% endif %}
+    src="{{ media.still_image.url }}"
+    alt="{{ alt|default:'' }}"
+    {% if width %}width="{{ width }}"{% endif %}
+    {% if height %}height="{{ height }}"{% endif %}
+    {% if fetchpriority %}fetchpriority="{{ fetchpriority }}"{% endif %}
+    {% if style %}style="{{ style }}"{% endif %}
+  >
+{% endif %}

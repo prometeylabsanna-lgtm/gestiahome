@@ -11,7 +11,11 @@
     {% for item in advantages %}
       <article class="benefit">
         <span class="benefit__media">
-          {% if item.image %}<img src="{{ item.image.url }}" alt="" width="303" height="197">{% elif block.image %}<img src="{{ block.image.url }}" alt="" width="303" height="197">{% endif %}
+          {% if item.shows_video or item.image %}
+            {% include "partials/smart_media.html" with media=item width=303 height=197 %}
+          {% elif block.shows_video or block.image %}
+            {% include "partials/smart_media.html" with media=block width=303 height=197 %}
+          {% endif %}
         </span>
         <h3>{{ item.title }}</h3>
         <div class="benefit__text">{{ item.text|richhtml }}</div>

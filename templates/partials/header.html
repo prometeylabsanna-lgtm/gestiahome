@@ -73,8 +73,8 @@
             {% for product in menu_cards %}
               <a class="mega-card" href="{{ product.get_absolute_url }}">
                 <span class="mega-card__media">
-                  {% with cover=product.cover %}
-                    {% if cover %}<img src="{{ cover.image.url }}" alt="" width="200" height="226">{% endif %}
+                  {% with media=product.card_media %}
+                    {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}
                   {% endwith %}
                 </span>
                 <span class="mega-card__meta">

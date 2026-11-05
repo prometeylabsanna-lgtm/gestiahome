@@ -5,15 +5,14 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from src.content.media import IMAGE_VALIDATOR, VIDEO_VALIDATOR, MediaChoice
 from src.core.models import TimeStampedModel
 from src.core.seo import category_meta_description, product_meta_description
 from src.core.slug import ensure_new_slug
 from src.core.utils import localized
 
-IMAGE_VALIDATOR = FileExtensionValidator(["jpg", "jpeg", "png", "webp"])
 
-
-class Category(TimeStampedModel):
+class Category(MediaChoice, TimeStampedModel):
     parent = models.ForeignKey(
         "self",
         verbose_name="Батьківська категорія",
@@ -30,6 +29,13 @@ class Category(TimeStampedModel):
         upload_to="categories/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
+    )
+    video = models.FileField(
+        "Відео",
+        upload_to="categories/video/",
+        blank=True,
+        validators=[VIDEO_VALIDATOR],
+        help_text="MP4 або WEBM.",
     )
     is_active = models.BooleanField("Активна", default=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
@@ -194,7 +200,7 @@ class ProductSet(models.Model):
         return localized(self, "name")
 
 
-class Product(TimeStampedModel):
+class Product(MediaChoice, TimeStampedModel):
     class Stock(models.TextChoices):
         IN_STOCK = "in_stock", _("В наявності")
         ON_ORDER = "on_order", _("Під замовлення")
@@ -254,6 +260,13 @@ class Product(TimeStampedModel):
         upload_to="products/cards/",
         blank=True,
         validators=[IMAGE_VALIDATOR],
+    )
+    video = models.FileField(
+        "Відео картки",
+        upload_to="products/cards/video/",
+        blank=True,
+        validators=[VIDEO_VALIDATOR],
+        help_text="MP4 або WEBM.",
     )
     sort = models.PositiveIntegerField("Порядок", default=0)
     filter_attrs = models.ManyToManyField(
@@ -350,10 +363,30 @@ class Product(TimeStampedModel):
     def card_photo_url(self):
         if self.card_image:
             return self.card_image.url
+        if self.shows_video and self.poster_src:
+            return self.poster_src
         cover = self.cover
-        if cover:
+        if cover is None:
+            return ""
+        if cover.image:
             return cover.image.url
-        return ""
+        return cover.poster_src
+
+    @property
+    def shows_card_video(self):
+        if self.shows_video:
+            return True
+        if self.card_image:
+            return False
+        cover = self.cover
+        return bool(cover and cover.shows_video)
+
+    @property
+    def card_media(self):
+        """Медіа для картки: власне відео/фото або cover з галереї."""
+        if self.shows_video or self.card_image:
+            return self
+        return self.cover
 
 
 class CatalogCell(models.Model):
@@ -436,19 +469,39 @@ class CatalogCell(models.Model):
         if self.image:
             return self.image.url
         cover = self.product.cover
-        if cover:
+        if cover is None:
+            return ""
+        if cover.image:
             return cover.image.url
-        return ""
+        return cover.poster_src
+
+    @property
+    def media_item(self):
+        if self.image:
+            return None
+        return self.product.cover
 
 
-class ProductImage(models.Model):
+class ProductImage(MediaChoice):
     product = models.ForeignKey(
         Product,
         verbose_name="Товар",
         related_name="images",
         on_delete=models.CASCADE,
     )
-    image = models.ImageField("Фото", upload_to="products/", validators=[IMAGE_VALIDATOR])
+    image = models.ImageField(
+        "Фото",
+        upload_to="products/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+    )
+    video = models.FileField(
+        "Відео",
+        upload_to="products/video/",
+        blank=True,
+        validators=[VIDEO_VALIDATOR],
+        help_text="MP4 або WEBM.",
+    )
     sort = models.PositiveIntegerField("Порядок", default=0)
     frame_height = models.DecimalField("Висота кадру, %", max_digits=6, decimal_places=2, default=Decimal("100"))
     frame_top = models.DecimalField("Зсув кадру, %", max_digits=6, decimal_places=2, default=Decimal("0"))
@@ -459,4 +512,4 @@ class ProductImage(models.Model):
         verbose_name_plural = "Фото товару"
 
     def __str__(self):
-        return "Фото"
+        return "Відео" if self.shows_video else "Фото"

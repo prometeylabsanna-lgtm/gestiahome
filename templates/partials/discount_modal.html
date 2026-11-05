@@ -11,7 +11,15 @@
   {% if discount_modal.title %}aria-labelledby="discount-dialog-title"{% else %}aria-label="{% trans 'Знижка' %}"{% endif %}
   {% if discount_modal.text %}aria-describedby="discount-dialog-text"{% endif %}
 >
-  {% if discount_modal.image %}
+  {% if discount_modal.shows_video %}
+    <video
+      class="discount-dialog__image"
+      autoplay muted loop playsinline preload="metadata"
+      {% if discount_modal.poster_src %}poster="{{ discount_modal.poster_src }}"{% endif %}
+    >
+      <source src="{{ discount_modal.video.url }}" type="{% if '.webm' in discount_modal.video.name %}video/webm{% else %}video/mp4{% endif %}">
+    </video>
+  {% elif discount_modal.image %}
     <img
       class="discount-dialog__image"
       src="{{ discount_modal.image.url }}"

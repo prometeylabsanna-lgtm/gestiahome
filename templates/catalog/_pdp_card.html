@@ -1,9 +1,11 @@
 {% load shop_tags %}
 <a class="pdp-card is-{{ item.card_crop }}" href="{{ item.get_absolute_url }}" style="--name-w: {{ item.name_width }}px">
   <span class="pdp-card__media">
-    {% if item.card_photo_url %}
-      <img src="{{ item.card_photo_url }}" alt="" width="368" height="415">
-    {% endif %}
+    {% with media=item.card_media %}
+      {% if media %}
+        {% include "partials/smart_media.html" with media=media width=368 height=415 %}
+      {% endif %}
+    {% endwith %}
   </span>
   <span class="pdp-card__meta">
     <span class="pdp-card__name">{{ item.name }}</span>

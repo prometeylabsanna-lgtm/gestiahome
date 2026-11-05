@@ -164,12 +164,12 @@
     overflow: hidden;
   }
 
-  .page-about .about-pick__media img {
+  .page-about .about-pick__media :is(img, video) {
     position: absolute;
     max-width: none;
   }
 
-  .page-about .about-pick--shift img {
+  .page-about .about-pick--shift :is(img, video) {
     left: 0;
     top: -7.21%;
     width: 100%;
@@ -177,7 +177,7 @@
     object-fit: fill;
   }
 
-  .page-about .about-pick--cover img {
+  .page-about .about-pick--cover :is(img, video) {
     inset: 0;
     width: 100%;
     height: 100%;

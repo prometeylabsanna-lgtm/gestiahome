@@ -88,7 +88,7 @@
   background: #f3eee6;
 }
 
-.wish-item__photo img {
+.wish-item__photo :is(img, video) {
   display: block;
   width: 100%;
   height: 100%;

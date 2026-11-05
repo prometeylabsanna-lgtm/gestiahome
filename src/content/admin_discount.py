@@ -20,12 +20,15 @@ class DiscountModalAdmin(GestiaModelAdmin):
             "delay_seconds",
             "shows_per_session",
             "text_uk",
+            "media_kind",
             "image",
+            "video",
+            "poster",
         ),
         en_fields=("text_en",),
         uk_description=(
             "Попап зі збором email. Текст — один блок. Підписи форми фіксовані. "
-            "Зображення — фон вікна (необов’язково)."
+            "Фон вікна — фото або відео (необов’язково)."
         ),
     )
 
@@ -53,6 +56,10 @@ class DiscountModalAdmin(GestiaModelAdmin):
             formfield.help_text = _EN_HINT
         if formfield is not None and db_field.name == "image":
             formfield.help_text = "Фон вікна. JPG або PNG."
+        if formfield is not None and db_field.name == "video":
+            formfield.help_text = "MP4 або WEBM. Фон замість фото."
+        if formfield is not None and db_field.name == "poster":
+            formfield.help_text = "Кадр до старту відео. Якщо порожньо — основне фото."
         return tighten(formfield, self.text_limits.get(db_field.name))
 
     def get_form(self, request, obj=None, change=False, **kwargs):

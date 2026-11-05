@@ -88,7 +88,7 @@
   overflow: hidden;
 }
 
-.cart-item__photo img {
+.cart-item__photo :is(img, video) {
   width: 100%;
   height: 100%;
   max-width: none;

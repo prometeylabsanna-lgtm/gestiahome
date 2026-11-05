@@ -27,13 +27,32 @@ from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 CARD_PHOTO = "303×197 px. Спільне фото для всіх карток (десктоп і мобільний). JPG або PNG."
 CAT_PHOTO = "Плитка категорії. JPG або PNG, довга сторона до 2560 px."
+CAT_MEDIA_FIELDS = ("media_kind", "image", "video", "poster")
 
 
 class HomeCategorySlotForm(forms.ModelForm):
+    media_kind = forms.ChoiceField(
+        label="Що показати",
+        choices=(("photo", "Фото"), ("video", "Відео")),
+        initial="photo",
+        required=False,
+        help_text="Фото — картинка. Відео — MP4 або WEBM.",
+    )
     image = forms.ImageField(
         label="Фото",
         required=False,
         help_text=CAT_PHOTO,
+        widget=AdminImagePreviewWidget,
+    )
+    video = forms.FileField(
+        label="Відео",
+        required=False,
+        help_text="MP4 або WEBM.",
+    )
+    poster = forms.ImageField(
+        label="Постер",
+        required=False,
+        help_text="Кадр до старту відео. Якщо порожньо — основне фото.",
         widget=AdminImagePreviewWidget,
     )
 
@@ -44,21 +63,25 @@ class HomeCategorySlotForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk and self.instance.category_id:
-            self.fields["image"].initial = self.instance.category.image
+            cat = self.instance.category
+            for name in CAT_MEDIA_FIELDS:
+                self.fields[name].initial = getattr(cat, name)
 
     def save(self, commit=True):
         obj = super().save(commit=False)
         if commit:
             obj.save()
-        if obj.category_id and "image" in self.cleaned_data:
+        if obj.category_id:
             cat = obj.category
-            image = self.cleaned_data["image"]
-            if image is False:
-                cat.image = None
-                cat.save(update_fields=["image"])
-            elif image:
-                cat.image = image
-                cat.save(update_fields=["image"])
+            updates = []
+            for name in CAT_MEDIA_FIELDS:
+                if name not in self.cleaned_data:
+                    continue
+                db_field = cat._meta.get_field(name)
+                db_field.save_form_data(cat, self.cleaned_data[name])
+                updates.append(name)
+            if updates:
+                cat.save(update_fields=updates)
         return obj
 
 
@@ -72,7 +95,7 @@ class HomeCategorySlotInline(GestiaTabularInline):
     ordering_field = "sort"
     hide_ordering_field = True
     autocomplete_fields = ("category",)
-    fields = ("category", "image", "sort")
+    fields = ("category", "media_kind", "image", "video", "poster", "sort")
 
 
 class HomePopularSlotInline(GestiaTabularInline):

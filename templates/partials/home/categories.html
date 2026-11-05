@@ -4,7 +4,7 @@
     {% for cat in categories %}
       <a class="cat-card" href="{{ cat.get_absolute_url }}">
         <span class="cat-card__media">
-          {% if cat.image %}<img src="{{ cat.image.url }}" alt="" width="303" height="342">{% endif %}
+          {% include "partials/smart_media.html" with media=cat width=303 height=342 %}
         </span>
         <span class="cat-card__name">{{ cat.name }}</span>
       </a>

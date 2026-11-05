@@ -18,6 +18,11 @@
   height: auto;
 }
 
+#discount-dialog video.discount-dialog__image {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
 #discount-dialog .sheet__meta {
   margin: 0;
 }

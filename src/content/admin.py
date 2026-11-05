@@ -95,7 +95,7 @@ class AdvantageAdmin(GestiaModelAdmin):
     text_limits = {"title_uk": 24, "title_en": 24, "text_uk": 80, "text_en": 80}
     tiny_fields = ("text_uk", "text_en")
     fieldsets = language_tabs(
-        uk_fields=("sort", "title_uk", "text_uk", "image"),
+        uk_fields=("sort", "title_uk", "text_uk", "media_kind", "image", "video", "poster"),
         en_fields=("title_en", "text_en"),
     )
 
@@ -106,6 +106,10 @@ class AdvantageAdmin(GestiaModelAdmin):
         hint = ""
         if db_field.name == "image":
             hint = "303×197 px. Якщо порожньо — лишається фото блоку «Переваги». JPG або PNG."
+        elif db_field.name == "video":
+            hint = "MP4 або WEBM."
+        elif db_field.name == "poster":
+            hint = "Кадр до старту відео. Якщо порожньо — основне фото."
         return tighten(formfield, self.text_limits.get(db_field.name), hint)
 
     def get_form(self, request, obj=None, change=False, **kwargs):

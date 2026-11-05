@@ -260,13 +260,21 @@ def og_image_url(context) -> str:
     if request is None:
         return ""
     product = context.get("product")
-    cover = getattr(product, "cover", None) if product is not None else None
-    image = getattr(cover, "image", None) if cover is not None else None
-    if image:
-        try:
-            return absolute_media(request, image.url)
-        except ValueError:
-            pass
+    if product is not None:
+        media_url = getattr(product, "card_photo_url", "") or ""
+        if not media_url:
+            cover = getattr(product, "cover", None)
+            if cover is not None:
+                image = getattr(cover, "image", None)
+                if image:
+                    media_url = image.url
+                else:
+                    media_url = getattr(cover, "poster_src", "") or ""
+        if media_url:
+            try:
+                return absolute_media(request, media_url)
+            except ValueError:
+                pass
     seo = context.get("seo") or {}
     return seo.get("image") or ""
 

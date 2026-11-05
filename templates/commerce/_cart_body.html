@@ -11,9 +11,9 @@
           {% for row in rows %}
             <article class="cart-item" role="listitem"{% if row.over_stock %} data-over-stock{% endif %}>
               <div class="cart-item__photo">
-                {% if row.product.cover %}
-                  <img src="{{ row.product.cover.image.url }}" alt="{{ row.product.name }}" width="104" height="104">
-                {% endif %}
+                {% with media=row.product.card_media %}
+                  {% if media %}{% include "partials/smart_media.html" with media=media width=104 height=104 alt=row.product.name %}{% endif %}
+                {% endwith %}
               </div>
               <div class="cart-item__body">
                 <div class="cart-item__top">

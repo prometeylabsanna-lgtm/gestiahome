@@ -44,6 +44,26 @@ body.waitlist-modal-open {
   background-repeat: no-repeat;
 }
 
+.waitlist-modal__panel--video {
+  overflow: hidden;
+}
+
+.waitlist-modal__bg-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.waitlist-modal__panel--video .waitlist-modal__close,
+.waitlist-modal__panel--video .waitlist-modal__body {
+  position: relative;
+  z-index: 1;
+}
+
 .waitlist-modal__panel--photo .waitlist-modal__body {
   padding: 0.85rem;
   border-radius: 0.5rem;

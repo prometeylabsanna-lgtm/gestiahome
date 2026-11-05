@@ -19,6 +19,7 @@ class MediaChoice(models.Model):
         max_length=8,
         choices=Kind.choices,
         default=Kind.PHOTO,
+        blank=True,
         help_text="Фото — картинка. Відео — MP4 або WEBM.",
     )
     poster = WebPImageField(
@@ -32,7 +33,33 @@ class MediaChoice(models.Model):
     class Meta:
         abstract = True
 
+    def clean(self):
+        super().clean()
+        if not self.media_kind:
+            self.media_kind = self.Kind.PHOTO
+
+    def save(self, *args, **kwargs):
+        if not self.media_kind:
+            self.media_kind = self.Kind.PHOTO
+        super().save(*args, **kwargs)
+
     @property
     def shows_video(self):
         video = getattr(self, "video", None)
         return self.media_kind == self.Kind.VIDEO and bool(video)
+
+    @property
+    def still_image(self):
+        """Основне фото або фото картки (для постера / fallback)."""
+        for name in ("image", "card_image"):
+            value = getattr(self, name, None)
+            if value:
+                return value
+        return None
+
+    @property
+    def poster_src(self):
+        if self.poster:
+            return self.poster.url
+        still = self.still_image
+        return still.url if still else ""

@@ -23,7 +23,18 @@
         <div class="pdp-gallery" data-pdp-gallery>
           {% for image in product.images.all %}
             <div class="pdp-shot{% if forloop.first %} is-current{% endif %}" data-shot>
-              <img src="{{ image.image.url }}" alt="{% if forloop.first %}{{ product.name }}{% endif %}" width="636" height="770"{% if forloop.first %} fetchpriority="high"{% endif %}{% localize off %} style="--pdp-shot-h: {{ image.frame_height }}; --pdp-shot-t: {{ image.frame_top }};"{% endlocalize %}>
+              {% if image.shows_video %}
+                <video
+                  autoplay muted loop playsinline preload="metadata"
+                  width="636" height="770"
+                  {% if image.poster_src %}poster="{{ image.poster_src }}"{% endif %}
+                  {% localize off %}style="--pdp-shot-h: {{ image.frame_height }}; --pdp-shot-t: {{ image.frame_top }};"{% endlocalize %}
+                >
+                  <source src="{{ image.video.url }}" type="{% if '.webm' in image.video.name %}video/webm{% else %}video/mp4{% endif %}">
+                </video>
+              {% elif image.image %}
+                <img src="{{ image.image.url }}" alt="{% if forloop.first %}{{ product.name }}{% endif %}" width="636" height="770"{% if forloop.first %} fetchpriority="high"{% endif %}{% localize off %} style="--pdp-shot-h: {{ image.frame_height }}; --pdp-shot-t: {{ image.frame_top }};"{% endlocalize %}>
+              {% endif %}
             </div>
           {% endfor %}
           <div class="pdp-gallery__nav">

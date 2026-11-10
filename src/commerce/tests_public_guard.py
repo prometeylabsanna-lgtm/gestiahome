@@ -53,7 +53,8 @@ class PublicFormGuardTests(TestCase):
     def test_honeypot_is_rendered_on_personal_forms(self):
         home = self.client.get("/")
         self.assertContains(home, HONEYPOT_MARK)
-        self.assertGreaterEqual(home.content.decode().count(HONEYPOT_MARK), 2)
+        # Головна більше не рендерить callback-форму; honeypot лишається у waitlist-модалці.
+        self.assertGreaterEqual(home.content.decode().count(HONEYPOT_MARK), 1)
         product = self.client.get(self.product.get_absolute_url())
         self.assertContains(product, HONEYPOT_MARK)
         product_html = product.content.decode()

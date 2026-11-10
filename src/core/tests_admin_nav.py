@@ -24,6 +24,7 @@ class SidebarTreeTests(TestCase):
             [
                 "home_banner",
                 "home_banner_text",
+                "home_collections",
                 "home_categories",
                 "home_mid_banner",
                 "home_popular",

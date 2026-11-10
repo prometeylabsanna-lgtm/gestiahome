@@ -7,12 +7,13 @@ from unfold.widgets import UnfoldAdminTextInputWidget
 from src.content.admin_keyed import KeyedBlockAdmin
 from src.content.admin_limits import tighten
 from src.content.home_slots import sync_category_home_sort, sync_popular_flags
-from src.content.models import ContactForms, HomeBlock
+from src.content.models import ContactForms, HomeBlock, HomeCollection
 from src.content.models_home_slots import HomeCategorySlot, HomePopularSlot
 from src.content.proxies import (
     HomeAdvantagesBlock,
     HomeCallbackBlock,
     HomeCategoriesBlock,
+    HomeCollectionsBlock,
     HomeLocaleBlock,
     HomePopularBlock,
     HomeReviewsBlock,
@@ -109,6 +110,60 @@ class HomePopularSlotInline(GestiaTabularInline):
     hide_ordering_field = True
     autocomplete_fields = ("product",)
     fields = ("product", "sort")
+
+
+class HomeCollectionInline(GestiaStackedInline):
+    model = HomeCollection
+    extra = 0
+    tab = True
+    verbose_name = "Колекція"
+    verbose_name_plural = "Колекції"
+    ordering_field = "sort"
+    hide_ordering_field = True
+    autocomplete_fields = ("category",)
+    tiny_fields = ("text_uk", "text_en")
+    fields = (
+        "is_active",
+        "sort",
+        "label_uk",
+        "label_en",
+        "title_uk",
+        "title_en",
+        "text_uk",
+        "text_en",
+        "image_large",
+        "image_small",
+        "alt_large_uk",
+        "alt_large_en",
+        "alt_small_uk",
+        "alt_small_en",
+        "category",
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+@admin.register(HomeCollectionsBlock)
+class HomeCollectionsAdmin(KeyedBlockAdmin):
+    block_key = HomeBlock.Key.COLLECTIONS
+    default_sort = 2
+    inlines = (HomeCollectionInline,)
+    text_limits = {
+        "title_uk": 80,
+        "title_en": 80,
+        "link_uk": 80,
+        "link_en": 80,
+        "cta_uk": 40,
+        "cta_en": 40,
+    }
+    tiny_fields = ()
+    fieldsets = language_tabs(
+        uk_fields=("title_uk", "link_uk", "cta_uk"),
+        en_fields=("title_en", "link_en", "cta_en"),
+    )
 
 
 class HomeCallbackForm(forms.ModelForm):

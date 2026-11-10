@@ -15,6 +15,7 @@
   --nd-btn-hover: #3a1d10;
   --nd-scrim: rgba(37, 16, 8, 0.25);
   --nd-dialog-shadow: 0 8px 24px rgba(37, 16, 8, 0.12);
+  --nd-wish-shadow: drop-shadow(0 0 2px rgba(37, 16, 8, 0.45));
   --nd-surface: #fff;
   --nd-flag-blue: #0057b7;
   --nd-flag-yellow: #ffd700;
@@ -27,6 +28,7 @@
   --nd-fs-14: 14px;
   --nd-fs-15: 15px;
   --nd-fs-16: 16px;
+  --nd-fs-17: 17px;
   --nd-fs-18: 18px;
   --nd-fs-26: 26px;
   --nd-fs-28: 28px;

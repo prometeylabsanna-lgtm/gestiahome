@@ -26,6 +26,10 @@ def contains(request, sku: str) -> bool:
     return sku in _raw(request)
 
 
+def sku_set(request) -> set[str]:
+    return set(_raw(request))
+
+
 def add(request, sku: str) -> bool:
     items = _raw(request)
     if sku in items:

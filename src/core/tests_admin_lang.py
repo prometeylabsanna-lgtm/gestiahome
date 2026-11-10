@@ -26,6 +26,7 @@ from src.content.admin_blocks import (
     HomeAdvantagesAdmin,
     HomeCallbackAdmin,
     HomeCategoriesAdmin,
+    HomeCollectionsAdmin,
     HomePopularAdmin,
     HomeReviewsAdmin,
 )
@@ -101,6 +102,7 @@ class AdminLanguageTabFieldsetTests(TestCase):
             HomeCategoriesAdmin,
             HomePopularAdmin,
             HomeAdvantagesAdmin,
+            HomeCollectionsAdmin,
             HomeReviewsAdmin,
             HomeCallbackAdmin,
             SiteSettingsAdmin,

@@ -2,16 +2,23 @@
 
 LITERALS = {
     "hero_title": (
-        "Декор для дому, текстиль \nі флористика",
-        "Home decor, textiles \nand floristry",
+        "Art of modern hospitality",
+        "Art of modern hospitality",
     ),
     "hero_text": (
-        "Декор для дому, домашній текстиль, флористика та одяг для дому від Gestia Home. "
-        "Створюйте затишний простір із речами, у яких поєднуються естетика та функціональність",
-        "Home decor, home textiles, floristry, and clothing for the home from Gestia Home. "
-        "Create a cosy space with pieces that bring aesthetics and function together.",
+        "Святкові бокси для самостійного декорування столу",
+        "Festive boxes for decorating your own table",
     ),
     "hero_cta": ("Перейти до каталогу", "Go to the catalogue"),
+    "collections_title": (
+        "Різдвяна колекція святкових боксів",
+        "Christmas collection of festive boxes",
+    ),
+    "collections_link": (
+        "Традиції починаються зі столу",
+        "Traditions begin at the table",
+    ),
+    "collections_cta": ("Дізнатись детальніше", "Learn more"),
     "categories_label": ("Категорії", "Categories"),
     "popular_title": ("Популярні товари", "Popular products"),
     "popular_cta": ("Перейти до каталогу", "Go to the catalogue"),

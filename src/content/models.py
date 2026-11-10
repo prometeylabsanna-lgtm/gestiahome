@@ -121,6 +121,7 @@ class SiteSettings(SingletonModel):
 class HomeBlock(MediaChoice):
     class Key(models.TextChoices):
         HERO = "hero", "Головний банер"
+        COLLECTIONS = "collections", "Колекції"
         CATEGORIES = "categories", "Категорії"
         VIDEO = "video", "Відео 1"
         POPULAR = "popular", "Популярні товари"
@@ -224,6 +225,78 @@ class HomeBlock(MediaChoice):
         while len(parts) < 3:
             parts.append("")
         return parts
+
+
+class HomeCollection(models.Model):
+    rich_text_fields = ("text_uk", "text_en")
+    block = models.ForeignKey(
+        "content.HomeBlock",
+        related_name="collection_cards",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Блок",
+    )
+    label_uk = models.CharField("Підпис", max_length=120, blank=True)
+    label_en = models.CharField("Підпис (EN)", max_length=120, blank=True)
+    title_uk = models.CharField("Назва", max_length=160)
+    title_en = models.CharField("Назва (EN)", max_length=160, blank=True)
+    text_uk = models.TextField("Текст", blank=True)
+    text_en = models.TextField("Текст (EN)", blank=True)
+    image_large = models.ImageField(
+        "Велике фото",
+        upload_to="home/collections/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+    )
+    image_small = models.ImageField(
+        "Мале фото",
+        upload_to="home/collections/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+    )
+    alt_large_uk = models.CharField("Alt великого фото", max_length=200, blank=True)
+    alt_large_en = models.CharField("Alt великого фото (EN)", max_length=200, blank=True)
+    alt_small_uk = models.CharField("Alt малого фото", max_length=200, blank=True)
+    alt_small_en = models.CharField("Alt малого фото (EN)", max_length=200, blank=True)
+    category = models.ForeignKey(
+        "catalog.Category",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="home_collections",
+        verbose_name="Категорія",
+    )
+    is_active = models.BooleanField("Показувати на сайті", default=True)
+    sort = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["sort", "id"]
+        verbose_name = "Колекція"
+        verbose_name_plural = "Колекції"
+
+    def __str__(self):
+        return self.title_uk
+
+    @property
+    def label(self):
+        return localized(self, "label")
+
+    @property
+    def title(self):
+        return localized(self, "title")
+
+    @property
+    def text(self):
+        return localized(self, "text")
+
+    @property
+    def alt_large(self):
+        return localized(self, "alt_large")
+
+    @property
+    def alt_small(self):
+        return localized(self, "alt_small")
 
 
 class Advantage(MediaChoice):

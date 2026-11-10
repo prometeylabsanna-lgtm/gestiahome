@@ -1,6 +1,7 @@
 {% load i18n shop_tags static content_tags %}
 {% cms block.title "popular_title" as pop_title %}
 {% cms block.cta "popular_cta" as pop_cta %}
+{% if pop_nav %}
 <section class="popular">
   {% if pop_title %}<h2>{{ pop_title }}</h2>{% endif %}
   <div class="pop-rail">
@@ -18,40 +19,72 @@
       </a>
     {% endfor %}
   </div>
-  {% if pop_nav %}
-    <div class="about-picks" data-about-pop>
-      {% for product in popular %}
-        <a class="about-pick about-pick--{% if forloop.counter0|divisibleby:2 %}shift{% else %}cover{% endif %}" href="{{ product.get_absolute_url }}">
-          <span class="about-pick__media">
-            {% with media=product.card_media %}
-              {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}
-            {% endwith %}
-          </span>
-          <span class="about-pick__meta">
-            <span class="about-pick__name">{{ product.name }}</span>
-            <span class="about-pick__price">{% home_price product %}</span>
-          </span>
-        </a>
-      {% endfor %}
+  <div class="about-picks" data-about-pop>
+    {% for product in popular %}
+      <a class="about-pick about-pick--{% if forloop.counter0|divisibleby:2 %}shift{% else %}cover{% endif %}" href="{{ product.get_absolute_url }}">
+        <span class="about-pick__media">
+          {% with media=product.card_media %}
+            {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}
+          {% endwith %}
+        </span>
+        <span class="about-pick__meta">
+          <span class="about-pick__name">{{ product.name }}</span>
+          <span class="about-pick__price">{% home_price product %}</span>
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+  {% if pop_cta %}
+    <div class="pop-actions">
+      <a class="figma-btn figma-btn--brown" href="{% url 'catalog' %}">{{ pop_cta }}</a>
+      <button class="pop-nav__btn" type="button" data-about-pop-prev aria-label="{% trans 'Попередні товари' %}">
+        <span class="pop-nav__turn">
+          <img src="{% static 'figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg' %}" width="15" height="15" alt="">
+        </span>
+      </button>
+      <button class="pop-nav__btn pop-nav__btn--next" type="button" data-about-pop-next aria-label="{% trans 'Наступні товари' %}">
+        <span class="pop-nav__turn">
+          <img src="{% static 'figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg' %}" width="15" height="15" alt="">
+        </span>
+      </button>
     </div>
   {% endif %}
+</section>
+{% else %}
+<section class="nd-pop" aria-labelledby="nd-pop-title">
+  {% if pop_title %}<h2 class="nd-pop__title" id="nd-pop-title">{{ pop_title }}</h2>{% endif %}
+  <ul class="nd-pop__rail">
+    {% for product in popular %}
+      <li class="nd-pop__item">
+        <div class="nd-pop__wish">
+          {% if product.sku in wishlist_skus %}
+            {% include "partials/wishlist_btn.html" with product=product in_wishlist=True %}
+          {% else %}
+            {% include "partials/wishlist_btn.html" with product=product in_wishlist=False %}
+          {% endif %}
+        </div>
+        <a class="nd-pop__card" href="{{ product.get_absolute_url }}">
+          <span class="nd-pop__media">
+            {% with media=product.card_media %}
+              {% if media %}{% include "partials/smart_media.html" with media=media width=368 height=415 %}{% endif %}
+            {% endwith %}
+          </span>
+          <span class="nd-pop__meta">
+            <h3 class="nd-pop__name">{{ product.name }}</h3>
+            <span class="nd-pop__price">{% home_price product %}</span>
+          </span>
+        </a>
+      </li>
+    {% endfor %}
+    <li class="nd-pop__spacer" aria-hidden="true"></li>
+  </ul>
   {% if pop_cta %}
-    {% if pop_nav %}
-      <div class="pop-actions">
-        <a class="figma-btn figma-btn--brown" href="{% url 'catalog' %}">{{ pop_cta }}</a>
-        <button class="pop-nav__btn" type="button" data-about-pop-prev aria-label="{% trans 'Попередні товари' %}">
-          <span class="pop-nav__turn">
-            <img src="{% static 'figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg' %}" width="15" height="15" alt="">
-          </span>
-        </button>
-        <button class="pop-nav__btn pop-nav__btn--next" type="button" data-about-pop-next aria-label="{% trans 'Наступні товари' %}">
-          <span class="pop-nav__turn">
-            <img src="{% static 'figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg' %}" width="15" height="15" alt="">
-          </span>
-        </button>
-      </div>
-    {% else %}
-      <a class="figma-btn figma-btn--brown" href="{% url 'catalog' %}">{{ pop_cta }}</a>
-    {% endif %}
+    <a class="nd-pop__more" href="{% url 'catalog' %}">
+      <span class="nd-pop__more-label">{{ pop_cta }}</span>
+      <svg class="nd-pop__more-icon" width="26" height="26" viewBox="0 0 46 46" fill="none" aria-hidden="true">
+        <path d="M1 1l44 44M45 8v37H8" stroke="currentColor" stroke-width="2"></path>
+      </svg>
+    </a>
   {% endif %}
 </section>
+{% endif %}

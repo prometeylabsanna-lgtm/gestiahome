@@ -167,15 +167,14 @@ class HeadingSeoTests(SeoFixture):
 
     def test_visible_hero_is_the_only_h1(self):
         HomeBlock.objects.create(key="hero", title_uk=_UK_TITLE, title_en=_EN_TITLE)
-        expected = {"/": _UK_TITLE, "/en/": _EN_TITLE}
-        for path, text in expected.items():
+        for path, slogan in ({"/": _UK_TITLE, "/en/": _EN_TITLE}).items():
             page = self.client.get(path)
             nodes = _h1_nodes(page)
             self.assertEqual(len(nodes), 1, path)
             self.assertEqual(_h1_count(page), 1, path)
             self.assertNotIn("visually-hidden", nodes[0][0])
-            self.assertIn(text, nodes[0][1])
-            self.assertNotIn("Gestia Home</h1>", page.content.decode())
+            self.assertIn('alt="Gestia Home"', nodes[0][1])
+            self.assertIn(slogan, page.content.decode())
         for path in ("/katalog/", "/en/katalog/"):
             page = self.client.get(path)
             nodes = _h1_nodes(page)

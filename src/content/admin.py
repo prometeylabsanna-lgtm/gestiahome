@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from src.content.admin_limits import tighten
-from src.content.models import Advantage, FooterLink, HomeBlock, Review, SiteSettings
+from src.content.models import Advantage, FooterLink, HomeBlock, HomeCollection, Review, SiteSettings
 from src.content.proxies import AboutReview, HomeReview
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_lang import language_tabs
@@ -85,6 +85,61 @@ class HomeBlockAdmin(GestiaModelAdmin):
         form = super().get_form(request, obj, change=change, **kwargs)
         force_tinymce(form, self.tiny_fields, short=True)
         return form
+
+
+@admin.register(HomeCollection)
+class HomeCollectionAdmin(GestiaModelAdmin):
+    list_display = ("title_uk", "is_active", "sort")
+    list_filter = ("is_active",)
+    search_fields = ("title_uk", "title_en", "label_uk")
+    ordering = ("sort", "id")
+    autocomplete_fields = ("category",)
+    tiny_fields = ("text_uk", "text_en")
+    fieldsets = language_tabs(
+        uk_fields=(
+            "is_active",
+            "sort",
+            "label_uk",
+            "title_uk",
+            "text_uk",
+            "image_large",
+            "image_small",
+            "alt_large_uk",
+            "alt_small_uk",
+            "category",
+        ),
+        en_fields=(
+            "label_en",
+            "title_en",
+            "text_en",
+            "alt_large_en",
+            "alt_small_en",
+        ),
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=True)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if obj.block_id is None:
+            block, _ = HomeBlock.objects.get_or_create(
+                key=HomeBlock.Key.COLLECTIONS,
+                defaults={
+                    "sort": 2,
+                    "title_uk": "Різдвяна колекція святкових боксів",
+                    "link_uk": "Традиції починаються зі столу",
+                    "cta_uk": "Дізнатись детальніше",
+                },
+            )
+            obj.block = block
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Advantage)

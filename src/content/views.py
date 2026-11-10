@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+from django.db.utils import OperationalError, ProgrammingError
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -8,10 +9,29 @@ from django.views.decorators.http import require_http_methods
 from src.commerce.forms import ContactForm, style_form
 from src.commerce.models import Inquiry
 from src.commerce.services import create_inquiry
-from src.core.ratelimit import honeypot_filled, reject_if_limited
+from src.commerce.wishlist import sku_set
 from src.content.home_slots import about_popular, home_categories, home_popular
 from src.content.legal_pages import legal_document
-from src.content.models import AboutPage, Advantage, HomeBlock, Review
+from src.content.models import AboutPage, Advantage, HomeBlock, HomeCollection, Review
+from src.core.ratelimit import honeypot_filled, reject_if_limited
+
+
+def _home_collections():
+    try:
+        rows = list(
+            HomeCollection.objects.filter(is_active=True, block__key=HomeBlock.Key.COLLECTIONS)
+            .select_related("category")
+            .order_by("sort", "id")
+        )
+        if rows:
+            return rows
+        return list(
+            HomeCollection.objects.filter(is_active=True, block__isnull=True)
+            .select_related("category")
+            .order_by("sort", "id")
+        )
+    except (OperationalError, ProgrammingError):
+        return []
 
 
 @require_http_methods(["GET", "HEAD", "POST"])
@@ -40,8 +60,10 @@ def home(request):
         {
             "categories": home_categories(),
             "popular": home_popular(),
+            "collections": _home_collections(),
             "advantages": advantages,
             "reviews": Review.objects.filter(placement=Review.Placement.HOME),
+            "wishlist_skus": sku_set(request),
             "home_form": form,
         },
         status=status,

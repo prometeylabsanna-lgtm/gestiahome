@@ -29,6 +29,21 @@ NAV_TREE = [
                 "url_name": "admin:content_homebannertext_changelist",
             },
             {
+                "key": "home_collections",
+                "title": "Колекції",
+                "icon": "collections",
+                "url_name": "admin:content_homecollectionsblock_changelist",
+                "items": [
+                    {
+                        "key": "home_collection_list",
+                        "title": "Список колекцій",
+                        "icon": "format_list_bulleted",
+                        "url_name": "admin:content_homecollection_changelist",
+                    },
+                ],
+                "dynamic": "collections",
+            },
+            {
                 "key": "home_categories",
                 "title": "Категорії",
                 "icon": "grid_view",
@@ -331,13 +346,19 @@ def _walk(entries):
 
 def _with_dynamic_children(entry):
     kind = entry.get("dynamic") or ""
-    if kind != "advantages":
-        return entry
-    children = list(entry.get("items") or [])
-    children.extend(_advantage_nav_items())
-    expanded = dict(entry)
-    expanded["items"] = children
-    return expanded
+    if kind == "advantages":
+        children = list(entry.get("items") or [])
+        children.extend(_advantage_nav_items())
+        expanded = dict(entry)
+        expanded["items"] = children
+        return expanded
+    if kind == "collections":
+        children = list(entry.get("items") or [])
+        children.extend(_collection_nav_items())
+        expanded = dict(entry)
+        expanded["items"] = children
+        return expanded
+    return entry
 
 
 def _advantage_nav_items():
@@ -358,6 +379,30 @@ def _advantage_nav_items():
                 "title": title[:48],
                 "icon": "workspace_premium",
                 "url_name": "admin:content_advantage_change",
+                "url_args": (row.pk,),
+            }
+        )
+    return items
+
+
+def _collection_nav_items():
+    try:
+        from src.content.models import HomeCollection
+    except Exception:
+        return []
+    try:
+        rows = list(HomeCollection.objects.order_by("sort", "id").only("id", "title_uk"))
+    except Exception:
+        return []
+    items = []
+    for row in rows:
+        title = (row.title_uk or "").strip().replace("\n", " ") or f"Колекція #{row.pk}"
+        items.append(
+            {
+                "key": f"home_collection_{row.pk}",
+                "title": title[:48],
+                "icon": "auto_awesome",
+                "url_name": "admin:content_homecollection_change",
                 "url_args": (row.pk,),
             }
         )

@@ -25,6 +25,13 @@ class HomeHeroBlock(HomeBlock):
         verbose_name_plural = "Текст банера"
 
 
+class HomeCollectionsBlock(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Колекції"
+        verbose_name_plural = "Колекції"
+
+
 class HomeCategoriesBlock(HomeBlock):
     class Meta:
         proxy = True

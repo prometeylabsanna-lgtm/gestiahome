@@ -1,0 +1,92 @@
+{% load i18n static content_tags richtext %}
+{% if block %}
+  {% cms block.title "collections_title" as col_title %}
+  {% cms block.link_label "collections_link" as col_slogan %}
+  {% cms block.cta "collections_cta" as col_cta %}
+{% else %}
+  {% cms "" "collections_title" as col_title %}
+  {% cms "" "collections_link" as col_slogan %}
+  {% cms "" "collections_cta" as col_cta %}
+{% endif %}
+<section class="nd-cols" aria-labelledby="nd-cols-title">
+  <div class="nd-cols__head">
+    {% if col_title %}<h2 class="nd-cols__title" id="nd-cols-title">{{ col_title }}</h2>{% endif %}
+    {% if col_slogan %}<p class="nd-cols__slogan">{{ col_slogan }}</p>{% endif %}
+  </div>
+  <div class="nd-cols__rule" aria-hidden="true">
+    <span class="nd-cols__line"></span>
+    <img
+      class="nd-cols__mark"
+      src="{% static 'nd/g-mark-light.png' %}"
+      width="34"
+      height="50"
+      alt=""
+    >
+    <span class="nd-cols__line"></span>
+  </div>
+  <div class="nd-cols__list">
+    {% for item in collections %}
+      <article
+        class="nd-col{% if forloop.counter|divisibleby:2 %} nd-col--b{% else %} nd-col--a{% endif %}"
+        aria-labelledby="nd-col-{{ item.pk }}"
+      >
+        <div class="nd-col__small">
+          {% if item.image_small %}
+            <img
+              src="{{ item.image_small.url }}"
+              alt="{{ item.alt_small }}"
+              width="280"
+              height="288"
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+        <div class="nd-col__large">
+          {% if item.image_large %}
+            <img
+              src="{{ item.image_large.url }}"
+              alt="{{ item.alt_large }}"
+              width="414"
+              height="779"
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+        <div class="nd-col__copy">
+          <h3 class="nd-col__heading" id="nd-col-{{ item.pk }}">
+            {% if item.label %}<span class="nd-col__label">{{ item.label }}</span>{% endif %}
+            <span class="nd-col__name">{{ item.title }}</span>
+          </h3>
+          {% if item.text %}
+            <div class="nd-col__text">{{ item.text|richhtml }}</div>
+          {% endif %}
+          <div class="nd-col__foot">
+            {% if item.category_id %}
+              <a class="nd-col__cta" href="{{ item.category.get_absolute_url }}">{% if col_cta %}{{ col_cta }}{% endif %}</a>
+              <a
+                class="nd-col__arrow"
+                href="{{ item.category.get_absolute_url }}"
+                aria-label="{% blocktrans with name=item.title %}Детальніше про колекцію {{ name }}{% endblocktrans %}"
+              >
+                <svg width="46" height="46" viewBox="0 0 46 46" fill="none" aria-hidden="true">
+                  <path d="M1 1l44 44M45 8v37H8" stroke="currentColor" stroke-width="1.5"></path>
+                </svg>
+              </a>
+            {% else %}
+              <a class="nd-col__cta" href="{% url 'catalog' %}">{% if col_cta %}{{ col_cta }}{% endif %}</a>
+              <a
+                class="nd-col__arrow"
+                href="{% url 'catalog' %}"
+                aria-label="{% blocktrans with name=item.title %}Детальніше про колекцію {{ name }}{% endblocktrans %}"
+              >
+                <svg width="46" height="46" viewBox="0 0 46 46" fill="none" aria-hidden="true">
+                  <path d="M1 1l44 44M45 8v37H8" stroke="currentColor" stroke-width="1.5"></path>
+                </svg>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>

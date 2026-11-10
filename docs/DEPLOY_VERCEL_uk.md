@@ -13,7 +13,7 @@
 | Background | Немає Celery / cron / постійних воркерів |
 | Function size | Python bundle ≤ ~500 MB unzipped; media **не** входить у function (`excludeFiles`) |
 | Cold start | Копія SQLite в `/tmp` (без авто-створення суперкористувача) |
-| Секрет | У коді є публічний `DEMO_SECRET_KEY` — **демо не повинно тримати реальні дані** |
+| Секрет | `SECRET_KEY` лише з Vercel env (Production + Preview); без нього рантайм падає |
 | Адмін | У demo DB **немає** admin-користувача; як його отримати для демо — поза межами цього гайду / майбутнє |
 
 Оновлення до продакшену: додайте `DATABASE_URL` (Neon/Postgres) і `AWS_STORAGE_BUCKET_NAME` (S3/R2) — код уже підтримує обидва шляхи. Для реального прод **обовʼязково** свій `SECRET_KEY` (і `config.settings.production`, не demo-ключ).
@@ -21,13 +21,13 @@
 ## Змінні оточення
 
 **Для демо на Vercel з нульовими Env — нічого задавати не потрібно.**  
-`config.settings.vercel` підставляє demo `SECRET_KEY`, хости `.vercel.app` / localhost, CSRF `https://*.vercel.app`, `ADMIN_URL=admin/`. Системні `VERCEL_*` підхоплюються автоматично.
+`config.settings.vercel` вимагає `SECRET_KEY` з env (на build — тимчасовий випадковий), хости `.vercel.app` / localhost, CSRF `https://*.vercel.app`, `ADMIN_URL=admin/`. Системні `VERCEL_*` підхоплюються автоматично.
 
 ### Опційно (майбутній реальний prod / розширене демо)
 
 | Імʼя | Навіщо |
 |------|--------|
-| `SECRET_KEY` | Власний Django secret замість публічного `DEMO_SECRET_KEY` (**обовʼязково** для будь-яких реальних даних) |
+| `SECRET_KEY` | Django secret (**обовʼязково**; без нього рантайм не стартує) |
 | `DJANGO_SETTINGS_MODULE` | `config.settings.vercel` (або покладіться на `VERCEL=1` у `manage.py` / `wsgi.py`) |
 | `SITE_URL` | Canonical / sitemap; інакше `https://` + `VERCEL_PROJECT_PRODUCTION_URL` / `VERCEL_URL`, або host із request |
 | `ALLOWED_HOSTS` | Додаткові хости (`.vercel.app`, `localhost`, `127.0.0.1` уже в settings) |
@@ -135,7 +135,7 @@ DJANGO_SETTINGS_MODULE=config.settings.vercel python manage.py loaddata /tmp/ges
 
 - при `VERCEL=1` default module = `config.settings.vercel`;
 - `SECRET_KEY` у base з порожнім default (імпорт не падає);
-- на vercel без env — публічний `DEMO_SECRET_KEY` (лише демо!);
+- на vercel без env — помилка ImproperlyConfigured (крім build-фази `DJANGO_BUILD_PHASE=1`);
 - `config.settings.production` як і раніше **вимагає** `SECRET_KEY`.
 
 ## Швидка перевірка локально (без `.env`)

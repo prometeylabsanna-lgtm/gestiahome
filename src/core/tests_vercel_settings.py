@@ -1,8 +1,9 @@
-"""Contract + isolated smoke tests for config.settings.vercel (zero-env demo)."""
+"""Contract + isolated smoke tests for config.settings.vercel (SECRET_KEY from env)."""
 
 from __future__ import annotations
 
 import os
+import secrets
 import subprocess
 import sys
 from pathlib import Path
@@ -17,7 +18,7 @@ PYTHON = str(VENV_PYTHON) if VENV_PYTHON.is_file() else sys.executable
 
 
 def _isolated_env(**extra: str) -> dict[str, str]:
-    """Minimal env; empty SECRET_KEY overrides a local .env so demo key is used."""
+    """Minimal env with a random per-test SECRET_KEY (overrides a local .env)."""
     env = {
         "HOME": os.environ.get("HOME", ""),
         "PATH": os.environ.get("PATH", ""),
@@ -25,7 +26,7 @@ def _isolated_env(**extra: str) -> dict[str, str]:
         "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
         "DJANGO_SETTINGS_MODULE": "config.settings.vercel",
         "VERCEL": "1",
-        "SECRET_KEY": "",
+        "SECRET_KEY": "test-" + secrets.token_urlsafe(32),
         "ALLOWED_HOSTS": "",
         "CSRF_TRUSTED_ORIGINS": "",
         "SITE_URL": "",
@@ -38,17 +39,11 @@ def _isolated_env(**extra: str) -> dict[str, str]:
 
 
 class VercelSettingsSourceTests(SimpleTestCase):
-    def test_demo_secret_key_contract(self):
+    def test_no_hardcoded_secret_key_contract(self):
         text = VERCEL_SETTINGS.read_text(encoding="utf-8")
-        self.assertIn("DEMO_SECRET_KEY", text)
-        self.assertIn("demo only, Vercel test project", text)
-        self.assertIn('SECRET_KEY = _secret or DEMO_SECRET_KEY', text)
-        self.assertNotIn("_BUILD_DUMMY_SECRET", text)
-        self.assertNotIn("_is_build_phase", text)
-        self.assertNotIn(
-            "SECRET_KEY must be set in the Vercel Environment Variables UI",
-            text,
-        )
+        self.assertNotIn("DEMO_SECRET_KEY", text)
+        self.assertIn("SECRET_KEY must be set in the Vercel Environment Variables", text)
+        self.assertIn('os.environ.get("DJANGO_BUILD_PHASE") == "1"', text)
         self.assertIn("ENSURE_DEMO_SUPERUSER_ON_START = False", text)
         self.assertIn(
             'SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"',
@@ -65,14 +60,44 @@ class VercelSettingsSourceTests(SimpleTestCase):
 
 
 class VercelSettingsIsolatedTests(SimpleTestCase):
-    def test_zero_secret_uses_demo_key_and_hosts(self):
+    def test_missing_secret_fails_at_runtime(self):
+        proc = subprocess.run(
+            [PYTHON, "-c", "import django; django.setup()"],
+            cwd=str(ROOT),
+            env=_isolated_env(SECRET_KEY=""),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("SECRET_KEY must be set", proc.stderr)
+
+    def test_missing_secret_ok_in_build_phase(self):
+        script = (
+            "import django\n"
+            "django.setup()\n"
+            "from django.conf import settings\n"
+            "assert settings.SECRET_KEY.startswith('build-only-')\n"
+            "print('build-ok')\n"
+        )
+        proc = subprocess.run(
+            [PYTHON, "-c", script],
+            cwd=str(ROOT),
+            env=_isolated_env(SECRET_KEY="", DJANGO_BUILD_PHASE="1"),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("build-ok", proc.stdout)
+
+    def test_env_secret_used_and_hosts(self):
         script = (
             "import os, django\n"
             "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.vercel')\n"
             "django.setup()\n"
             "from django.conf import settings\n"
-            "from config.settings.vercel import DEMO_SECRET_KEY\n"
-            "assert settings.SECRET_KEY == DEMO_SECRET_KEY\n"
+            "assert settings.SECRET_KEY == os.environ['SECRET_KEY']\n"
             "assert settings.DEBUG is False\n"
             "assert '.vercel.app' in settings.ALLOWED_HOSTS\n"
             "assert 'localhost' in settings.ALLOWED_HOSTS\n"

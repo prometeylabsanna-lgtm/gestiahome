@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
@@ -17,6 +18,8 @@ class _OpenSingleton(GestiaModelAdmin):
         return False
 
     def changelist_view(self, request, extra_context=None):
+        if not self.has_view_or_change_permission(request):
+            raise PermissionDenied
         obj = self.model.load()
         url = reverse(
             f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change",

@@ -72,6 +72,7 @@
 .nd-hero__cta {
   margin-top: clamp(32px, 3.5vw, 50px);
   font-size: var(--nd-fs-18);
+  line-height: normal;
   letter-spacing: var(--nd-ls-02);
   color: var(--nd-surface);
   text-decoration: underline;
@@ -241,6 +242,7 @@
 
 .nd-col__cta {
   font-size: var(--nd-fs-17);
+  line-height: normal;
   letter-spacing: var(--nd-ls-02);
   color: var(--nd-ink);
   text-decoration: underline;
@@ -484,6 +486,7 @@
 
 .nd-pop__more-label {
   font-size: var(--nd-fs-18);
+  line-height: normal;
   letter-spacing: var(--nd-ls-02);
   text-decoration: underline;
   text-underline-offset: 4px;

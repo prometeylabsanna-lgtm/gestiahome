@@ -402,6 +402,16 @@
   flex: none;
 }
 
+.nd-card--rail .nd-card__media {
+  aspect-ratio: var(--nd-pdp-rail-ratio);
+}
+
+.nd-card--rail .nd-card__meta {
+  margin-top: 12px;
+  gap: 16px;
+  font-size: var(--nd-fs-16);
+}
+
 .nd-cat__empty {
   margin: 0;
   padding: 60px 0;

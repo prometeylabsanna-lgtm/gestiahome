@@ -1,5 +1,5 @@
 {% load shop_tags %}
-<li class="product-card nd-card" data-qa="product-card">
+<li class="product-card nd-card{% if modifier %} nd-card--{{ modifier }}{% endif %}" data-qa="product-card">
   <div class="product-card__wish nd-card__wish">
     {% if product.sku in wishlist_skus %}
       {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
@@ -11,7 +11,11 @@
     <span class="nd-card__media">
       {% with media=product.card_media %}
         {% if media %}
-          {% include "partials/smart_media.html" with media=media width=303 height=342 %}
+          {% if modifier == "rail" %}
+            {% include "partials/smart_media.html" with media=media width=368 height=415 %}
+          {% else %}
+            {% include "partials/smart_media.html" with media=media width=303 height=342 %}
+          {% endif %}
         {% endif %}
       {% endwith %}
     </span>

@@ -55,6 +55,16 @@
   --nd-cat-gap: 30px;
   --nd-cat-gap-mobile: 12px;
   --nd-cat-row-gap: 20px;
+
+  --nd-pdp-gallery-ratio: 636 / 770;
+  --nd-pdp-rail-ratio: 368 / 415;
+  --nd-pdp-sticky-top: 104px;
+  --nd-pdp-action-qty: 92px;
+  --nd-pdp-gap: 30px;
+  --nd-pdp-gallery-gap-mobile: 12px;
+  --nd-pdp-fs-title: clamp(36px, 3.9vw, 56px);
+  --nd-pdp-fs-note: 32px;
+  --nd-pdp-fs-rail: clamp(36px, 4.4vw, 64px);
 }
 
 body {

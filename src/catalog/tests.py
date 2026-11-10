@@ -137,7 +137,8 @@ class FacetTests(TestCase):
         self.assertContains(page, 'data-nd-filters-toggle')
         self.assertContains(page, 'data-nd-filters-panel')
         self.assertContains(page, 'id="catalog-results"')
-        self.assertContains(page, 'hx-target="#catalog-results"')
+        self.assertContains(page, 'id="nd-cat-form"')
+        self.assertContains(page, 'form="nd-cat-form"')
         self.assertContains(page, "Каталог товарів Gestia Home")
         self.assertContains(page, 'data-screen-label="Товари"')
         self.assertContains(page, 'aria-label="Товари"')
@@ -534,3 +535,23 @@ class CuratedCategoryGridTests(TestCase):
         CatalogCell.objects.all().delete()
         page = self.client.get(reverse("catalog"), {"category": "ny"})
         self.assertEqual(sorted(p.sku for p in page.context["products"]), ["NY1", "NY2"])
+
+
+class CatalogFilterStateTests(CuratedCategoryGridTests):
+    """Стан фільтра як у Catalog.dc.html: крихта «Фільтри», картки поза GET-формою (без csrf у URL)."""
+
+    def test_category_page_crumb_is_filters(self):
+        page = self.client.get(reverse("category", kwargs={"slug": "ny"}), {"category": "ny"})
+        self.assertContains(page, '<span aria-current="page">Фільтри</span>', html=True)
+        self.assertContains(page, "Скинути фільтри")
+        self.assertContains(page, "<span data-nd-filters-count>(1)</span>", html=True)
+        self.assertNotContains(page, "is-filters-open")
+
+    def test_cards_are_outside_filter_form(self):
+        html = self.client.get(reverse("catalog"), {"category": "ny"}).content.decode()
+        start = html.index('id="nd-cat-form"')
+        self.assertLess(html.index("</form>", start), html.index("product-grid"))
+
+    def test_empty_state_copy_matches_design(self):
+        page = self.client.get(reverse("catalog"), {"category": "other", "q": "zzz"})
+        self.assertContains(page, "За обраними фільтрами товарів не знайдено")

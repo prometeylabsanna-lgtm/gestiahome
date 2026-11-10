@@ -112,7 +112,8 @@ def _catalog_context(request, category=None):
         "filter_groups": filter_groups_for_catalog(facet_base),
         "filter_categories": filter_categories(),
         "panel_open": _panel_open(parsed),
-        "filters_open": _panel_open(parsed),
+        # макет: після «Застосувати» мобільна панель закривається, лічильник — у кнопці «Фільтри (N)»
+        "filters_open": False,
         "subcategories": subcategories,
         "filters_reset_url": filters_reset_url(request),
         "filters_active": bool(parsed["in_stock"] or parsed["attrs"] or parsed["categories"]),

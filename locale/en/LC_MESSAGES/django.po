@@ -186,6 +186,9 @@ msgstr "Next products"
 msgid "Товарів немає."
 msgstr "No products found."
 
+msgid "За обраними фільтрами товарів не знайдено"
+msgstr "No products match the selected filters"
+
 msgid "Каталог"
 msgstr "Catalogue"
 

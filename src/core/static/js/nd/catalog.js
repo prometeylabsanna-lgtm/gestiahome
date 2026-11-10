@@ -10,6 +10,35 @@
 
   root.classList.add("is-ready");
 
+  // Макет застосовує фільтри без перезавантаження: прокрутка панелі (sticky aside) і сторінки лишається.
+  // У нас звичайний GET — зберігаємо й відновлюємо обидві позиції один раз після «Застосувати».
+  const aside = root.querySelector(".nd-cat__aside");
+  const SCROLL_KEY = "nd-cat-scroll";
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(SCROLL_KEY) || "null");
+    sessionStorage.removeItem(SCROLL_KEY);
+    if (saved && saved.path === location.pathname) {
+      if (aside) {
+        aside.scrollTop = saved.aside || 0;
+      }
+      window.scrollTo(0, saved.page || 0);
+    }
+  } catch (error) {
+    /* sessionStorage недоступний — без відновлення */
+  }
+  if (form) {
+    form.addEventListener("submit", () => {
+      try {
+        sessionStorage.setItem(
+          SCROLL_KEY,
+          JSON.stringify({ path: location.pathname, aside: aside ? aside.scrollTop : 0, page: window.scrollY }),
+        );
+      } catch (error) {
+        /* ignore */
+      }
+    });
+  }
+
   function setFiltersOpen(open) {
     root.classList.toggle("is-filters-open", open);
     if (filtersBtn) {

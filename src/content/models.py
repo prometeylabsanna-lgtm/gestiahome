@@ -223,7 +223,7 @@ class HomeBlock(MediaChoice):
         parts = localized(self, "lines").splitlines()
         while len(parts) < 3:
             parts.append("")
-        return parts[:3]
+        return parts
 
 
 class Advantage(MediaChoice):

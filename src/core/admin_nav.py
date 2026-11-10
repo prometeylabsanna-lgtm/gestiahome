@@ -225,6 +225,12 @@ NAV_TREE = [
                 "url_name": "admin:content_sitesettings_changelist",
             },
             {
+                "key": "chrome_locale",
+                "title": "Країна та мова",
+                "icon": "public",
+                "url_name": "admin:content_homelocaleblock_changelist",
+            },
+            {
                 "key": "chrome_footer",
                 "title": "Тексти підвалу",
                 "icon": "notes",

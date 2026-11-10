@@ -31,14 +31,23 @@ class PageStyleTests(TestCase):
         self.assertIn("--ink:#778899", css)
         self.assertIn("--accent:#abcdef", css)
         self.assertIn("Georgia", css)
-        self.assertIn(".site-header,.site-header__bar{background:var(--chrome)}", css)
-        self.assertIn(".site-footer{background:var(--chrome);color:var(--chrome-fg)}", css)
+        self.assertIn(
+            ".site-header,.site-header__bar,.nd-header__bar{background:var(--chrome)}",
+            css,
+        )
+        self.assertIn(
+            ".site-footer,.nd-footer{background:var(--chrome);color:var(--chrome-fg)}",
+            css,
+        )
         self.assertIn("--chrome-fg:", css)
         row.chrome_background_color = TOKEN_CHROME
         row.save()
         default_css = self.client.get(reverse("theme_css")).content.decode()
-        self.assertIn(".site-header,.site-header__bar{background:var(--chrome)}", default_css)
-        self.assertNotIn(".site-footer{background:var(--chrome)", default_css)
+        self.assertIn(
+            ".site-header,.site-header__bar,.nd-header__bar{background:var(--chrome)}",
+            default_css,
+        )
+        self.assertNotIn(".site-footer,.nd-footer{background:var(--chrome)", default_css)
         site = SiteSettings.load()
         self.assertEqual(site.color_paper, "#112233")
         self.assertEqual(site.color_ink, "#778899")

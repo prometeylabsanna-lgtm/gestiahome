@@ -93,12 +93,15 @@ def build_theme_css() -> str:
     )
     # Дефолтний білий = як у макеті: біла шапка, темний підвал із footer.css.
     # Будь-який інший chrome — спільний фон шапки і підвалу.
-    chrome_rule = ".site-header,.site-header__bar{background:var(--chrome)}"
+    chrome_rule = (
+        ".site-header,.site-header__bar,.nd-header__bar{background:var(--chrome)}"
+    )
     if chrome.lower() != TOKEN_CHROME.lower():
         chrome_rule += (
-            ".site-footer{background:var(--chrome);color:var(--chrome-fg)}"
-            ".site-footer a,.site-footer__col a,.site-footer__legal,"
+            ".site-footer,.nd-footer{background:var(--chrome);color:var(--chrome-fg)}"
+            ".site-footer a,.site-footer__col a,.nd-footer__col a,.site-footer__legal,"
             ".site-footer__credit,.site-footer__lead,.site-footer__tail,"
+            ".nd-footer__address a,.nd-footer__bottom,"
             ".site-footer__credit-link,.site-footer__credit-name{color:var(--chrome-fg)}"
         )
     if accent.lower() == TOKEN_ACCENT.lower():

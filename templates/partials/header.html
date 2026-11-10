@@ -1,124 +1,366 @@
 {% load i18n shop_tags static content_tags %}
-<header class="site-header" data-header>
-  <div class="site-header__bar">
-    <button class="burger-btn" type="button" data-burger aria-expanded="false" aria-controls="burger-panel">
-      <img class="burger-btn__open" src="{% static 'figma/mobile/b37e7.svg' %}" width="36" height="13" alt="">
-      <img class="burger-btn__close" src="{% static 'figma/mobile_burger/close-square.svg' %}" width="18" height="18" alt="">
-      <span class="visually-hidden">{% trans "Меню" %}</span>
+{% with locale=home_blocks.locale %}
+<div class="nd-header-spacer" aria-hidden="true"></div>
+<header class="site-header nd-header" data-header data-nd-header>
+  <div class="site-header__bar nd-header__bar">
+    <button
+      class="nd-header__burger"
+      type="button"
+      data-burger
+      aria-expanded="false"
+      aria-controls="burger-panel"
+      aria-label="{% trans 'Меню' %}"
+    >
+      <span class="nd-header__burger-open">{% include "partials/nd/icons/burger.html" %}</span>
+      <span class="nd-header__burger-close" hidden>{% include "partials/nd/icons/burger-close.html" %}</span>
     </button>
 
-    <nav class="head-nav" aria-label="{% trans 'Основне' %}">
-      <button class="head-nav__catalog" type="button" data-catalog aria-expanded="false" aria-controls="mega-panel">
-        {% trans "Каталог" %}
+    <nav class="head-nav nd-header__nav" aria-label="{% trans 'Основна навігація' %}">
+      <button
+        class="head-nav__catalog nd-header__catalog"
+        type="button"
+        data-catalog
+        aria-expanded="false"
+        aria-controls="mega-panel"
+      >{% trans "Каталог" %}</button>
+      <a class="head-nav__about nd-header__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
+      <button
+        class="nd-header__search-btn"
+        type="button"
+        data-search-open
+        aria-expanded="false"
+        aria-controls="desk-search"
+        aria-label="{% trans 'Пошук' %}"
+        data-search-closed
+      >
+        {% include "partials/nd/icons/search.html" %}
       </button>
-      <a class="head-nav__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
-      <a class="icon-btn" href="{% url 'catalog' %}" aria-label="{% trans 'Пошук' %}">
-        <img src="{% static 'figma/desktop/d595f.svg' %}" width="22" height="22" alt="">
-      </a>
+      <form
+        class="nd-header__search-inline"
+        id="desk-search"
+        role="search"
+        action="{% url 'catalog' %}"
+        method="get"
+        data-search-form
+        hidden
+      >
+        <label class="nd-header__search-label">
+          {% include "partials/nd/icons/search.html" with size=18 %}
+          <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
+          <input
+            type="search"
+            name="q"
+            maxlength="80"
+            enterkeyhint="search"
+            autocomplete="off"
+            aria-label="{% trans 'Пошук товарів' %}"
+            data-search-input
+          >
+        </label>
+      </form>
     </nav>
 
     {% include "partials/brand.html" with kind="header" %}
 
-    <div class="head-actions">
-      {% include "partials/lang_currency_switch.html" with prefix="desk" %}
-      {% if site_settings.phone %}
-        <a class="icon-btn" href="tel:{{ site_settings.phone|cut:' ' }}" aria-label="{% trans 'Зателефонувати' %}">
-          <img src="{% static 'figma/desktop/f6cbe.svg' %}" width="24" height="24" alt="">
-        </a>
+    <div class="head-actions nd-header__actions">
+      {% if lang_enabled.en %}
+        <form class="nd-header__lang" action="{% url 'set_language' %}" method="post">
+          {% csrf_token %}
+          {% if LANGUAGE_CODE == 'uk' %}
+            <input type="hidden" name="next" value="{{ lang_switch_urls.en }}">
+            <input type="hidden" name="language" value="en">
+          {% else %}
+            <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
+            <input type="hidden" name="language" value="uk">
+          {% endif %}
+          <button type="submit" aria-label="{% trans 'Змінити мову' %}">
+            <span class="nd-header__opt{% if LANGUAGE_CODE == 'uk' %} is-current{% endif %}">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if LANGUAGE_CODE == 'en' %} is-current{% endif %}">EN</span>
+          </button>
+        </form>
+      {% else %}
+        <span class="nd-header__lang" aria-hidden="true">
+          <span class="nd-header__opt is-current">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt">EN</span>
+        </span>
       {% endif %}
-      <a class="icon-btn" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}">
-        <img src="{% static 'figma/desktop/dba9b.svg' %}" width="21" height="21" alt="">
+      <button
+        class="nd-header__currency"
+        type="button"
+        data-region-open
+        aria-expanded="false"
+        aria-controls="region-dialog"
+        aria-label="{% trans 'Змінити місце доставки та валюту' %}"
+      >
+        <span class="nd-header__opt{% if currency == 'uah' %} is-current{% endif %}">₴</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if currency == 'eur' %} is-current{% endif %}">€</span>
+      </button>
+      <a class="nd-header__icon" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}">
+        {% include "partials/nd/icons/heart.html" %}
       </a>
-      <a class="icon-btn head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
-        <img src="{% static 'figma/desktop/38908.svg' %}" width="17.5213" height="18.7918" alt="">
+      <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
+        {% include "partials/nd/icons/bag.html" %}
         {% include "partials/cart_count.html" %}
       </a>
     </div>
 
-    <div class="head-mobile-tools">
-      <a class="icon-btn" href="{% url 'catalog' %}" aria-label="{% trans 'Пошук' %}">
-        <img src="{% static 'figma/mobile/d595f.svg' %}" width="22" height="22" alt="">
-      </a>
-      <a class="icon-btn head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
-        <img src="{% static 'figma/mobile/38908.svg' %}" width="17.5213" height="18.7918" alt="">
+    <div class="head-mobile-tools nd-header__mobile-tools">
+      <button
+        class="nd-header__icon nd-header__mobile-search"
+        type="button"
+        data-mobile-search-open
+        aria-expanded="false"
+        aria-controls="mobile-search-panel"
+        aria-label="{% trans 'Пошук' %}"
+        data-mobile-search-btn
+      >
+        {% include "partials/nd/icons/search.html" %}
+      </button>
+      <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
+        {% include "partials/nd/icons/bag.html" %}
         {% include "partials/cart_count_mobile.html" %}
       </a>
     </div>
   </div>
 
-  <div class="mega" id="mega-panel" data-mega hidden>
-    <button class="mega__scrim" type="button" data-catalog-close tabindex="-1" aria-label="{% trans 'Закрити каталог' %}"></button>
-    <div class="mega__panel">
-      <div class="mega__inner">
-        <div class="mega__nav">
-          <div class="mega__cats">
-            <a href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
-            <div class="mega__list">
-              {% for cat in menu_categories %}
-                <a class="{% if cat.menu_featured %}is-feature{% endif %}" href="{{ cat.get_absolute_url }}">
-                  <span>{{ cat.name }}</span>
-                  {% if cat.menu_featured %}
-                    <img src="{% static 'figma/megamenu/8af5b.svg' %}" width="109" height="1" alt="">
-                  {% endif %}
-                </a>
-              {% endfor %}
-            </div>
-          </div>
-          <div class="mega__social">
-            {% include "partials/social_row.html" with tone="dark" %}
-          </div>
-        </div>
-        <div class="mega__grid">
-          <div class="mega__products">
-            {% for product in menu_cards %}
-              <a class="mega-card" href="{{ product.get_absolute_url }}">
-                <span class="mega-card__media">
-                  {% with media=product.card_media %}
-                    {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}
-                  {% endwith %}
-                </span>
-                <span class="mega-card__meta">
-                  <span class="mega-card__name">{{ product.menu_name }}</span>
-                  <span class="mega-card__price">{% home_price product %}</span>
-                </span>
+  <div class="mega nd-mega" id="mega-panel" data-mega hidden>
+    <button class="mega__scrim nd-mega__scrim" type="button" data-catalog-close tabindex="-1" aria-label="{% trans 'Закрити каталог' %}"></button>
+    <div class="mega__panel nd-mega__panel">
+      <div class="mega__inner nd-mega__inner">
+        <nav class="mega__nav nd-mega__nav" aria-label="{% trans 'Каталог' %}">
+          <a class="nd-mega__all" href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
+          <div class="mega__list nd-mega__list">
+            {% for cat in menu_categories %}
+              <a class="nd-mega__cat{% if cat.menu_featured %} is-feature{% endif %}" href="{{ cat.get_absolute_url }}">
+                <span>{{ cat.name }}</span>
               </a>
             {% endfor %}
           </div>
+          <ul class="nd-mega__social">
+            <li>
+              <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
+                {% include "partials/nd/icons/instagram.html" %}
+                <span>Instagram</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}" target="_blank" rel="noopener noreferrer">
+                {% include "partials/nd/icons/pinterest.html" %}
+                <span>Pinterest</span>
+              </a>
+            </li>
+            {% if site_settings.phone %}
+              <li>
+                <a href="tel:{{ site_settings.phone|cut:' ' }}">
+                  {% include "partials/nd/icons/phone.html" %}
+                  <span>{{ site_settings.phone }}</span>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+        <div class="mega__grid nd-mega__grid">
+          <ul class="mega__products nd-mega__products">
+            {% for product in menu_cards %}
+              <li>
+                <a class="mega-card nd-mega-card" href="{{ product.get_absolute_url }}">
+                  <span class="mega-card__media nd-mega-card__media">
+                    {% with media=product.card_media %}
+                      {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}
+                    {% endwith %}
+                  </span>
+                  <span class="mega-card__meta nd-mega-card__meta">
+                    <span class="mega-card__name">{{ product.menu_name }}</span>
+                    <span class="mega-card__price">{% home_price product %}</span>
+                  </span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
           {% if home_blocks.mega.cta %}
-            <a class="figma-btn figma-btn--mini" href="{% url 'catalog' %}">{{ home_blocks.mega.cta }}</a>
+            <a class="figma-btn figma-btn--mini nd-mega__cta" href="{% url 'catalog' %}">{{ home_blocks.mega.cta }}</a>
           {% endif %}
         </div>
       </div>
     </div>
   </div>
 
+  <div class="nd-mobile-search" id="mobile-search-panel" data-mobile-search hidden>
+    <button class="nd-mobile-search__scrim" type="button" data-mobile-search-close tabindex="-1" aria-label="{% trans 'Закрити пошук' %}"></button>
+    <form class="nd-mobile-search__form" role="search" action="{% url 'catalog' %}" method="get">
+      <label class="nd-mobile-search__label">
+        {% include "partials/nd/icons/search.html" with size=18 stroke="1.4" %}
+        <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
+        <input
+          type="search"
+          name="q"
+          maxlength="80"
+          enterkeyhint="search"
+          autocomplete="off"
+          placeholder="{% trans 'Пошук' %}"
+          aria-label="{% trans 'Пошук товарів' %}"
+          data-mobile-search-input
+        >
+      </label>
+    </form>
+  </div>
+
+  {% if locale %}
+  <div
+    class="nd-region"
+    id="region-dialog"
+    role="dialog"
+    aria-labelledby="region-title"
+    data-region
+    data-currency="{{ currency }}"
+    hidden
+  >
+    <button
+      class="nd-region__close"
+      type="button"
+      data-region-close
+      aria-label="{% trans 'Закрити' %}"
+      hidden
+    >
+      {% include "partials/nd/icons/close.html" %}
+    </button>
+
+    <div class="nd-region__step" data-region-step="confirm">
+      <h2 class="nd-region__title" id="region-title">{{ locale.title }}</h2>
+      <div class="nd-region__current">
+        <span class="nd-region__flag" aria-hidden="true"></span>
+        <span>{{ locale.text }}</span>
+      </div>
+      <button class="nd-region__confirm" type="button" data-region-confirm>{{ locale.cta }}</button>
+      <button class="nd-region__change" type="button" data-region-to-region>{{ locale.link_label }}</button>
+      <form id="region-confirm-currency" action="{% url 'set_currency' %}" method="post" hidden>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <input type="hidden" name="currency" value="uah">
+      </form>
+    </div>
+
+    <div class="nd-region__step" data-region-step="region" hidden>
+      <h2 class="nd-region__title">{{ locale.field_labels.0 }}</h2>
+      {% if locale.note %}<p class="nd-region__note">{{ locale.note }}</p>{% endif %}
+      <div class="nd-region__picks">
+        <form action="{% url 'set_currency' %}" method="post" data-region-pick="ua">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <input type="hidden" name="currency" value="uah">
+          <button type="submit">{{ locale.field_labels.1 }}</button>
+        </form>
+        <form action="{% url 'set_currency' %}" method="post" data-region-pick="intl">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <input type="hidden" name="currency" value="eur">
+          <button type="submit">{{ locale.field_labels.2 }}</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="nd-region__step" data-region-step="lang" hidden>
+      <h2 class="nd-region__title">{{ locale.field_labels.3 }}</h2>
+      {% if locale.field_labels.4 %}<p class="nd-region__note">{{ locale.field_labels.4 }}</p>{% endif %}
+      <div class="nd-region__picks">
+        {% if lang_enabled.uk %}
+        <form action="{% url 'set_language' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
+          <input type="hidden" name="language" value="uk">
+          <button type="submit">{{ locale.field_labels.5 }}</button>
+        </form>
+        {% endif %}
+        {% if lang_enabled.en %}
+        <form action="{% url 'set_language' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ lang_switch_urls.en }}">
+          <input type="hidden" name="language" value="en">
+          <button type="submit">{{ locale.field_labels.6 }}</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </header>
 
-<div class="burger" id="burger-panel" data-burger-panel hidden>
-  <div class="burger__body">
-    <form class="burger-search" action="{% url 'catalog' %}" method="get">
-      <img src="{% static 'figma/mobile_burger/a3570.svg' %}" width="22" height="22" alt="">
-      <label class="visually-hidden" for="burger-q">{% trans "Пошук товарів" %}</label>
-      <input id="burger-q" name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off">
-      <img class="burger-search__line" src="{% static 'figma/mobile_burger/cb9a5.svg' %}" width="362" height="1" alt="">
+<nav class="burger nd-burger" id="burger-panel" data-burger-panel aria-label="{% trans 'Мобільна навігація' %}" hidden>
+  <div class="burger__body nd-burger__body">
+    <form class="burger-search nd-burger__search" action="{% url 'catalog' %}" method="get" role="search">
+      <label class="nd-burger__search-label">
+        {% include "partials/nd/icons/search.html" with size=24 %}
+        <span class="visually-hidden" id="burger-q-label">{% trans "Пошук товарів" %}</span>
+        <input id="burger-q" name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off" aria-labelledby="burger-q-label">
+      </label>
     </form>
-    <div class="burger__catalog" data-burger-catalog>
-      <button class="burger__catalog-head" type="button" data-burger-catalog-toggle aria-expanded="true" aria-controls="burger-cats">
+
+    <div class="burger__catalog nd-burger__catalog" data-burger-catalog>
+      <button
+        class="burger__catalog-head nd-burger__catalog-head"
+        type="button"
+        data-burger-catalog-toggle
+        aria-expanded="true"
+        aria-controls="burger-cats"
+      >
         <span>{% cms "" "menu_title" %}</span>
-        <img src="{% static 'figma/mobile_burger/fed4e.svg' %}" width="15" height="15" alt="">
+        {% include "partials/nd/icons/chevron.html" %}
       </button>
-      <div class="burger__cats" id="burger-cats" data-burger-cats>
+      <div class="burger__cats nd-burger__cats" id="burger-cats" data-burger-cats>
         <a href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
         {% for cat in menu_categories %}
           <a class="{% if cat.menu_featured %}is-feature{% endif %}" href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
         {% endfor %}
       </div>
-      <img class="burger__rule" src="{% static 'figma/mobile_burger/e4369.svg' %}" width="362" height="1" alt="">
+    </div>
+
+    <div class="nd-burger__links">
       <a class="burger__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
+      <a href="{% url 'wishlist' %}">{% trans "Обране" %}</a>
     </div>
-    <div class="burger__foot">
-      {% include "partials/social_row.html" with tone="dark" %}
-      {% include "partials/lang_currency_switch.html" with prefix="burger" %}
-    </div>
+
+    <ul class="nd-burger__foot">
+      <li>
+        <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
+          {% include "partials/nd/icons/instagram.html" with size=18 stroke="1.5" %}
+          <span>Instagram</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}" target="_blank" rel="noopener noreferrer">
+          {% include "partials/nd/icons/pinterest.html" with size=18 %}
+          <span>Pinterest</span>
+        </a>
+      </li>
+      <li class="nd-burger__meta">
+        {% if site_settings.phone %}
+          <a href="tel:{{ site_settings.phone|cut:' ' }}">
+            {% include "partials/nd/icons/phone.html" with size=18 %}
+            <span>{{ site_settings.phone }}</span>
+          </a>
+        {% endif %}
+        {% if lang_enabled.en %}
+          <form class="nd-header__lang" action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            {% if LANGUAGE_CODE == 'uk' %}
+              <input type="hidden" name="next" value="{{ lang_switch_urls.en }}">
+              <input type="hidden" name="language" value="en">
+            {% else %}
+              <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
+              <input type="hidden" name="language" value="uk">
+            {% endif %}
+            <button type="submit" aria-label="{% trans 'Змінити мову' %}">
+              <span class="nd-header__opt{% if LANGUAGE_CODE == 'uk' %} is-current{% endif %}">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if LANGUAGE_CODE == 'en' %} is-current{% endif %}">EN</span>
+            </button>
+          </form>
+        {% endif %}
+        <button
+          class="nd-header__currency"
+          type="button"
+          data-region-open
+          aria-label="{% trans 'Змінити місце доставки та валюту' %}"
+        >
+          <span class="nd-header__opt{% if currency == 'uah' %} is-current{% endif %}">₴</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if currency == 'eur' %} is-current{% endif %}">€</span>
+        </button>
+      </li>
+    </ul>
   </div>
-</div>
+</nav>
+{% endwith %}

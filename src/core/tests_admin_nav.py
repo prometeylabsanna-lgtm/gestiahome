@@ -56,6 +56,7 @@ class SidebarTreeTests(TestCase):
         self.assertIn("about_review_list", keys)
         self.assertNotIn("home_cta", keys)
         self.assertNotIn("chrome_footer_links", keys)
+        self.assertIn("chrome_locale", keys)
         self.assertNotIn("home_video", keys)
         self.assertNotIn("home_video_2", keys)
 

@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils import translation
 
 from src.content.media import MediaChoice
-from src.content.models import AboutPage, HomeBlock, SiteSettings
+from src.content.models import AboutPage, FooterLink, HomeBlock, SiteSettings
 
 
 class AboutRenderTests(TestCase):
@@ -46,6 +46,21 @@ class HeaderFooterRenderTests(TestCase):
         cache.clear()
         translation.activate("uk")
         self.site = SiteSettings.load()
+        HomeBlock.objects.get_or_create(
+            key="locale",
+            defaults={
+                "sort": 8,
+                "title_uk": "Країна та мова",
+                "text_uk": "Україна/Гривня",
+                "cta_uk": "Підтвердити",
+                "link_uk": "Змінити",
+                "note_uk": "Оберіть місце доставки",
+                "lines_uk": (
+                    "Місце доставки\nУкраїна\nМіжнародна доставка\n"
+                    "Мова сайту\nОберіть мову / Choose language\nУкраїнська\nEnglish"
+                ),
+            },
+        )
 
     def test_nav_labels_use_fixed_literals(self):
         self.site.nav_about_uk = "Історія"
@@ -55,11 +70,11 @@ class HeaderFooterRenderTests(TestCase):
         self.site.menu_title_en = "Boxes"
         self.site.save()
         page = self.client.get("/")
-        self.assertContains(page, 'class="head-nav__about"')
+        self.assertContains(page, 'class="head-nav__about')
         self.assertContains(page, ">Про нас</a>")
         self.assertContains(page, ">Усі товари</a>")
         self.assertContains(page, "<span>Каталог</span>")
-        self.assertContains(page, 'class="head-nav__catalog"')
+        self.assertContains(page, 'class="head-nav__catalog')
         self.assertNotContains(page, ">Історія</a>")
         self.assertNotContains(page, "<span>Бокси</span>")
         english = self.client.get("/en/")
@@ -76,17 +91,40 @@ class HeaderFooterRenderTests(TestCase):
         self.site.save()
         page = self.client.get("/")
         self.assertContains(page, "Зроблено")
-        self.assertContains(page, "figma/desktop/5493c.png")
+        self.assertContains(page, "nd/logo.png")
         english = self.client.get("/en/")
         self.assertContains(english, "Made by")
 
-    def test_telegram_url_in_social_row(self):
+    def test_telegram_url_in_footer_contacts(self):
         self.site.telegram_url = "https://t.me/gestia_home"
         self.site.save()
         page = self.client.get("/")
         self.assertContains(page, 'href="https://t.me/gestia_home"')
         self.assertContains(page, ">Telegram</span>")
 
+    def test_phone_tel_links_in_menu_and_footer_not_header_icon(self):
+        self.site.phone = "+380 67 111 22 33"
+        self.site.save()
+        page = self.client.get("/")
+        html = page.content.decode()
+        self.assertNotIn('aria-label="Зателефонувати"', html)
+        self.assertIn('href="tel:+380671112233"', html)
+        self.assertIn('class="nd-mega__social"', html)
+        self.assertIn('class="nd-burger__foot"', html)
+        self.assertIn('class="nd-footer__address"', html)
+        self.assertGreaterEqual(html.count('href="tel:+380671112233"'), 3)
+
+    def test_footer_info_column_renders_cms_links(self):
+        FooterLink.objects.create(
+            column="info",
+            label_uk="Про нас",
+            label_en="About",
+            url_name="about",
+            sort=1,
+        )
+        page = self.client.get("/")
+        self.assertContains(page, 'aria-label="Інформація"')
+        self.assertContains(page, ">Про нас</a>")
 
 
 class MediaChoiceTests(TestCase):

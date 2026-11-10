@@ -88,6 +88,13 @@ class HomeCallbackBlock(HomeBlock):
         verbose_name_plural = "Зворотній дзвінок"
 
 
+class HomeLocaleBlock(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Країна та мова"
+        verbose_name_plural = "Країна та мова"
+
+
 class AboutIntro(AboutPage):
     class Meta:
         proxy = True

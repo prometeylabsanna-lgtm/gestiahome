@@ -201,6 +201,7 @@
 }
 
 .nd-faq__contact-links a {
+  line-height: normal;
   color: var(--nd-cream);
   text-decoration: underline;
   text-underline-offset: 4px;

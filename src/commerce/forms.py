@@ -73,7 +73,7 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
         label=_("Доставка"),
         choices=[
             (Order.Delivery.BRANCH, _("Нова пошта (відділення)")),
-            (Order.Delivery.LOCKER, _("Нова пошта (поштамат)")),
+            (Order.Delivery.LOCKER, _("Нова пошта (поштомат)")),
             (Order.Delivery.COURIER, _("Кур’єрська доставка")),
         ],
         initial=Order.Delivery.BRANCH,

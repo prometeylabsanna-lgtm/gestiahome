@@ -65,9 +65,17 @@ def shop(request):
             )
             .order_by("sort", "id")
         )
-        featured = Product.objects.filter(slug="boks-rizdvyanyi-shyshky", is_active=True).prefetch_related("images").first()
-        if featured is not None:
-            menu_cards = [featured, featured, featured]
+        # Мегаменю: 3 картки як у дизайні (Шишки, Гніздо, Український); fallback — популярні.
+        menu_slugs = ["boks-rizdvyanyi-shyshky", "velykodnii-hnizdo", "velykodnii-ukrainskyi"]
+        found = {
+            product.slug: product
+            for product in Product.objects.filter(slug__in=menu_slugs, is_active=True).prefetch_related("images")
+        }
+        menu_cards = [found[slug] for slug in menu_slugs if slug in found]
+        if not menu_cards:
+            menu_cards = list(
+                Product.objects.filter(is_active=True, is_popular=True).prefetch_related("images").order_by("sort", "id")[:3]
+            )
         footer_columns = build_footer_columns()
         cart_count = item_count(request)
         wishlist_count = wish_count(request)

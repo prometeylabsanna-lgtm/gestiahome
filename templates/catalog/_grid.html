@@ -1,27 +1,6 @@
 {% load shop_tags %}
-<ul class="product-grid" data-qa="product-grid">
+<ul class="nd-cat__grid product-grid" data-qa="product-grid">
   {% for product in products %}
-    <li class="product-card" data-qa="product-card">
-      <div class="product-card__wish">
-        {% if product.sku in wishlist_skus %}
-          {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
-        {% else %}
-          {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
-        {% endif %}
-      </div>
-      <a href="{{ product.get_absolute_url }}">
-        <span class="product-card__media">
-          {% with media=product.card_media %}
-            {% if media %}
-              {% include "partials/smart_media.html" with media=media width=303 height=342 %}
-            {% endif %}
-          {% endwith %}
-        </span>
-        <span class="product-card__meta">
-          <span class="product-card__name">{{ product.name }}</span>
-          <span class="product-card__price">{% home_price product %}</span>
-        </span>
-      </a>
-    </li>
+    {% include "partials/nd/product_card.html" %}
   {% endfor %}
 </ul>

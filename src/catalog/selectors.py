@@ -142,6 +142,20 @@ def filter_frame_cards():
     return _cells(CatalogCell.Surface.FILTERS)
 
 
+def curated_catalog_products():
+    """Товари з кураторських клітинок FILTERS (без мозаїки); без товару / неактивні — пропуск."""
+    products = []
+    for cell in filter_frame_cards():
+        product = getattr(cell, "product", None)
+        if product is None or not product.is_active:
+            continue
+        products.append(product)
+    return products
+
+
+CATALOG_PAGE_SIZE = 12
+
+
 def mobile_frame_groups():
     groups = []
     tiles = []

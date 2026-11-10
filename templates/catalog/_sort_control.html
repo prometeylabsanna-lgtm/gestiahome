@@ -1,38 +1,40 @@
-{% load i18n static %}
-<div class="catalog-sort{% if compact %} catalog-sort--mob{% endif %}" data-catalog-sort>
+{% load i18n %}
+<div class="nd-cat-sort{% if compact %} nd-cat-sort--compact{% endif %}" data-nd-sort>
   <button
-    class="catalog-sort__btn"
+    class="nd-cat-sort__btn"
     type="button"
-    data-sort-open
+    data-nd-sort-open
     aria-expanded="false"
     aria-haspopup="listbox"
     aria-controls="{{ menu_id }}"
   >
-    <span data-sort-label>
+    <span data-nd-sort-label>
       {% if parsed.sort == "price_asc" %}
-        {% trans "Спочатку дешевші" %}
+        {% trans "Ціна: за зростанням" %}
       {% elif parsed.sort == "price_desc" %}
-        {% trans "Спочатку дорожчі" %}
+        {% trans "Ціна: за спаданням" %}
       {% elif parsed.sort == "name" %}
-        {% trans "За назвою" %}
+        {% trans "Назва: А–Я" %}
       {% else %}
         {% trans "Сортувати за" %}
       {% endif %}
     </span>
-    <img src="{% static sort_icon %}" width="15" height="15" alt="">
+    <span class="nd-cat-sort__chev" aria-hidden="true">
+      {% include "partials/nd/icons/chevron.html" with size=10 %}
+    </span>
   </button>
-  <ul class="catalog-sort__menu" id="{{ menu_id }}" role="listbox" hidden data-sort-menu>
-    <li role="option">
-      <button type="button" data-sort-value="" {% if not parsed.sort %}aria-selected="true"{% endif %}>{% trans "За замовчуванням" %}</button>
+  <ul class="nd-cat-sort__menu" id="{{ menu_id }}" role="listbox" hidden data-nd-sort-menu aria-label="{% trans 'Сортування' %}">
+    <li role="option" {% if not parsed.sort %}aria-selected="true"{% endif %}>
+      <button type="button" data-nd-sort-value=""{% if not parsed.sort %} class="is-active"{% endif %}>{% trans "Сортувати за" %}</button>
     </li>
-    <li role="option">
-      <button type="button" data-sort-value="price_asc" {% if parsed.sort == "price_asc" %}aria-selected="true"{% endif %}>{% trans "Спочатку дешевші" %}</button>
+    <li role="option" {% if parsed.sort == "price_asc" %}aria-selected="true"{% endif %}>
+      <button type="button" data-nd-sort-value="price_asc"{% if parsed.sort == "price_asc" %} class="is-active"{% endif %}>{% trans "Ціна: за зростанням" %}</button>
     </li>
-    <li role="option">
-      <button type="button" data-sort-value="price_desc" {% if parsed.sort == "price_desc" %}aria-selected="true"{% endif %}>{% trans "Спочатку дорожчі" %}</button>
+    <li role="option" {% if parsed.sort == "price_desc" %}aria-selected="true"{% endif %}>
+      <button type="button" data-nd-sort-value="price_desc"{% if parsed.sort == "price_desc" %} class="is-active"{% endif %}>{% trans "Ціна: за спаданням" %}</button>
     </li>
-    <li role="option">
-      <button type="button" data-sort-value="name" {% if parsed.sort == "name" %}aria-selected="true"{% endif %}>{% trans "За назвою" %}</button>
+    <li role="option" {% if parsed.sort == "name" %}aria-selected="true"{% endif %}>
+      <button type="button" data-nd-sort-value="name"{% if parsed.sort == "name" %} class="is-active"{% endif %}>{% trans "Назва: А–Я" %}</button>
     </li>
   </ul>
 </div>

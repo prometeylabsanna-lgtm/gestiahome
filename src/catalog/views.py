@@ -1,17 +1,18 @@
-from django.http import Http404
+from urllib.parse import urlencode
+
+from django.http import Http404, QueryDict
 from django.shortcuts import get_object_or_404, render
 
 from src.catalog.models import Category
 from src.catalog.selectors import (
+    CATALOG_PAGE_SIZE,
     base_products,
-    catalog_bands,
     category_scope,
+    curated_catalog_products,
     filter_catalog,
     filter_categories,
-    filter_frame_cards,
     filter_groups_for_catalog,
     filters_reset_url,
-    mobile_frame_groups,
     parse_catalog_filters,
     pdp_related,
     pdp_set_products,
@@ -30,17 +31,43 @@ def _panel_open(parsed):
     return bool(parsed["attrs"] or parsed["categories"])
 
 
+def _active_filter_count(parsed):
+    count = len(parsed["categories"])
+    for values in parsed["attrs"].values():
+        count += len(values)
+    if parsed["in_stock"]:
+        count += 1
+    return count
+
+
+def _load_all_url(request):
+    query = QueryDict(mutable=True)
+    for key in request.GET:
+        if key == "all":
+            continue
+        query.setlist(key, request.GET.getlist(key))
+    query["all"] = "1"
+    encoded = urlencode(query, doseq=True)
+    return f"{request.path}?{encoded}" if encoded else f"{request.path}?all=1"
+
+
 def _catalog_context(request, category=None):
     parsed = parse_catalog_filters(request.GET)
     qs = base_products()
     if category:
         qs = qs.filter(category_id__in=category_scope(category))
     facet_base = qs
-    products = filter_catalog(qs, parsed)
+    filtered = filter_catalog(qs, parsed)
     active = _filters_active(parsed)
-    # Mosaic is only for the root catalog browse; category/filter views use the grid.
-    use_mosaic = not category and not active
-    bands = catalog_bands() if use_mosaic else []
+    use_curated = not category and not active
+    if use_curated:
+        all_products = curated_catalog_products()
+    else:
+        all_products = list(filtered)
+    show_all = request.GET.get("all") == "1"
+    total_count = len(all_products)
+    has_more = not show_all and total_count > CATALOG_PAGE_SIZE
+    products = all_products if show_all else all_products[:CATALOG_PAGE_SIZE]
     block = HomeBlock.objects.filter(key=HomeBlock.Key.CATALOG).first()
     subcategories = []
     if category:
@@ -57,16 +84,19 @@ def _catalog_context(request, category=None):
         "parsed": parsed,
         "filter_groups": filter_groups_for_catalog(facet_base),
         "filter_categories": filter_categories(),
-        "filter_cards": filter_frame_cards() if use_mosaic else [],
-        "mobile_groups": mobile_frame_groups() if use_mosaic else [],
         "panel_open": _panel_open(parsed),
+        "filters_open": _panel_open(parsed),
         "subcategories": subcategories,
         "filters_reset_url": filters_reset_url(request),
+        "filters_active": bool(parsed["in_stock"] or parsed["attrs"] or parsed["categories"]),
+        "active_filter_count": _active_filter_count(parsed),
         "crumbs": category.chain() if category else [],
-        "catalog_bands": bands,
-        "show_mosaic": use_mosaic,
+        "has_more": has_more,
+        "show_all": show_all,
+        "load_all_url": _load_all_url(request),
         "catalog_cta": block.cta if block else "",
         "wishlist_skus": sku_set(request),
+        "use_curated": use_curated,
     }
 
 

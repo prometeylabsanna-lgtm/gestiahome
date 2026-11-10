@@ -1,35 +1,45 @@
-{% load i18n static %}
-<div class="filter-panel__options">
-  <section class="filter-sec">
-    <h2>{% trans "Категорії" %}</h2>
-    <div class="filter-sec__opts">
-      {% for category in filter_categories %}
-        <label class="filter-opt">
-          <input type="checkbox" name="category" value="{{ category.slug }}"{% if category.slug in parsed.categories %} checked{% endif %}>
-          <span class="filter-dot" aria-hidden="true"></span>
-          <span>{{ category.filter_label }}</span>
+{% load i18n %}
+<fieldset class="nd-cat-facet">
+  <legend class="nd-cat-facet__title">{% trans "Категорії" %}</legend>
+  <ul class="nd-cat-facet__list">
+    {% for category in filter_categories %}
+      <li>
+        <label class="nd-cat-check">
+          <input
+            class="visually-hidden"
+            type="checkbox"
+            name="category"
+            value="{{ category.slug }}"
+            {% if category.slug in parsed.categories %}checked{% endif %}
+          >
+          <span class="nd-cat-check__dot" aria-hidden="true"></span>
+          <span class="nd-cat-check__label">{{ category.filter_label }}</span>
         </label>
-      {% endfor %}
-    </div>
-  </section>
-  {% for group in filter_groups %}
-    <div class="filter-rule" aria-hidden="true">
-      <img class="rule-desk" src="{% static 'figma/v2/filters/40433.svg' %}" width="243" height="1" alt="">
-      <img class="rule-mob" src="{% static 'figma/v2/filters/83b43.svg' %}" width="322" height="1" alt="">
-    </div>
-    <section class="filter-sec">
-      <h2>{{ group.group.name }}</h2>
-      <div class="filter-sec__opts">
-        {% for value in group.values %}
-          {% with mark=group.group.slug|add:":"|add:value.slug %}
-            <label class="filter-opt">
-              <input type="checkbox" name="{{ group.group.slug }}" value="{{ value.slug }}"{% if mark in parsed.selected %} checked{% endif %}>
-              <span class="filter-dot" aria-hidden="true"></span>
-              <span>{{ value.name }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</fieldset>
+{% for group in filter_groups %}
+  <fieldset class="nd-cat-facet{% if forloop.last %} nd-cat-facet--last{% endif %}">
+    <legend class="nd-cat-facet__title">{{ group.group.name }}</legend>
+    <ul class="nd-cat-facet__list">
+      {% for value in group.values %}
+        {% with mark=group.group.slug|add:":"|add:value.slug %}
+          <li>
+            <label class="nd-cat-check">
+              <input
+                class="visually-hidden"
+                type="checkbox"
+                name="{{ group.group.slug }}"
+                value="{{ value.slug }}"
+                {% if mark in parsed.selected %}checked{% endif %}
+              >
+              <span class="nd-cat-check__dot" aria-hidden="true"></span>
+              <span class="nd-cat-check__label">{{ value.name }}</span>
             </label>
-          {% endwith %}
-        {% endfor %}
-      </div>
-    </section>
-  {% endfor %}
-</div>
+          </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+  </fieldset>
+{% endfor %}

@@ -2,140 +2,121 @@
 {% load i18n static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/catalog.css' %}">
-  <link rel="stylesheet" href="{% static 'css/pages/catalog-1440.css' %}">
-  <link rel="stylesheet" href="{% static 'css/pages/catalog-filters.css' %}">
-  <link rel="stylesheet" href="{% static 'css/pages/catalog-mobile.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/catalog.css' %}">
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'js/pages/catalog.js' %}" defer></script>
+  <script src="{% static 'js/nd/catalog.js' %}" defer></script>
 {% endblock %}
 {% block title %}{% if category %}{{ category.seo_title }}{% else %}{% trans "Каталог" %} — Gestia{% endif %}{% endblock %}
 {% block description %}{% if category %}{{ category.seo_description }}{% else %}{% trans "Каталог святкових боксів і сервірування Gestia Home" %}{% endif %}{% endblock %}
 
 {% block content %}
-  <h1 class="visually-hidden">{% if category %}{{ category.name }}{% else %}{% trans "Каталог" %}{% endif %}</h1>
-  <div class="catalog-frame{% if panel_open %} is-filters{% endif %}" data-catalog-page>
-    <div class="catalog-closed" data-catalog-closed{% if panel_open %} hidden{% endif %}>
-      <div class="catalog-top">
-        <p class="catalog-crumb">
-          <a href="{% url 'home' %}">{% trans "Головна" %}</a>/<a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>{% for crumb in crumbs %}/{% if forloop.last %}<span aria-current="page">{{ crumb.name }}</span>{% else %}<a href="{{ crumb.get_absolute_url }}">{{ crumb.name }}</a>{% endif %}{% endfor %}
-        </p>
-        <button class="btn btn--ghost filters-open" type="button" data-filters-open aria-expanded="{% if panel_open %}true{% else %}false{% endif %}" aria-controls="catalog-filters">{% trans "Фільтр" %}</button>
-      </div>
-      <div id="catalog-results" class="catalog-board">
-        {% include "catalog/_results.html" %}
-      </div>
-    </div>
-
-    <div class="catalog-open" id="catalog-filters" data-catalog-open{% if not panel_open %} hidden{% endif %}>
-      <p class="catalog-open__crumb">
-        <a href="{% url 'home' %}">{% trans "Головна" %}</a>/<a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>/<button type="button" data-filters-close>{% trans "Фільтри" %}</button>
-      </p>
-      <form class="catalog-open__form" method="get" action="{{ request.path }}">
-        <div class="catalog-open__bar">
-          <label class="catalog-search">
-            <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
-            <img class="catalog-search__icon" src="{% static 'figma/v2/filters/dc8e5.svg' %}" width="22" height="22" alt="">
-            <input name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off" value="{{ parsed.q }}">
-            <img class="catalog-search__line" src="{% static 'figma/v2/filters/25788.svg' %}" width="303" height="1" alt="">
-          </label>
-          {% include "catalog/_sort_control.html" with menu_id="catalog-sort-desk" sort_icon="figma/v2/filters/33b2c.svg" %}
-          {% if parsed.sort %}<input type="hidden" name="sort" value="{{ parsed.sort }}">{% endif %}
-        </div>
-        <div class="catalog-open__body">
-          <div class="catalog-open__row">
-            <div class="filter-panel">
-              {% include "catalog/_filter_fields.html" %}
-              <button class="figma-btn filter-apply" type="submit"><span>{% trans "Застосувати" %}</span></button>
-            </div>
-            <div class="filter-results">
-              {% if show_mosaic %}
-                <div class="filter-cards">
-                  {% for cell in filter_cards %}
-                    {% include "catalog/_cell.html" with cell=cell %}
-                  {% endfor %}
-                </div>
-              {% else %}
-                {% include "catalog/_grid.html" %}
-                {% if not products %}
-                  <p class="empty">{% trans "Товарів немає." %}</p>
-                {% endif %}
-              {% endif %}
-            </div>
-          </div>
-          {% if catalog_cta %}
-            <button class="figma-btn catalog-open__more" type="button"><span>{{ catalog_cta }}</span></button>
-          {% endif %}
-        </div>
-      </form>
-    </div>
-
-    <div class="catalog-mobile{% if show_mosaic %} is-frame{% endif %}">
-      <p class="catalog-mobile__crumb">
-        <a href="{% url 'home' %}">{% trans "Головна" %}</a>/<a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
-      </p>
-      <div class="catalog-mobile__main">
-        <div class="catalog-mobile__controls">
-          <form method="get" action="{{ request.path }}">
-            <label class="catalog-search catalog-search--wide">
-              <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
-              <img class="catalog-search__icon" src="{% static 'figma/v2/filters/e7e3d.svg' %}" width="22" height="22" alt="">
-              <input name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off" value="{{ parsed.q }}">
-              <img class="catalog-search__line" src="{% static 'figma/v2/filters/a9940.svg' %}" width="362" height="1" alt="">
-            </label>
-            {% for slug in parsed.categories %}
-              <input type="hidden" name="category" value="{{ slug }}">
-            {% endfor %}
-            {% for key, values in parsed.attrs.items %}
-              {% for value in values %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-              {% endfor %}
-            {% endfor %}
-            {% if parsed.in_stock %}<input type="hidden" name="in_stock" value="1">{% endif %}
-            {% if parsed.sort %}<input type="hidden" name="sort" value="{{ parsed.sort }}">{% endif %}
-          </form>
-          <div class="catalog-mobile__tools">
-            <button class="catalog-mobile__filter" type="button" data-sheet-open aria-expanded="false" aria-controls="catalog-sheet">
-              <img src="{% static 'figma/v2/filters/06eb2.svg' %}" width="20" height="20" alt="">
-              <span>{% trans "Фільтри" %}</span>
-            </button>
-            {% include "catalog/_sort_control.html" with menu_id="catalog-sort-mob" sort_icon="figma/v2/filters/6f842.svg" compact=1 %}
-          </div>
-        </div>
-        <div class="catalog-mobile__catalog">
-          {% if show_mosaic %}
-            {% for group in mobile_groups %}
-              <div class="{% if group.kind == 'tiles' %}m-tiles{% elif group.kind == 'feature_tall' %}m-feature-tall{% else %}m-feature{% endif %}">
-                {% for cell in group.cells %}
-                  <div class="{% if cell.slot == 'tile' or cell.slot == 'tile_tall' %}m-tile{% endif %}{% if cell.slot == 'tile_tall' %} is-tall{% endif %}">
-                    {% include "catalog/_cell.html" with cell=cell %}
-                  </div>
-                {% endfor %}
-              </div>
-            {% endfor %}
+  <div class="nd-cat{% if filters_open %} is-filters-open{% endif %}" data-nd-cat>
+    <nav class="nd-cat__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-cat__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li>
+          {% if crumbs %}
+            <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
+            <span aria-hidden="true">/</span>
           {% else %}
-            {% include "catalog/_grid.html" %}
-            {% if not products %}
-              <p class="empty">{% trans "Товарів немає." %}</p>
-            {% endif %}
+            <span aria-current="page">{% trans "Каталог" %}</span>
           {% endif %}
+        </li>
+        {% for crumb in crumbs %}
+          <li>
+            {% if forloop.last %}
+              <span aria-current="page">{{ crumb.name }}</span>
+            {% else %}
+              <a href="{{ crumb.get_absolute_url }}">{{ crumb.name }}</a>
+              <span aria-hidden="true">/</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+
+    <h1 class="visually-hidden">{% if category %}{{ category.name }}{% else %}{% trans "Каталог" %}{% endif %}</h1>
+
+    <form
+      id="nd-cat-form"
+      class="nd-cat__layout"
+      method="get"
+      action="{{ request.path }}"
+      hx-get="{{ request.path }}"
+      hx-target="#catalog-results"
+      hx-push-url="true"
+      hx-swap="innerHTML"
+      data-nd-cat-form
+    >
+      <aside class="nd-cat__aside" aria-label="{% trans 'Пошук і фільтри' %}">
+        <label class="nd-cat-search">
+          <span class="nd-cat-search__icon" aria-hidden="true">
+            {% include "partials/nd/icons/search.html" with size=22 %}
+          </span>
+          <span class="visually-hidden">{% trans "Пошук у каталозі" %}</span>
+          <input
+            class="nd-cat-search__input"
+            name="q"
+            type="search"
+            maxlength="80"
+            enterkeyhint="search"
+            autocomplete="off"
+            value="{{ parsed.q }}"
+          >
+        </label>
+
+        <div class="nd-cat__mobile-tools">
+          <button
+            class="nd-cat__filters-btn"
+            type="button"
+            data-nd-filters-toggle
+            aria-expanded="{% if filters_open %}true{% else %}false{% endif %}"
+            aria-controls="nd-cat-filters"
+          >
+            <span>
+              {% trans "Фільтри" %}{% if active_filter_count %} ({{ active_filter_count }}){% endif %}
+            </span>
+            <span class="nd-cat__filters-chev" aria-hidden="true">
+              {% include "partials/nd/icons/chevron.html" with size=10 %}
+            </span>
+          </button>
+          {% include "catalog/_sort_control.html" with menu_id="catalog-sort-mob" compact=1 %}
         </div>
-        {% if catalog_cta %}
-          <button class="figma-btn catalog-mobile__more" type="button"><span>{{ catalog_cta }}</span></button>
-        {% endif %}
-      </div>
-      <div class="catalog-sheet" id="catalog-sheet" data-catalog-sheet hidden>
-        <form method="get" action="{{ request.path }}">
-          {% if parsed.q %}<input type="hidden" name="q" value="{{ parsed.q }}">{% endif %}
-          {% if parsed.sort %}<input type="hidden" name="sort" value="{{ parsed.sort }}">{% endif %}
-          <div class="filter-panel">
+
+        <div class="nd-cat__filters" id="nd-cat-filters" data-nd-filters-panel>
+          <div class="nd-cat__panel">
             {% include "catalog/_filter_fields.html" %}
-            <button class="figma-btn filter-apply" type="submit"><span>{% trans "Застосувати" %}</span></button>
+            <button class="nd-cat__apply" type="submit">{% trans "Застосувати" %}</button>
+            {% if filters_active %}
+              <a class="nd-cat__reset" href="{{ filters_reset_url }}">{% trans "Скинути фільтри" %}</a>
+            {% endif %}
           </div>
-          <button class="visually-hidden" type="button" data-sheet-close>{% trans "Закрити" %}</button>
-        </form>
-      </div>
-    </div>
+        </div>
+      </aside>
+
+      <section class="nd-cat__main" aria-label="{% trans 'Товари' %}">
+        <div class="nd-cat__sort-row">
+          {% include "catalog/_sort_control.html" with menu_id="catalog-sort-desk" %}
+        </div>
+
+        <label class="nd-cat-sort__native-wrap">
+          <span class="visually-hidden">{% trans "Сортування" %}</span>
+          <select class="nd-cat-sort__native" name="sort" data-nd-sort-native>
+            <option value="" {% if not parsed.sort %}selected{% endif %}>{% trans "Сортувати за" %}</option>
+            <option value="price_asc" {% if parsed.sort == "price_asc" %}selected{% endif %}>{% trans "Ціна: за зростанням" %}</option>
+            <option value="price_desc" {% if parsed.sort == "price_desc" %}selected{% endif %}>{% trans "Ціна: за спаданням" %}</option>
+            <option value="name" {% if parsed.sort == "name" %}selected{% endif %}>{% trans "Назва: А–Я" %}</option>
+          </select>
+        </label>
+
+        <div id="catalog-results" class="nd-cat__results">
+          {% include "catalog/_results.html" %}
+        </div>
+      </section>
+    </form>
   </div>
 {% endblock %}

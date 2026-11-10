@@ -45,6 +45,16 @@
   --nd-gutter: clamp(16px, 4.8vw, 69px);
   --nd-header-h: 80px;
   --nd-header-h-compact: 72px;
+
+  --nd-cat-panel: #faf9f8;
+  --nd-cat-border: #e3ddd8;
+  --nd-cat-sort-shadow: 0 8px 24px rgba(37, 16, 8, 0.1);
+  --nd-cat-aside-top: 100px;
+  --nd-cat-aside-max: calc(100vh - 120px);
+  --nd-cat-card-ratio: 303 / 342;
+  --nd-cat-gap: 30px;
+  --nd-cat-gap-mobile: 12px;
+  --nd-cat-row-gap: 20px;
 }
 
 body {

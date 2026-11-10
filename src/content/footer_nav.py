@@ -51,6 +51,15 @@ def _legal_from_pages():
 def build_footer_columns():
     from src.catalog.models import Category
 
+    # Як і legal: якщо в CMS задано FooterLink column=category — беремо їх (підписи з макета).
+    category_links = _footer_link_items("category")
+    if category_links:
+        return {
+            "category": category_links,
+            "info": _footer_link_items("info"),
+            "legal": _footer_link_items("legal") or _legal_from_pages(),
+        }
+
     categories = [
         SimpleNamespace(label=_("Усі товари"), href=reverse("catalog"), underlined=False),
     ]

@@ -72,3 +72,17 @@ class FooterNavTests(TestCase):
         hrefs = [item.href for item in columns["legal"]]
         self.assertEqual(len(hrefs), LegalPage.objects.count())
         self.assertIn(reverse("shipping"), hrefs)
+
+
+class FooterCategoryLinksTests(TestCase):
+    def test_category_column_prefers_footer_links(self):
+        translation.activate("uk")
+        Category.objects.create(slug="rizdvyani-boksy", name_uk="Новорічний декор", sort=1, is_active=True)
+        FooterLink.objects.filter(column="category").delete()
+        FooterLink.objects.create(column="category", label_uk="Усі товари", url_name="catalog", sort=1)
+        FooterLink.objects.create(
+            column="category", label_uk="Різдвяні бокси", url_name="category", url_arg="rizdvyani-boksy", sort=2
+        )
+        columns = build_footer_columns()
+        self.assertEqual([item.label for item in columns["category"]], ["Усі товари", "Різдвяні бокси"])
+        self.assertEqual(columns["category"][1].href, reverse("category", kwargs={"slug": "rizdvyani-boksy"}))

@@ -7,8 +7,10 @@ import unittest
 from decimal import Decimal
 from pathlib import Path
 
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -272,6 +274,30 @@ class LiqPayCallbackTests(TestCase):
         self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
         self.assertEqual(self.order.payment_raw_status, "processing")
 
+    def test_wait_compensation_marks_paid(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, status="wait_compensation", payment_id="txn-wc"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+        self.assertIsNotNone(self.order.paid_at)
+        self.assertEqual(self.order.payment_raw_status, "wait_compensation")
+        self.assertEqual(self.order.payment_txn, "txn-wc")
+
+    def test_wait_accept_stays_awaiting(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, status="wait_accept", payment_id="txn-wa"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+        self.assertIsNone(self.order.paid_at)
+        self.assertEqual(self.order.payment_raw_status, "wait_accept")
+        self.assertEqual(self.order.payment_txn, "txn-wa")
+
     def test_failure_after_paid_does_not_downgrade(self):
         self.client.post(reverse("liqpay_callback"), _callback_post(self.order))
         self.order.refresh_from_db()
@@ -400,6 +426,49 @@ class LiqPayCallbackTests(TestCase):
         response = self.client.post(
             reverse("liqpay_callback"),
             _callback_post(self.order, algo="sha1", payment_id="txn-sha1"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    @override_settings(LIQPAY_ALLOW_SHA1_FALLBACK=False)
+    def test_callback_sha1_rejected_when_fallback_disabled(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, algo="sha1", payment_id="txn-sha1-off"),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+        self.assertEqual(self.order.payment_raw_status, "")
+        self.assertEqual(self.order.payment_txn, "")
+
+    @override_settings(LIQPAY_ALLOW_SHA1_FALLBACK=True)
+    def test_callback_sha1_accepted_when_fallback_enabled(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, algo="sha1", payment_id="txn-sha1-on"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+        self.assertEqual(self.order.payment_txn, "txn-sha1-on")
+
+    @override_settings(LIQPAY_ALLOW_SHA1_FALLBACK=False)
+    def test_callback_sha3_accepted_when_sha1_fallback_disabled(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, algo="sha3", payment_id="txn-sha3-nofall"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    @override_settings(LIQPAY_ALLOW_SHA1_FALLBACK=True)
+    def test_callback_sha3_accepted_when_sha1_fallback_enabled(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, algo="sha3", payment_id="txn-sha3-fall"),
         )
         self.assertEqual(response.status_code, 200)
         self.order.refresh_from_db()
@@ -822,6 +891,186 @@ class LiqPayAdminReadonlyTests(TestCase):
         self.assertNotIn("payment_method", fields)
         self.assertNotIn("currency", fields)
         self.assertIn("total", fields)
+
+
+@LIQPAY_ON
+class LiqPayAdminManualConfirmTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.User = User
+        self.change_perm = Permission.objects.get(
+            content_type__app_label="commerce",
+            codename="change_order",
+        )
+        self.confirm_perm = Permission.objects.get(
+            content_type__app_label="commerce",
+            codename="confirm_payment_manually",
+        )
+        self.staff = User.objects.create_user(
+            username="lp-staff",
+            email="lp-staff@example.com",
+            password="x",
+            is_staff=True,
+        )
+        self.staff.user_permissions.add(self.change_perm)
+        self.allowed = User.objects.create_user(
+            username="lp-confirm",
+            email="lp-confirm@example.com",
+            password="x",
+            is_staff=True,
+        )
+        self.allowed.user_permissions.add(self.change_perm, self.confirm_perm)
+        self.card_order = Order.objects.create(
+            number="GS250101-MANUAL1",
+            source=Order.Source.CART,
+            customer_name="Оля",
+            phone="+380671112233",
+            email="a@b.c",
+            currency="uah",
+            delivery_method=Order.Delivery.BRANCH,
+            delivery_address="Київ",
+            payment_method=Order.Payment.CARD,
+            payment_status=Order.PayStatus.AWAITING,
+            payment_ref="GS250101-MANUAL1-abcd",
+            total=Decimal("10.00"),
+            consent=True,
+        )
+        self.cash_order = Order.objects.create(
+            number="GS250101-MANUAL2",
+            source=Order.Source.CART,
+            customer_name="Оля",
+            phone="+380671112233",
+            email="a@b.c",
+            currency="uah",
+            delivery_method=Order.Delivery.BRANCH,
+            delivery_address="Київ",
+            payment_method=Order.Payment.ON_DELIVERY,
+            payment_status=Order.PayStatus.UNPAID,
+            total=Decimal("10.00"),
+            consent=True,
+        )
+        self.changelist = reverse("admin:commerce_order_changelist")
+
+    def _post_action(self, user, *order_pks):
+        client = Client()
+        client.force_login(user)
+        return client.post(
+            self.changelist,
+            {
+                "action": "confirm_payment_manually",
+                "_selected_action": [str(pk) for pk in order_pks],
+            },
+            follow=True,
+        )
+
+    def test_action_hidden_without_permission(self):
+        admin = OrderAdmin(Order, AdminSite())
+        request = RequestFactory().get("/admin/")
+        request.user = self.staff
+        actions = admin.get_actions(request)
+        self.assertNotIn("confirm_payment_manually", actions)
+
+    def test_action_rejected_without_permission_order_unchanged(self):
+        response = self._post_action(self.staff, self.card_order.pk)
+        self.assertEqual(response.status_code, 200)
+        self.card_order.refresh_from_db()
+        self.assertEqual(self.card_order.payment_status, Order.PayStatus.AWAITING)
+        self.assertIsNone(self.card_order.paid_at)
+        self.assertEqual(self.card_order.payment_raw_status, "")
+        self.assertFalse(
+            LogEntry.objects.filter(object_id=str(self.card_order.pk)).exists()
+        )
+
+    def test_action_with_permission_marks_paid_and_logs(self):
+        response = self._post_action(self.allowed, self.card_order.pk)
+        self.assertEqual(response.status_code, 200)
+        self.card_order.refresh_from_db()
+        self.assertEqual(self.card_order.payment_status, Order.PayStatus.PAID)
+        self.assertIsNotNone(self.card_order.paid_at)
+        self.assertEqual(self.card_order.payment_raw_status, "manual")
+        entry = LogEntry.objects.get(object_id=str(self.card_order.pk))
+        self.assertEqual(entry.user_id, self.allowed.pk)
+        self.assertIn("Оплату підтверджено вручну", entry.get_change_message())
+
+    def test_non_card_order_skipped_no_log(self):
+        response = self._post_action(self.allowed, self.cash_order.pk)
+        self.assertEqual(response.status_code, 200)
+        self.cash_order.refresh_from_db()
+        self.assertEqual(self.cash_order.payment_status, Order.PayStatus.UNPAID)
+        self.assertIsNone(self.cash_order.paid_at)
+        self.assertEqual(self.cash_order.payment_raw_status, "")
+        self.assertFalse(
+            LogEntry.objects.filter(object_id=str(self.cash_order.pk)).exists()
+        )
+
+    def test_already_paid_keeps_paid_at(self):
+        from django.utils import timezone as dj_tz
+
+        fixed = dj_tz.now().replace(microsecond=0)
+        Order.objects.filter(pk=self.card_order.pk).update(
+            payment_status=Order.PayStatus.PAID,
+            paid_at=fixed,
+            payment_raw_status="success",
+        )
+        self.card_order.refresh_from_db()
+        paid_at = self.card_order.paid_at
+        response = self._post_action(self.allowed, self.card_order.pk)
+        self.assertEqual(response.status_code, 200)
+        self.card_order.refresh_from_db()
+        self.assertEqual(self.card_order.payment_status, Order.PayStatus.PAID)
+        self.assertEqual(self.card_order.paid_at, paid_at)
+        self.assertEqual(self.card_order.payment_raw_status, "success")
+        self.assertFalse(
+            LogEntry.objects.filter(
+                object_id=str(self.card_order.pk),
+                change_message__contains="Оплату підтверджено вручну",
+            ).exists()
+        )
+
+
+class LiqPayVercelDemoDisabledTests(TestCase):
+    def test_vercel_settings_force_liqpay_disabled(self):
+        env = {
+            "HOME": os.environ.get("HOME", ""),
+            "PATH": os.environ.get("PATH", ""),
+            "LANG": os.environ.get("LANG", "C.UTF-8"),
+            "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
+            "DJANGO_SETTINGS_MODULE": "config.settings.vercel",
+            "VERCEL": "1",
+            "SECRET_KEY": "",
+            "ALLOWED_HOSTS": "",
+            "CSRF_TRUSTED_ORIGINS": "",
+            "SITE_URL": "",
+            "DATABASE_URL": "",
+            "ADMIN_URL": "",
+            "SECURE_SSL_REDIRECT": "False",
+            "LIQPAY_PUBLIC_KEY": "dummy_pub",
+            "LIQPAY_PRIVATE_KEY": "dummy_priv",
+            "LIQPAY_SANDBOX": "1",
+        }
+        code = (
+            "import django\n"
+            "django.setup()\n"
+            "from django.conf import settings\n"
+            "from src.commerce.payments.liqpay import enabled\n"
+            "print('enabled', enabled())\n"
+            "print('public_empty', settings.LIQPAY_PUBLIC_KEY == '')\n"
+            "print('private_empty', settings.LIQPAY_PRIVATE_KEY == '')\n"
+            "print('sandbox', settings.LIQPAY_SANDBOX)\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=str(_PROJECT_ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("enabled False", result.stdout)
+        self.assertIn("public_empty True", result.stdout)
+        self.assertIn("private_empty True", result.stdout)
+        self.assertIn("sandbox False", result.stdout)
 
 
 class LiqPayProductionSandboxGuardTests(TestCase):

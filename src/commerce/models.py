@@ -65,6 +65,9 @@ class Order(models.Model):
         ordering = ["-created_at"]
         verbose_name = "Замовлення"
         verbose_name_plural = "Замовлення"
+        permissions = [
+            ("confirm_payment_manually", "Підтвердити оплату вручну"),
+        ]
 
     def __str__(self):
         return self.number

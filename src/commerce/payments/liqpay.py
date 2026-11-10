@@ -26,6 +26,10 @@ CHECKOUT_URL = "https://www.liqpay.ua/api/3/checkout"
 _JSON_SEP = (",", ":")
 _CARD_CURRENCY = "uah"
 
+# LiqPay docs: wait_compensation = successful, credited in daily settlement.
+PAID_STATUSES = frozenset({"success", "wait_compensation"})
+FAILED_STATUSES = frozenset({"failure", "error", "reversed"})
+
 
 def enabled() -> bool:
     return bool(settings.LIQPAY_PUBLIC_KEY) and bool(settings.LIQPAY_PRIVATE_KEY)
@@ -64,7 +68,9 @@ def _match_signature(data: str, signature: str, key: str) -> str | None:
         return None
     if hmac.compare_digest(_digest_b64(hashlib.sha3_256, data, key), sig_b):
         return "sha3-256"
-    if hmac.compare_digest(_digest_b64(hashlib.sha1, data, key), sig_b):
+    if settings.LIQPAY_ALLOW_SHA1_FALLBACK and hmac.compare_digest(
+        _digest_b64(hashlib.sha1, data, key), sig_b
+    ):
         return "sha1"
     return None
 
@@ -269,8 +275,8 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
             order.save(update_fields=fields)
             return 200, "OK"
 
-        # success / sandbox: any attempt for this order number → paid
-        if status == "success" or (status == "sandbox" and settings.LIQPAY_SANDBOX):
+        # success / wait_compensation / sandbox: any attempt for this order number → paid
+        if status in PAID_STATUSES or (status == "sandbox" and settings.LIQPAY_SANDBOX):
             order.payment_status = Order.PayStatus.PAID
             order.paid_at = timezone.now()
             fields.extend(["payment_status", "paid_at"])
@@ -281,7 +287,7 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
             return 200, "OK"
 
         # failure/error/reversed: only current attempt (payment_ref) may mark failed
-        if status in ("failure", "error", "reversed"):
+        if status in FAILED_STATUSES:
             if current_attempt:
                 order.payment_status = Order.PayStatus.FAILED
                 fields.append("payment_status")
@@ -291,7 +297,7 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
             order.save(update_fields=fields)
             return 200, "OK"
 
-        # processing / wait_* / 3ds_verify / etc. — stay awaiting, record raw only
+        # processing / wait_accept / 3ds_verify / etc. — stay awaiting, record raw only
         if txn and not order.payment_txn:
             order.payment_txn = txn[:64]
             fields.append("payment_txn")

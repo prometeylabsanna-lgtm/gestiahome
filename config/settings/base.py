@@ -110,6 +110,7 @@ NOVA_POSHTA_API_KEY = config("NOVA_POSHTA_API_KEY", default="")
 LIQPAY_PUBLIC_KEY = str(config("LIQPAY_PUBLIC_KEY", default="") or "").strip()
 LIQPAY_PRIVATE_KEY = str(config("LIQPAY_PRIVATE_KEY", default="") or "").strip()
 LIQPAY_SANDBOX = config("LIQPAY_SANDBOX", default=False, cast=bool)
+LIQPAY_ALLOW_SHA1_FALLBACK = config("LIQPAY_ALLOW_SHA1_FALLBACK", default=True, cast=bool)
 
 # Тимчасовий залишок активних товарів, доки адміністратор не виставить реальні кількості.
 STOCK_PLACEHOLDER_QTY = 10

@@ -61,7 +61,7 @@
               <li class="nd-pdp__chip">{% trans "Арт." %} {{ product.sku }}</li>
             </ul>
             {% if product.description %}
-              <div class="nd-pdp__desc">{{ product.description|richhtml }}</div>
+              <div class="nd-pdp__desc">{{ product.description|richlines }}</div>
             {% endif %}
             <p class="nd-pdp__price">{% home_price product %}</p>
             <form

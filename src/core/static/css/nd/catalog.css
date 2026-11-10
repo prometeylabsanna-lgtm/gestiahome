@@ -54,9 +54,6 @@
   color: var(--nd-muted);
 }
 
-.nd-cat__crumbs-list span[aria-hidden="true"] {
-  margin: 0 0.1em;
-}
 
 .nd-cat__products {
   margin-top: clamp(24px, 3.3vw, 48px);
@@ -373,7 +370,9 @@
   line-height: normal;
 }
 
-.nd-card__link {
+/* .product-card a (cards.css) ставить display:grid → медіа ширше за колонку на 390 */
+.nd-card__link,
+.product-card .nd-card__link {
   display: block;
   text-decoration: none;
   color: inherit;

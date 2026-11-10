@@ -120,3 +120,9 @@ body {
   color: var(--nd-ink);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Крихти: у дизайні <a>…</a><span>/</span> без пробілу — flex прибирає пробіл між тегами в шаблонах */
+[class*="__crumbs-list"] > li {
+  display: flex;
+  align-items: baseline;
+}

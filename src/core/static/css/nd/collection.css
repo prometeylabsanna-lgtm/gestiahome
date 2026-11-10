@@ -63,9 +63,6 @@
   color: var(--nd-muted);
 }
 
-.nd-colp__crumbs-list span[aria-hidden="true"] {
-  margin: 0 0.1em;
-}
 
 .nd-colp__main {
   margin-top: 20px;

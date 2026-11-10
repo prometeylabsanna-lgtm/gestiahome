@@ -63,9 +63,6 @@
   color: var(--nd-muted);
 }
 
-.nd-pdp__crumbs-list span[aria-hidden="true"] {
-  margin: 0 0.1em;
-}
 
 .nd-pdp__main {
   margin-top: 20px;

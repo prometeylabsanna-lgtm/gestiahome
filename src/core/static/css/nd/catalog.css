@@ -54,9 +54,6 @@
   color: var(--nd-muted);
 }
 
-.nd-cat__crumbs-list span[aria-hidden="true"] {
-  margin: 0 0.1em;
-}
 
 .nd-cat__products {
   margin-top: clamp(24px, 3.3vw, 48px);

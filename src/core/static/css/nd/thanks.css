@@ -9,6 +9,7 @@
   padding: 0 var(--nd-gutter);
   padding-left: max(var(--nd-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--nd-gutter), env(safe-area-inset-right, 0px));
+  padding-bottom: clamp(80px, 8.3vw, 120px);
   overflow-x: clip;
 }
 

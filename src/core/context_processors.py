@@ -9,6 +9,16 @@ from src.core.middleware import language_enabled
 from src.core.seo import build_head
 
 
+def _next_path(request) -> str:
+    """Full path for language/currency next, without sensitive ?number=."""
+    params = request.GET.copy()
+    params.pop("number", None)
+    query = params.urlencode()
+    if query:
+        return f"{request.path}?{query}"
+    return request.path
+
+
 def shop(request):
     currency = request.session.get("currency", "uah")
     if currency not in {"uah", "eur"}:
@@ -69,9 +79,9 @@ def shop(request):
         discount_modal = DiscountModal.load()
     except (OperationalError, ProgrammingError):
         discount_modal = None
-    full = request.get_full_path()
+    next_path = _next_path(request)
     switch = {
-        code: localize_path(full, code)
+        code: localize_path(next_path, code)
         for code, _label in settings.LANGUAGES
     }
     return {
@@ -85,6 +95,7 @@ def shop(request):
         "currency": currency,
         "cart_count": cart_count,
         "wishlist_count": wishlist_count,
+        "next_path": next_path,
         "lang_switch_urls": switch,
         "lang_enabled": {
             code: language_enabled(code) for code, _label in settings.LANGUAGES

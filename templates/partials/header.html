@@ -257,7 +257,7 @@
       <button class="nd-region__change" type="button" data-region-to-region>{{ locale.link_label }}</button>
       <form id="region-confirm-currency" action="{% url 'set_currency' %}" method="post" hidden>
         {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <input type="hidden" name="next" value="{{ next_path }}">
         <input type="hidden" name="currency" value="uah">
       </form>
     </div>
@@ -268,13 +268,13 @@
       <div class="nd-region__picks">
         <form action="{% url 'set_currency' %}" method="post" data-region-pick="ua">
           {% csrf_token %}
-          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <input type="hidden" name="next" value="{{ next_path }}">
           <input type="hidden" name="currency" value="uah">
           <button type="submit">{{ locale.field_labels.1 }}</button>
         </form>
         <form action="{% url 'set_currency' %}" method="post" data-region-pick="intl">
           {% csrf_token %}
-          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <input type="hidden" name="next" value="{{ next_path }}">
           <input type="hidden" name="currency" value="eur">
           <button type="submit">{{ locale.field_labels.2 }}</button>
         </form>

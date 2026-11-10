@@ -259,6 +259,8 @@ def np_streets(request):
 
 
 def thanks(request):
+    from src.content.models_thankyou import ThankYouPage
+
     kind = request.GET.get("kind", "order")
     number = (request.GET.get("number") or "").strip()
     done = request.session.get("orders_done")
@@ -267,7 +269,11 @@ def thanks(request):
     return render(
         request,
         "commerce/thanks.html",
-        {"kind": kind, "number": number},
+        {
+            "kind": kind,
+            "number": number,
+            "thanks_page": ThankYouPage.load(),
+        },
     )
 
 

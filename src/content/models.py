@@ -803,4 +803,5 @@ from src.content import models_home_slots as _home_slots  # noqa: E402,F401
 from src.content import models_legal as _legal_models  # noqa: E402,F401
 from src.content import models_menu as _menu_models  # noqa: E402,F401
 from src.content import models_styles as _style_models  # noqa: E402,F401
+from src.content import models_thankyou as _thankyou_models  # noqa: E402,F401
 from src.content import proxies as _home_proxies  # noqa: E402,F401

@@ -24,6 +24,7 @@ import src.content.admin_home_banners  # noqa: F401, E402
 import src.content.admin_legal  # noqa: F401, E402
 import src.content.admin_menu  # noqa: F401, E402
 import src.content.admin_styles  # noqa: F401, E402
+import src.content.admin_thankyou  # noqa: F401, E402
 
 
 class SingletonAdmin(GestiaModelAdmin):

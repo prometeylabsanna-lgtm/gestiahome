@@ -379,10 +379,10 @@ class CheckoutTests(TestCase):
         session.save()
         page = self.client.get("/thank-you/?kind=order&number=G-100")
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, "Дякуємо за замовлення")
+        self.assertContains(page, "Раді стати частиною ваших традицій!")
         self.assertContains(page, "G-100")
-        self.assertContains(page, "До каталогу")
-        self.assertContains(page, "css/pages/utility.css")
+        self.assertContains(page, "На головну")
+        self.assertContains(page, "css/nd/thanks.css")
         legacy = self.client.get("/diakuiemo/?kind=order&number=G-100")
         self.assertEqual(legacy.status_code, 200)
 
@@ -573,8 +573,11 @@ class ThanksGuardTests(TestCase):
     def test_hides_foreign_number(self):
         page = self.client.get("/thank-you/?kind=order&number=GS-FOREIGN")
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, "Дякуємо за замовлення")
-        self.assertNotContains(page, "Номер замовлення")
+        self.assertContains(page, "Раді стати частиною ваших традицій!")
+        self.assertContains(
+            page,
+            "Замовлення оформлено. Після відправлення ви отримаєте номер",
+        )
         self.assertNotContains(page, 'data-qa="order-number"')
 
 

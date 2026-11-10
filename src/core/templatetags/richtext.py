@@ -1,7 +1,7 @@
 import re
 
 from django import template
-from django.utils.html import linebreaks
+from django.utils.html import escape, linebreaks
 from django.utils.safestring import mark_safe
 
 from src.core.html_sanitize import sanitize_rich_html, strip_outer_p
@@ -67,3 +67,21 @@ def richinline(value):
     if not _looks_like_html(cleaned):
         return mark_safe(cleaned.replace("\n", "<br>"))
     return mark_safe(strip_outer_p(cleaned))
+
+
+@register.filter(name="richhtml_number")
+def richhtml_number(value, number):
+    """Sanitize CMS HTML and safely substitute {number} (escaped, data-qa span)."""
+    text = value if isinstance(value, str) else ""
+    cleaned = sanitize_rich_html(text)
+    if not cleaned:
+        return ""
+    raw = "" if number is None else str(number)
+    if raw:
+        safe = escape(raw)
+        replacement = f'<span data-qa="order-number">{safe}</span>'
+    else:
+        replacement = ""
+    if not _looks_like_html(cleaned):
+        cleaned = str(linebreaks(cleaned))
+    return mark_safe(cleaned.replace("{number}", replacement))

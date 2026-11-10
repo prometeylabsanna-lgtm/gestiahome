@@ -1,6 +1,7 @@
 from src.content.models import AboutPage, HomeBlock, Review, SiteSettings
 from src.content.models_faq import FaqPage
 from src.content.models_legal import LegalPage
+from src.content.models_thankyou import ThankYouPage
 
 
 class HomeBannerMedia(HomeBlock):
@@ -245,3 +246,17 @@ class FooterChrome(SiteSettings):
         proxy = True
         verbose_name = "Тексти підвалу"
         verbose_name_plural = "Тексти підвалу"
+
+
+class ThankYouOrder(ThankYouPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Замовлення"
+        verbose_name_plural = "Замовлення"
+
+
+class ThankYouContact(ThankYouPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Повідомлення / контакт"
+        verbose_name_plural = "Повідомлення / контакт"

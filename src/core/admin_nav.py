@@ -116,6 +116,23 @@ NAV_TREE = [
         ],
     },
     {
+        "title": "Сторінка подяки",
+        "items": [
+            {
+                "key": "thankyou_order",
+                "title": "Замовлення",
+                "icon": "check_circle",
+                "url_name": "admin:content_thankyouorder_changelist",
+            },
+            {
+                "key": "thankyou_contact",
+                "title": "Повідомлення / контакт",
+                "icon": "mail",
+                "url_name": "admin:content_thankyoucontact_changelist",
+            },
+        ],
+    },
+    {
         "title": "Каталог",
         "items": [
             {

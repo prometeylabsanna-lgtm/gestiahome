@@ -1,36 +1,36 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static richtext %}
 
-{% block title %}{% trans "Дякуємо" %}{% endblock %}
+{% block title %}{% if kind == "contact" %}{{ thanks_page.contact_title }}{% else %}{{ thanks_page.order_title }}{% endif %}{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/utility.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/thanks.css' %}">
 {% endblock %}
 
 {% block content %}
-  <section class="util-page" data-qa="thanks-page">
-    <div class="util-page__inner">
-      <a class="util-page__logo" href="{% url 'home' %}" aria-label="Gestia">
-        <img src="{% static 'figma/desktop/5493c.png' %}" width="113" height="43" alt="Gestia">
-      </a>
+  <div class="nd-thanks" data-qa="thanks-page">
+    <section class="nd-thanks__section" aria-labelledby="thanks-title">
+      <img
+        class="nd-thanks__mark"
+        src="{% static 'nd/g-mark-light.png' %}"
+        alt=""
+        width="34"
+        height="50"
+      >
       {% if kind == "contact" %}
-        <h1 data-qa="lead-success">{% trans "Дякуємо" %}</h1>
-        <p class="util-page__text">{% trans "Ми отримали ваше повідомлення і незабаром відповімо." %}</p>
+        <h1 class="nd-thanks__title" id="thanks-title" data-qa="lead-success">{{ thanks_page.contact_title }}</h1>
+        <div class="nd-thanks__text">{{ thanks_page.contact_text|richhtml }}</div>
       {% else %}
-        <h1 data-qa="lead-success">{% trans "Дякуємо за замовлення" %}</h1>
-        <p class="util-page__text">
-          {% trans "Найближчим часом наш консультант зв'яжеться з вами." %}
-        </p>
+        <h1 class="nd-thanks__title" id="thanks-title" data-qa="lead-success">{{ thanks_page.order_title }}</h1>
         {% if number %}
-          <p class="util-page__meta" data-qa="order-number">
-            {% trans "Номер замовлення" %}: <strong>{{ number }}</strong>
-          </p>
+          <div class="nd-thanks__text">{{ thanks_page.order_text|richhtml_number:number }}</div>
+        {% else %}
+          <div class="nd-thanks__text">{{ thanks_page.order_text_nonum|richhtml }}</div>
         {% endif %}
       {% endif %}
-      <div class="util-page__actions">
-        <a class="figma-btn figma-btn--ink" href="{% url 'catalog' %}">{% trans "До каталогу" %}</a>
-        <a class="util-page__link" href="{% url 'home' %}">{% trans "На головну" %}</a>
-      </div>
-    </div>
-  </section>
+      {% if thanks_page.link %}
+        <a class="nd-thanks__link" href="{% url 'home' %}">{{ thanks_page.link }}</a>
+      {% endif %}
+    </section>
+  </div>
 {% endblock %}

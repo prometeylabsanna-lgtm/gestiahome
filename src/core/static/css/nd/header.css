@@ -259,6 +259,10 @@
   cursor: pointer;
 }
 
+.nd-burger__catalog-head > span {
+  font-size: var(--nd-fs-18);
+}
+
 .nd-burger__catalog-head .nd-icon-chevron {
   width: 12px;
   height: 12px;
@@ -413,13 +417,15 @@
   background: linear-gradient(var(--nd-flag-blue) 50%, var(--nd-flag-yellow) 50%);
 }
 
-.nd-region__confirm {
+button.nd-region__confirm {
   margin-top: 16px;
   box-sizing: border-box;
   width: 100%;
   height: 44px;
   min-height: 44px;
   border: 1px solid var(--nd-ink);
+  border-radius: 0;
+  font-family: inherit;
   font-size: 15px;
   background: transparent;
   color: var(--nd-ink);
@@ -429,8 +435,8 @@
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.nd-region__confirm:hover,
-.nd-region__confirm:focus-visible {
+button.nd-region__confirm:hover,
+button.nd-region__confirm:focus-visible {
   background: var(--nd-ink);
   color: var(--nd-cream);
 }

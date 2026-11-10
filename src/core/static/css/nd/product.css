@@ -2,6 +2,19 @@
   background: var(--nd-surface);
   color: var(--nd-ink);
   overflow-x: clip;
+  line-height: normal;
+}
+
+.page-product :is(
+  .nd-pdp__cart,
+  .nd-pdp__now,
+  .nd-pdp__chip,
+  .nd-pdp__price,
+  .nd-pdp__qty-value,
+  .nd-pdp-rail__cta,
+  .nd-card__price
+) {
+  line-height: normal;
 }
 
 .nd-scroll {
@@ -17,6 +30,7 @@
 
 .nd-pdp {
   overflow-x: clip;
+  line-height: normal;
 }
 
 .nd-pdp__crumbs {
@@ -218,11 +232,15 @@
 
 .nd-pdp__cart,
 .nd-pdp__now {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   height: 44px;
   display: flex;
   align-items: center;
   font: inherit;
   font-size: var(--nd-fs-16);
+  line-height: normal;
   color: inherit;
   cursor: pointer;
   -webkit-appearance: none;
@@ -296,6 +314,10 @@
   padding: 0;
 }
 
+.nd-pdp-note__body > p {
+  display: block;
+}
+
 .nd-pdp-note__body ul,
 .nd-pdp-note__body ol {
   list-style: none;
@@ -306,6 +328,61 @@
 
 .nd-pdp-rail {
   padding-top: clamp(80px, 8.3vw, 120px);
+}
+
+.nd-card {
+  position: relative;
+  min-width: 0;
+  line-height: normal;
+}
+
+.nd-card__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nd-card__link:hover {
+  color: inherit;
+}
+
+.nd-card__media {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background: var(--nd-cat-panel);
+}
+
+.nd-card__media :is(img, video) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nd-card__meta {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  font-size: var(--nd-fs-16);
+  line-height: 1.2;
+}
+
+.nd-card__name {
+  font-size: inherit;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: var(--nd-ls-01);
+  white-space: pre-line;
+  min-width: 0;
+}
+
+.nd-card__price {
+  white-space: nowrap;
+  flex: none;
+  line-height: 1.2;
 }
 
 .nd-pdp-rail__title {
@@ -333,6 +410,8 @@
 
 .nd-pdp-rail__list > .nd-card--rail {
   flex: 0 0 clamp(260px, 25.6vw, 368px);
+  width: clamp(260px, 25.6vw, 368px);
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -342,8 +421,12 @@
 
 .nd-card--rail .nd-card__meta {
   margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
   gap: 16px;
+  align-items: flex-start;
   font-size: var(--nd-fs-16);
+  line-height: 1.2;
 }
 
 .nd-pdp-rail__spacer {
@@ -366,6 +449,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--nd-fs-16);
+  line-height: normal;
   color: inherit;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;

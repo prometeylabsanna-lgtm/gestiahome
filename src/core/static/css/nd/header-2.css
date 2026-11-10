@@ -149,7 +149,11 @@
   .nd-mega__list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
+  }
+
+  .nd-mega__group.is-open:not(:last-child) {
+    margin-bottom: 10px;
   }
 
   .nd-mega__cat.is-feature {

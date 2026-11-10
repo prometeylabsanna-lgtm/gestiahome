@@ -102,6 +102,11 @@ class CollectionPageTests(TestCase):
         self.assertIn("Доставка", html)
         self.assertIn("Оплата", html)
         self.assertIn("nd/collection.css", html)
+        self.assertIn("Святкові бокси", html)
+        self.assertIn('aria-labelledby="others-title"', html)
+        self.assertIn('data-screen-label="Collection hero"', html)
+        self.assertIn('data-screen-label="In the box"', html)
+        self.assertIn('data-screen-label="Delivery and payment"', html)
 
     def test_inactive_collection_is_404(self):
         page = self.client.get(reverse("collection", kwargs={"slug": "page-hidden-col"}))

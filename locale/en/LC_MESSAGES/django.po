@@ -189,6 +189,9 @@ msgstr "No products found."
 msgid "Каталог"
 msgstr "Catalogue"
 
+msgid "Каталог товарів Gestia Home"
+msgstr "Catalogue of Gestia Home products"
+
 msgid "Каталог святкових боксів і сервірування Gestia Home"
 msgstr "Festive boxes and table settings from Gestia Home"
 

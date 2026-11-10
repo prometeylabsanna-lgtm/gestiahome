@@ -106,7 +106,7 @@
               <section class="nd-pdp-note">
                 {% if ship_block.title %}<h2 class="nd-pdp-note__title">{{ ship_block.title }}</h2>{% endif %}
                 {% if ship_block.text %}
-                  <div class="nd-pdp-note__body">{{ ship_block.text|richhtml }}</div>
+                  <div class="nd-pdp-note__body">{{ ship_block.text|richlines }}</div>
                 {% endif %}
               </section>
             {% endif %}
@@ -114,7 +114,7 @@
               <section class="nd-pdp-note">
                 {% if pay_block.title %}<h2 class="nd-pdp-note__title">{{ pay_block.title }}</h2>{% endif %}
                 {% if pay_block.text %}
-                  <div class="nd-pdp-note__body">{{ pay_block.text|richhtml }}</div>
+                  <div class="nd-pdp-note__body">{{ pay_block.text|richlines }}</div>
                 {% endif %}
               </section>
             {% endif %}
@@ -127,10 +127,10 @@
     {% trans "Схожі товари" as related_title %}
     {% trans "Перейти до каталогу" as catalog_cta %}
     {% if set_products %}
-      {% include "catalog/_pdp_band.html" with band_class="nd-pdp-rail--set" title=set_block.title|default:set_title rail_id="pdp-set" products=set_products cta=set_block.cta|default:catalog_cta %}
+      {% include "catalog/_pdp_band.html" with band_class="nd-pdp-rail--set" title=set_block.title|default:set_title rail_id="same-set" products=set_products cta=set_block.cta|default:catalog_cta %}
     {% endif %}
     {% if related %}
-      {% include "catalog/_pdp_band.html" with band_class="nd-pdp-rail--related" title=related_block.title|default:related_title rail_id="pdp-related" products=related cta=related_block.cta|default:catalog_cta %}
+      {% include "catalog/_pdp_band.html" with band_class="nd-pdp-rail--related" title=related_block.title|default:related_title rail_id="similar" products=related cta=related_block.cta|default:catalog_cta %}
     {% endif %}
 
     <div class="nd-pdp__spacer" aria-hidden="true"></div>

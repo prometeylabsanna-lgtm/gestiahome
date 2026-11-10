@@ -13,6 +13,7 @@ from src.commerce.wishlist import sku_set
 from src.content.home_slots import about_popular, home_categories, home_popular
 from src.content.legal_pages import legal_document
 from src.content.models import AboutPage, Advantage, HomeBlock, HomeCollection, Review
+from src.content.models_menu import MenuGroupItem
 from src.core.ratelimit import honeypot_filled, reject_if_limited
 
 
@@ -119,6 +120,16 @@ def collection_detail(request, slug):
         .select_related("category")
         .order_by("sort", "id")
     )
+    menu_item = (
+        MenuGroupItem.objects.filter(
+            collection_id=collection.pk,
+            is_active=True,
+            group__is_active=True,
+        )
+        .select_related("group")
+        .order_by("group__sort", "sort", "id")
+        .first()
+    )
     return render(
         request,
         "content/collection.html",
@@ -129,6 +140,7 @@ def collection_detail(request, slug):
             "others": others,
             "ship_block": blocks.get("pdp_ship"),
             "pay_block": blocks.get("pdp_pay"),
+            "menu_group": menu_item.group if menu_item else None,
         },
     )
 

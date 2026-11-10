@@ -19,7 +19,13 @@
           <span aria-hidden="true">/</span>
         </li>
         <li>
-          {% if collection.category_id %}
+          {% if menu_group %}
+            {% if collection.category_id %}
+              <a href="{{ collection.category.get_absolute_url }}">{{ menu_group.title }}</a>
+            {% else %}
+              <a href="{% url 'catalog' %}">{{ menu_group.title }}</a>
+            {% endif %}
+          {% elif collection.category_id %}
             <a href="{{ collection.category.get_absolute_url }}">{{ collection.category.name }}</a>
           {% else %}
             <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
@@ -154,7 +160,7 @@
           <div class="nd-colp-note">
             {% if ship_block.title %}<h2 class="nd-colp-note__title">{{ ship_block.title }}</h2>{% endif %}
             {% if ship_block.text %}
-              <div class="nd-colp-note__body">{{ ship_block.text|richhtml }}</div>
+              <div class="nd-colp-note__body">{{ ship_block.text|richlines }}</div>
             {% endif %}
           </div>
         {% endif %}
@@ -162,7 +168,7 @@
           <div class="nd-colp-note">
             {% if pay_block.title %}<h2 class="nd-colp-note__title">{{ pay_block.title }}</h2>{% endif %}
             {% if pay_block.text %}
-              <div class="nd-colp-note__body">{{ pay_block.text|richhtml }}</div>
+              <div class="nd-colp-note__body">{{ pay_block.text|richlines }}</div>
             {% endif %}
           </div>
         {% endif %}
@@ -170,7 +176,7 @@
     {% endif %}
 
     {% if others %}
-      <section class="nd-colp-others" aria-labelledby="others-title">
+      <section class="nd-colp-others" aria-labelledby="others-title" data-screen-label="Інші колекції">
         <h2 class="nd-colp-others__title" id="others-title">{% trans "Інші колекції" %}</h2>
         <ul class="nd-colp-others__list">
           {% for item in others %}

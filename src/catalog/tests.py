@@ -137,6 +137,9 @@ class FacetTests(TestCase):
         self.assertContains(page, 'data-nd-filters-panel')
         self.assertContains(page, 'id="catalog-results"')
         self.assertContains(page, 'hx-target="#catalog-results"')
+        self.assertContains(page, "Каталог товарів Gestia Home")
+        self.assertContains(page, 'data-screen-label="Товари"')
+        self.assertContains(page, 'aria-label="Товари"')
 
     def test_product_page_shows_figma_purchase(self):
         page = self.client.get("/tovar/a/")
@@ -171,8 +174,14 @@ class FacetTests(TestCase):
         with_rails = self.client.get("/tovar/a/")
         self.assertContains(with_rails, "nd-pdp-rail--set")
         self.assertContains(with_rails, "nd-pdp-rail--related")
+        self.assertContains(with_rails, 'aria-labelledby="same-set"')
+        self.assertContains(with_rails, 'aria-labelledby="similar"')
+        self.assertContains(with_rails, 'id="same-set"')
+        self.assertContains(with_rails, 'id="similar"')
         self.assertContains(with_rails, "/tovar/b/")
         self.assertContains(with_rails, 'data-qa="product-card"')
+        self.assertContains(with_rails, "nd-card__name")
+        self.assertContains(with_rails, "nd-card__price")
 
     def test_search_keeps_name(self):
         query = QueryDict(mutable=True)

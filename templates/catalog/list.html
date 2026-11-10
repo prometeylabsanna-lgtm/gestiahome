@@ -39,84 +39,86 @@
       </ol>
     </nav>
 
-    <h1 class="visually-hidden">{% if category %}{{ category.name }}{% else %}{% trans "Каталог" %}{% endif %}</h1>
+    <h1 class="visually-hidden">{% if category %}{{ category.name }}{% else %}{% trans "Каталог товарів Gestia Home" %}{% endif %}</h1>
 
-    <form
-      id="nd-cat-form"
-      class="nd-cat__layout"
-      method="get"
-      action="{{ request.path }}"
-      hx-get="{{ request.path }}"
-      hx-target="#catalog-results"
-      hx-push-url="true"
-      hx-swap="innerHTML"
-      data-nd-cat-form
-    >
-      <aside class="nd-cat__aside" aria-label="{% trans 'Пошук і фільтри' %}">
-        <label class="nd-cat-search">
-          <span class="nd-cat-search__icon" aria-hidden="true">
-            {% include "partials/nd/icons/search.html" with size=22 %}
-          </span>
-          <span class="visually-hidden">{% trans "Пошук у каталозі" %}</span>
-          <input
-            class="nd-cat-search__input"
-            name="q"
-            type="search"
-            maxlength="80"
-            enterkeyhint="search"
-            autocomplete="off"
-            value="{{ parsed.q }}"
-          >
-        </label>
-
-        <div class="nd-cat__mobile-tools">
-          <button
-            class="nd-cat__filters-btn"
-            type="button"
-            data-nd-filters-toggle
-            aria-expanded="{% if filters_open %}true{% else %}false{% endif %}"
-            aria-controls="nd-cat-filters"
-          >
-            <span>
-              {% trans "Фільтри" %}{% if active_filter_count %} ({{ active_filter_count }}){% endif %}
+    <section class="nd-cat__products" aria-label="{% trans 'Товари' %}" data-screen-label="Товари">
+      <form
+        id="nd-cat-form"
+        class="nd-cat__layout"
+        method="get"
+        action="{{ request.path }}"
+        hx-get="{{ request.path }}"
+        hx-target="#catalog-results"
+        hx-push-url="true"
+        hx-swap="innerHTML"
+        data-nd-cat-form
+      >
+        <aside class="nd-cat__aside" aria-label="{% trans 'Пошук і фільтри' %}">
+          <label class="nd-cat-search">
+            <span class="nd-cat-search__icon" aria-hidden="true">
+              {% include "partials/nd/icons/search.html" with size=22 %}
             </span>
-            <span class="nd-cat__filters-chev" aria-hidden="true">
-              {% include "partials/nd/icons/chevron.html" with size=10 %}
-            </span>
-          </button>
-          {% include "catalog/_sort_control.html" with menu_id="catalog-sort-mob" compact=1 %}
-        </div>
+            <span class="visually-hidden">{% trans "Пошук у каталозі" %}</span>
+            <input
+              class="nd-cat-search__input"
+              name="q"
+              type="search"
+              maxlength="80"
+              enterkeyhint="search"
+              autocomplete="off"
+              value="{{ parsed.q }}"
+            >
+          </label>
 
-        <div class="nd-cat__filters" id="nd-cat-filters" data-nd-filters-panel>
-          <div class="nd-cat__panel">
-            {% include "catalog/_filter_fields.html" %}
-            <button class="nd-cat__apply" type="submit">{% trans "Застосувати" %}</button>
-            {% if filters_active %}
-              <a class="nd-cat__reset" href="{{ filters_reset_url }}">{% trans "Скинути фільтри" %}</a>
-            {% endif %}
+          <div class="nd-cat__mobile-tools">
+            <button
+              class="nd-cat__filters-btn"
+              type="button"
+              data-nd-filters-toggle
+              aria-expanded="{% if filters_open %}true{% else %}false{% endif %}"
+              aria-controls="nd-cat-filters"
+            >
+              <span>
+                {% trans "Фільтри" %}{% if active_filter_count %} ({{ active_filter_count }}){% endif %}
+              </span>
+              <span class="nd-cat__filters-chev" aria-hidden="true">
+                {% include "partials/nd/icons/chevron.html" with size=10 %}
+              </span>
+            </button>
+            {% include "catalog/_sort_control.html" with menu_id="catalog-sort-mob" compact=1 %}
+          </div>
+
+          <div class="nd-cat__filters" id="nd-cat-filters" data-nd-filters-panel>
+            <div class="nd-cat__panel">
+              {% include "catalog/_filter_fields.html" %}
+              <button class="nd-cat__apply" type="submit">{% trans "Застосувати" %}</button>
+              {% if filters_active %}
+                <a class="nd-cat__reset" href="{{ filters_reset_url }}">{% trans "Скинути фільтри" %}</a>
+              {% endif %}
+            </div>
+          </div>
+        </aside>
+
+        <div class="nd-cat__main">
+          <div class="nd-cat__sort-row">
+            {% include "catalog/_sort_control.html" with menu_id="catalog-sort-desk" %}
+          </div>
+
+          <label class="nd-cat-sort__native-wrap">
+            <span class="visually-hidden">{% trans "Сортування" %}</span>
+            <select class="nd-cat-sort__native" name="sort" data-nd-sort-native>
+              <option value="" {% if not parsed.sort %}selected{% endif %}>{% trans "Сортувати за" %}</option>
+              <option value="price_asc" {% if parsed.sort == "price_asc" %}selected{% endif %}>{% trans "Ціна: за зростанням" %}</option>
+              <option value="price_desc" {% if parsed.sort == "price_desc" %}selected{% endif %}>{% trans "Ціна: за спаданням" %}</option>
+              <option value="name" {% if parsed.sort == "name" %}selected{% endif %}>{% trans "Назва: А–Я" %}</option>
+            </select>
+          </label>
+
+          <div id="catalog-results" class="nd-cat__results">
+            {% include "catalog/_results.html" %}
           </div>
         </div>
-      </aside>
-
-      <section class="nd-cat__main" aria-label="{% trans 'Товари' %}">
-        <div class="nd-cat__sort-row">
-          {% include "catalog/_sort_control.html" with menu_id="catalog-sort-desk" %}
-        </div>
-
-        <label class="nd-cat-sort__native-wrap">
-          <span class="visually-hidden">{% trans "Сортування" %}</span>
-          <select class="nd-cat-sort__native" name="sort" data-nd-sort-native>
-            <option value="" {% if not parsed.sort %}selected{% endif %}>{% trans "Сортувати за" %}</option>
-            <option value="price_asc" {% if parsed.sort == "price_asc" %}selected{% endif %}>{% trans "Ціна: за зростанням" %}</option>
-            <option value="price_desc" {% if parsed.sort == "price_desc" %}selected{% endif %}>{% trans "Ціна: за спаданням" %}</option>
-            <option value="name" {% if parsed.sort == "name" %}selected{% endif %}>{% trans "Назва: А–Я" %}</option>
-          </select>
-        </label>
-
-        <div id="catalog-results" class="nd-cat__results">
-          {% include "catalog/_results.html" %}
-        </div>
-      </section>
-    </form>
+      </form>
+    </section>
   </div>
 {% endblock %}

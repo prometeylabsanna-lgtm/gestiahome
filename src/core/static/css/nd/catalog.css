@@ -2,6 +2,7 @@
   background: var(--nd-surface);
   color: var(--nd-ink);
   overflow-x: clip;
+  line-height: normal;
 }
 
 .nd-cat {
@@ -9,6 +10,21 @@
   padding-left: max(var(--nd-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--nd-gutter), env(safe-area-inset-right, 0px));
   padding-bottom: max(clamp(80px, 8.3vw, 120px), env(safe-area-inset-bottom, 0px));
+  line-height: normal;
+}
+
+.page-catalog :is(
+  .nd-cat__filters-btn,
+  .nd-cat-sort__btn,
+  .nd-cat-check,
+  .nd-cat__apply,
+  .nd-cat__reset,
+  .nd-cat__more-btn,
+  .nd-card__price,
+  .nd-cat-search__input,
+  .nd-cat-sort__menu button
+) {
+  line-height: normal;
 }
 
 .nd-cat__crumbs {
@@ -43,8 +59,11 @@
   margin: 0 0.1em;
 }
 
-.nd-cat__layout {
+.nd-cat__products {
   margin-top: clamp(24px, 3.3vw, 48px);
+}
+
+.nd-cat__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   column-gap: var(--nd-cat-gap);
@@ -352,6 +371,7 @@
 .nd-card {
   position: relative;
   min-width: 0;
+  line-height: normal;
 }
 
 .nd-card__link {

@@ -58,3 +58,85 @@ class WishlistToggleNextSecurityTests(TestCase):
         response = self._post_next("/obrane/")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], "/obrane/")
+
+
+class CartNeverCacheSecurityTests(TestCase):
+    def setUp(self):
+        translation.activate("uk")
+        category = Category.objects.create(slug="sec-cache-cat", name_uk="Каталог")
+        self.product = Product.objects.create(
+            category=category,
+            sku="SEC-CACHE-1",
+            slug="sec-cache-1",
+            name_uk="Тестовий товар",
+            price_uah=Decimal("1000"),
+            price_eur=Decimal("25"),
+            stock_qty=5,
+        )
+
+    def _assert_never_cache(self, response):
+        cache_control = response.get("Cache-Control", "")
+        self.assertIn("no-store", cache_control)
+        self.assertIn("private", cache_control)
+
+    def test_cart_panel_never_cache(self):
+        response = self.client.get(reverse("cart_panel"))
+        self.assertEqual(response.status_code, 200)
+        self._assert_never_cache(response)
+
+    def test_cart_page_never_cache(self):
+        response = self.client.get(reverse("cart"))
+        self.assertEqual(response.status_code, 200)
+        self._assert_never_cache(response)
+
+    def test_cart_add_htmx_never_cache(self):
+        response = self.client.post(
+            reverse("cart_add"),
+            {"sku": self.product.sku, "qty": "1"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self._assert_never_cache(response)
+
+    def test_cart_add_htmx_panel_never_cache(self):
+        response = self.client.post(
+            reverse("cart_add"),
+            {
+                "sku": self.product.sku,
+                "qty": "1",
+                "panel": "1",
+                "panel_sku": self.product.sku,
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self._assert_never_cache(response)
+
+    def test_cart_update_htmx_never_cache(self):
+        session = self.client.session
+        session["cart"] = {self.product.sku: 1}
+        session.save()
+        response = self.client.post(
+            reverse("cart_update"),
+            {"sku": self.product.sku, "qty": "2"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self._assert_never_cache(response)
+
+    def test_cart_update_htmx_panel_never_cache(self):
+        session = self.client.session
+        session["cart"] = {self.product.sku: 1}
+        session.save()
+        response = self.client.post(
+            reverse("cart_update"),
+            {
+                "sku": self.product.sku,
+                "qty": "2",
+                "panel": "1",
+                "panel_sku": self.product.sku,
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self._assert_never_cache(response)

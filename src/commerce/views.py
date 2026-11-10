@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from src.catalog.models import Product
@@ -174,6 +175,7 @@ def _checkout_render(request, form, rows, total, currency):
     }
 
 
+@never_cache
 def cart_page(request):
     currency = _currency(request)
     rows, total = lines(request, currency)
@@ -298,6 +300,7 @@ def wishlist_page(request):
     )
 
 
+@never_cache
 @require_POST
 def wishlist_toggle(request):
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
@@ -315,6 +318,7 @@ def wishlist_toggle(request):
     return HttpResponseRedirect(next_url)
 
 
+@never_cache
 @require_POST
 def wishlist_remove(request):
     sku = request.POST.get("sku", "")
@@ -340,6 +344,7 @@ def wishlist_remove(request):
     return HttpResponseRedirect(reverse("wishlist"))
 
 
+@never_cache
 @require_POST
 def cart_add(request):
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
@@ -371,12 +376,14 @@ def sum_count(request):
     return item_count(request)
 
 
+@never_cache
 @require_GET
 def cart_panel(request):
     sku = (request.GET.get("sku") or "").strip()
     return render_panel(request, sku)
 
 
+@never_cache
 @require_POST
 def cart_update(request):
     sku = request.POST.get("sku", "")

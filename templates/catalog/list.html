@@ -22,38 +22,24 @@
           <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
           <span aria-hidden="true">/</span>
         </li>
-        {% if not crumbs %}
-          {# дизайн: сторінка каталогу з фільтрами — «Головна/Каталог/Фільтри» #}
-          <li><span aria-current="page">{% trans "Фільтри" %}</span></li>
-        {% endif %}
-        {% for crumb in crumbs %}
-          <li>
-            {% if forloop.last %}
-              <span aria-current="page">{{ crumb.name }}</span>
-            {% else %}
-              <a href="{{ crumb.get_absolute_url }}">{{ crumb.name }}</a>
-              <span aria-hidden="true">/</span>
-            {% endif %}
-          </li>
-        {% endfor %}
+        {# дизайн (Catalog.dc.html): каталог і стан фільтра/категорії — «Головна/Каталог/Фільтри» #}
+        <li><span aria-current="page">{% trans "Фільтри" %}</span></li>
       </ol>
     </nav>
 
     <h1 class="visually-hidden">{% if category %}{{ category.name }}{% else %}{% trans "Каталог товарів Gestia Home" %}{% endif %}</h1>
 
     <section class="nd-cat__products" aria-label="{% trans 'Товари' %}" data-screen-label="Товари">
-      <form
-        id="nd-cat-form"
-        class="nd-cat__layout"
-        method="get"
-        action="{{ request.path }}"
-        hx-get="{{ request.path }}"
-        hx-target="#catalog-results"
-        hx-push-url="true"
-        hx-swap="innerHTML"
-        data-nd-cat-form
-      >
+      {# форма лише в aside: картки (POST «в обране») не вкладені в GET-форму фільтрів — без csrf у URL #}
+      <div class="nd-cat__layout">
         <aside class="nd-cat__aside" aria-label="{% trans 'Пошук і фільтри' %}">
+          <form
+            id="nd-cat-form"
+            class="nd-cat__form"
+            method="get"
+            action="{{ request.path }}"
+            data-nd-cat-form
+          >
           <label class="nd-cat-search">
             <span class="nd-cat-search__icon" aria-hidden="true">
               {% include "partials/nd/icons/search.html" with size=22 %}
@@ -78,9 +64,8 @@
               aria-expanded="{% if filters_open %}true{% else %}false{% endif %}"
               aria-controls="nd-cat-filters"
             >
-              <span>
-                {% trans "Фільтри" %}{% if active_filter_count %} ({{ active_filter_count }}){% endif %}
-              </span>
+              {# макет: «Фільтри» і « (N)» — окремі flex-елементи кнопки (gap 10px) #}
+              <span>{% trans "Фільтри" %}</span>{% if active_filter_count %}<span data-nd-filters-count>({{ active_filter_count }})</span>{% endif %}
               <span class="nd-cat__filters-chev" aria-hidden="true">
                 {% include "partials/nd/icons/chevron.html" with size=10 %}
               </span>
@@ -97,6 +82,7 @@
               {% endif %}
             </div>
           </div>
+          </form>
         </aside>
 
         <div class="nd-cat__main">
@@ -106,7 +92,7 @@
 
           <label class="nd-cat-sort__native-wrap">
             <span class="visually-hidden">{% trans "Сортування" %}</span>
-            <select class="nd-cat-sort__native" name="sort" data-nd-sort-native>
+            <select class="nd-cat-sort__native" name="sort" form="nd-cat-form" data-nd-sort-native>
               <option value="" {% if not parsed.sort %}selected{% endif %}>{% trans "Сортувати за" %}</option>
               <option value="price_asc" {% if parsed.sort == "price_asc" %}selected{% endif %}>{% trans "Ціна: за зростанням" %}</option>
               <option value="price_desc" {% if parsed.sort == "price_desc" %}selected{% endif %}>{% trans "Ціна: за спаданням" %}</option>
@@ -118,7 +104,7 @@
             {% include "catalog/_results.html" %}
           </div>
         </div>
-      </form>
+      </div>
     </section>
   </div>
 {% endblock %}

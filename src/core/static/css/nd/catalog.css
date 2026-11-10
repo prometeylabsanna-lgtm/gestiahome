@@ -74,6 +74,11 @@
   min-width: 0;
 }
 
+/* форма фільтрів не створює власного блоку — діти лишаються flex-елементами aside */
+.nd-cat__form {
+  display: contents;
+}
+
 .nd-cat-search {
   display: flex;
   align-items: center;

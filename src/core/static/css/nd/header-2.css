@@ -152,10 +152,6 @@
     gap: 20px;
   }
 
-  .nd-mega__group.is-open:not(:last-child) {
-    margin-bottom: 10px;
-  }
-
   .nd-mega__cat.is-feature {
     color: var(--nd-off);
     font-weight: 500;

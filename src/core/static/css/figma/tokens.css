@@ -1,6 +1,6 @@
 :root {
   --font: "Inter", sans-serif; /* override via theme.css --font */
-  --header-h: calc(69.211px + env(safe-area-inset-top, 0px));
+  --header-h: calc(80px + env(safe-area-inset-top, 0px));
   --brown: #251008;
   --cream: #feedda;
   --cream-50: rgba(254, 237, 218, 0.5);
@@ -11,7 +11,7 @@
 
 @media (max-width: 767px) {
   :root {
-    --header-h: calc(69px + env(safe-area-inset-top, 0px));
+    --header-h: calc(72px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -81,6 +81,7 @@ body {
 .icon-btn img,
 .social-row img,
 .brand__photo img,
+.brand__img,
 .video-mark img,
 .rating,
 .field-ico,
@@ -90,4 +91,31 @@ body {
 .site-footer__rule,
 .locale__current img {
   max-width: none;
+}
+
+.social-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.social-row__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.social-row__item:hover,
+a.social-row__item:focus-visible {
+  text-decoration: underline;
+}
+
+.social-row__item img {
+  flex: none;
+}
+
+.social-row--cream .social-row__item {
+  color: var(--cream, #feedda);
 }

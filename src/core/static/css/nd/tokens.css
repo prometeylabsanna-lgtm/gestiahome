@@ -1,0 +1,52 @@
+:root {
+  --nd-ink: #251008;
+  --nd-cream: #feedda;
+  --nd-muted: #665852;
+  --nd-off: #9a8f8a;
+  --nd-price: #8b7e78;
+  --nd-gold: #e3c39a;
+  --nd-header-border: #f1ece8;
+  --nd-footer-rule: #917f71;
+  --nd-footer-link: #a89585;
+  --nd-footer-link-hover: #cdb9a8;
+  --nd-mobile-divider: #d9d2cd;
+  --nd-dialog-border: #e8e0da;
+  --nd-dialog-row: #efe9e4;
+  --nd-btn-hover: #3a1d10;
+  --nd-scrim: rgba(37, 16, 8, 0.25);
+  --nd-dialog-shadow: 0 8px 24px rgba(37, 16, 8, 0.12);
+  --nd-surface: #fff;
+  --nd-flag-blue: #0057b7;
+  --nd-flag-yellow: #ffd700;
+
+  --nd-serif: "Cormorant Garamond", serif;
+  --nd-sans: Inter, system-ui, sans-serif;
+
+  --nd-fs-12: 12px;
+  --nd-fs-13: 13px;
+  --nd-fs-14: 14px;
+  --nd-fs-15: 15px;
+  --nd-fs-16: 16px;
+  --nd-fs-18: 18px;
+  --nd-fs-26: 26px;
+  --nd-fs-28: 28px;
+  --nd-fs-40: 40px;
+  --nd-fs-70: 70px;
+  --nd-fs-80: 80px;
+
+  --nd-ls-01: -0.01em;
+  --nd-ls-02: -0.02em;
+  --nd-ls-03: -0.03em;
+  --nd-ls-04: -0.04em;
+  --nd-ls-btn: 0.04em;
+
+  --nd-gutter: clamp(16px, 4.8vw, 69px);
+  --nd-header-h: 80px;
+  --nd-header-h-compact: 72px;
+}
+
+body {
+  font-family: var(--nd-sans);
+  color: var(--nd-ink);
+  -webkit-font-smoothing: antialiased;
+}

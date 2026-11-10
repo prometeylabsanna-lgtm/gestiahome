@@ -33,19 +33,18 @@
   <link rel="icon" href="{% static 'images/favicon.ico' %}" sizes="any">
   <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-  {% if theme_font == "inter" %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500&display=swap">
-  {% endif %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@400;500&display=swap">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}">
   <link rel="stylesheet" href="{% static 'css/reset.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}">
   <link rel="stylesheet" href="{% static 'css/figma/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/header-menu.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/footer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/header-2.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/footer.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
@@ -70,7 +69,7 @@
   <script src="{% static 'js/htmx-errors.js' %}" defer></script>
   <script src="{% static 'js/utils.js' %}" defer></script>
   <script src="{% static 'js/form-validate.js' %}" defer></script>
-  <script src="{% static 'js/nav.js' %}" defer></script>
+  <script src="{% static 'js/nd/header.js' %}" defer></script>
   <script src="{% static 'js/dialog.js' %}" defer></script>
   {% if discount_modal and discount_modal.enabled %}
     <script src="{% static 'js/pages/waitlist-modal.js' %}" defer></script>

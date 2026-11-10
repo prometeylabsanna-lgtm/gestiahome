@@ -73,7 +73,8 @@ class PublicPageTests(TestCase):
         self.assertNotIn("figma/about/m/65445179-2967-4089-8231-e953ba0592e1.svg", body)
         self.assertIn("figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg", body)
         self.assertIn("data-about-pop", body)
-        self.assertIn("Inter:wght@100;400;500", body)
+        self.assertIn("family=Inter:wght@400;500", body)
+        self.assertIn("Cormorant+Garamond", body)
         self.assertIn("флористикою", body)
         self.assertNotIn("figma.com/api/mcp/asset", body)
         css_dir = Path(settings.BASE_DIR) / "src" / "core" / "static" / "css" / "pages"

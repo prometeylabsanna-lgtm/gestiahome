@@ -2,87 +2,119 @@
 {% load i18n static shop_tags %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/checkout.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/checkout.css' %}">
 {% endblock %}
 {% block extra_js %}
   <script src="{% static 'js/pages/checkout.js' %}" defer></script>
+  <script src="{% static 'js/nd/checkout-label.js' %}" defer></script>
 {% endblock %}
 {% block title %}{% trans "Оформлення замовлення" %}{% endblock %}
 
 {% block content %}
-  <div class="checkout-page">
-    {% trans "Кошик" as cart_label %}
-    {% trans "Оформлення замовлення" as checkout_label %}
-    {% url 'cart' as cart_url %}
-    {% include "partials/crumbs.html" with crumb_link_url=cart_url crumb_link_label=cart_label crumb_current=checkout_label %}
-    <form class="checkout-layout" method="post" action="{% url 'checkout' %}" data-once {% include "commerce/_validate_attrs.html" %}>
+  <div class="nd-checkout" data-nd-checkout>
+    <nav class="nd-checkout__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-checkout__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li>
+          <a href="{% url 'cart' %}">{% trans "Кошик" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li aria-current="page">{% trans "Оформлення" %}</li>
+      </ol>
+    </nav>
+
+    <form
+      class="nd-co"
+      method="post"
+      action="{% url 'checkout' %}"
+      data-once
+      {% include "commerce/_validate_attrs.html" %}
+    >
       {% csrf_token %}
       {% include "commerce/_honeypot.html" %}
       <input type="hidden" name="cart_sig" value="{{ cart_sig }}">
       <input type="hidden" name="idem" value="{{ idem }}">
-      <div class="checkout-form">
-        <h1>{% trans "Оформлення замовлення" %}</h1>
-        <div class="checkout-details">
-          {% if cart_notice %}
-            <p class="co-error" role="alert">{{ cart_notice }}</p>
-          {% endif %}
-          {% if form.non_field_errors %}
-            <p class="co-error">{{ form.non_field_errors|striptags }}</p>
-          {% endif %}
-          <section class="co-sec">
-            <h2 class="co-h">{% trans "Контактні дані" %}</h2>
-            <div class="co-fields">
-              <label class="co-field{% if form.name.errors %} is-invalid{% endif %}" data-field-wrap>
-                <img class="co-ico" src="{% static 'figma/checkout/3858d14e-7578-4ce2-8c54-aabd04bfff9f.svg' %}" width="22" height="22" alt="">
-                <input name="name" type="text" maxlength="120" autocomplete="name" autocapitalize="words" spellcheck="false" pattern="[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+(?:['’ʼ -][A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+)*" data-validate="name" aria-describedby="co-name-error" placeholder="{% trans 'Ім’я' %}" value="{{ form.name.value|default_if_none:'' }}">
+
+      <div class="nd-co__main">
+        <h1 class="nd-co__title">{% trans "Оформлення замовлення" %}</h1>
+
+        {% if cart_notice %}
+          <p class="nd-co-error" role="alert">{{ cart_notice }}</p>
+        {% endif %}
+        {% if form.non_field_errors %}
+          <p class="nd-co-error">{{ form.non_field_errors|striptags }}</p>
+        {% endif %}
+
+        <fieldset class="nd-co-sec">
+          <legend class="nd-co-sec__legend">{% trans "Контактні дані" %}</legend>
+          <div class="nd-co-sec__fields">
+            <label class="nd-co-field{% if form.name.errors %} is-invalid{% endif %}" data-field-wrap>
+              <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <input name="name" type="text" maxlength="120" autocomplete="name" autocapitalize="words" spellcheck="false" pattern="[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+(?:['’ʼ -][A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+)*" data-validate="name" aria-describedby="co-name-error" placeholder="{% trans 'Ім’я' %}" value="{{ form.name.value|default_if_none:'' }}">
+            </label>
+            <p class="nd-co-error" id="co-name-error" data-error-for="name"{% if not form.name.errors %} hidden{% endif %}>{% if form.name.errors %}{{ form.name.errors|striptags }}{% endif %}</p>
+
+            <label class="nd-co-field{% if form.phone.errors %} is-invalid{% endif %}" data-field-wrap>
+              <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <input name="phone" type="tel" inputmode="tel" maxlength="19" autocomplete="tel" pattern="\+38 \(0(?:39|50|63|66|67|68|73|77|91|92|93|94|95|96|97|98|99)\) \d{3}-\d{2}-\d{2}" data-validate="phone" aria-describedby="co-phone-error" placeholder="{% trans 'Номер телефону' %}" value="{{ form.phone.value|default_if_none:'' }}">
+            </label>
+            <p class="nd-co-error" id="co-phone-error" data-error-for="phone"{% if not form.phone.errors %} hidden{% endif %}>{% if form.phone.errors %}{{ form.phone.errors|striptags }}{% endif %}</p>
+
+            <label class="nd-co-field{% if form.email.errors %} is-invalid{% endif %}" data-field-wrap>
+              <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 5h18v14H3zM3 6l9 7 9-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <input name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" data-validate="email" aria-describedby="co-email-error" placeholder="{% trans 'Email' %}" value="{{ form.email.value|default_if_none:'' }}">
+            </label>
+            <p class="nd-co-error" id="co-email-error" data-error-for="email"{% if not form.email.errors %} hidden{% endif %}>{% if form.email.errors %}{{ form.email.errors|striptags }}{% endif %}</p>
+          </div>
+        </fieldset>
+
+        <fieldset class="nd-co-sec">
+          <legend class="nd-co-sec__legend" id="ship-label">{% trans "Доставка" %}</legend>
+          <div class="nd-co-ship" role="radiogroup" aria-labelledby="ship-label">
+            {% for value, label in form.delivery_method.field.choices %}
+              <label class="nd-co-ship__tab">
+                <input type="radio" name="delivery_method" value="{{ value }}" data-ship {% if form.delivery_method.value == value %}checked{% endif %}>
+                <span>{{ label }}</span>
               </label>
-              <p class="co-error" id="co-name-error" data-error-for="name"{% if not form.name.errors %} hidden{% endif %}>{% if form.name.errors %}{{ form.name.errors|striptags }}{% endif %}</p>
-              <label class="co-field{% if form.phone.errors %} is-invalid{% endif %}" data-field-wrap>
-                <img class="co-ico" src="{% static 'figma/checkout/24baed88-aa5f-4c39-88b2-cb26acd9a8f5.svg' %}" width="22" height="22" alt="">
-                <input name="phone" type="tel" inputmode="tel" maxlength="19" autocomplete="tel" pattern="\+38 \(0(?:39|50|63|66|67|68|73|77|91|92|93|94|95|96|97|98|99)\) \d{3}-\d{2}-\d{2}" data-validate="phone" aria-describedby="co-phone-error" placeholder="{% trans 'Номер телефону' %}" value="{{ form.phone.value|default_if_none:'' }}">
-              </label>
-              <p class="co-error" id="co-phone-error" data-error-for="phone"{% if not form.phone.errors %} hidden{% endif %}>{% if form.phone.errors %}{{ form.phone.errors|striptags }}{% endif %}</p>
-              <label class="co-field{% if form.email.errors %} is-invalid{% endif %}" data-field-wrap>
-                <img class="co-ico" src="{% static 'figma/checkout/2318dda8-3064-4d05-855d-aa0321c9bbfd.svg' %}" width="22" height="22" alt="">
-                <input name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" data-validate="email" aria-describedby="co-email-error" placeholder="{% trans 'Email' %}" value="{{ form.email.value|default_if_none:'' }}">
-              </label>
-              <p class="co-error" id="co-email-error" data-error-for="email"{% if not form.email.errors %} hidden{% endif %}>{% if form.email.errors %}{{ form.email.errors|striptags }}{% endif %}</p>
-            </div>
-          </section>
-          <section class="co-sec">
-            <h2 class="co-h" id="ship-label">{% trans "Доставка" %}</h2>
-            <div class="ship-tabs" role="radiogroup" aria-labelledby="ship-label">
-              {% for value, label in form.delivery_method.field.choices %}
-                <label class="ship-tab">
-                  <input type="radio" name="delivery_method" value="{{ value }}" data-ship {% if form.delivery_method.value == value %}checked{% endif %}>
-                  <span>{{ label }}</span>
-                </label>
-              {% endfor %}
-            </div>
-            {% if form.delivery_method.errors %}<p class="co-error">{{ form.delivery_method.errors|striptags }}</p>{% endif %}
-            <div
-              class="co-fields"
-              data-np-ship
-              data-np-min="2"
-              data-np-cities-url="{% url 'np_cities' %}"
-              data-np-warehouses-url="{% url 'np_warehouses' %}"
-              data-np-streets-url="{% url 'np_streets' %}"
-              data-label-branch="{% trans 'Відділення' %}"
-              data-label-locker="{% trans 'Поштомат' %}"
-              data-label-street="{% trans 'Вулиця' %}"
-              data-hint-np-off="{% trans 'Підказки недоступні — вкажіть місто і відділення вручну.' %}"
-              data-hint-cities-fail="{% trans 'Не вдалося завантажити міста. Спробуйте ще раз або введіть вручну.' %}"
-              data-hint-no-branches="{% trans 'Для цього міста відділень не знайдено — введіть вручну.' %}"
-              data-hint-branches-fail="{% trans 'Не вдалося завантажити відділення — введіть вручну.' %}"
-              data-hint-streets-off="{% trans 'Підказки вулиць недоступні — введіть вручну.' %}"
-              data-hint-no-streets="{% trans 'Вулиць не знайдено. Уточніть назву або введіть вручну.' %}"
-              data-hint-streets-fail="{% trans 'Не вдалося завантажити вулиці — введіть вручну.' %}"
-              data-hint-pick-city="{% trans 'Оберіть місто зі списку або введіть назву.' %}"
-              data-hint-street-format="{% trans 'Вулиця окремо; будинок і квартиру — у полях праворуч.' %}"
-            >
+            {% endfor %}
+          </div>
+          {% if form.delivery_method.errors %}<p class="nd-co-error">{{ form.delivery_method.errors|striptags }}</p>{% endif %}
+
+          <div
+            class="nd-co-sec__fields nd-co-ship-fields"
+            data-np-ship
+            data-np-min="2"
+            data-np-cities-url="{% url 'np_cities' %}"
+            data-np-warehouses-url="{% url 'np_warehouses' %}"
+            data-np-streets-url="{% url 'np_streets' %}"
+            data-label-branch="{% trans 'Відділення' %}"
+            data-label-locker="{% trans 'Поштомат' %}"
+            data-label-street="{% trans 'Вулиця' %}"
+            data-hint-np-off="{% trans 'Підказки недоступні — вкажіть місто і відділення вручну.' %}"
+            data-hint-cities-fail="{% trans 'Не вдалося завантажити міста. Спробуйте ще раз або введіть вручну.' %}"
+            data-hint-no-branches="{% trans 'Для цього міста відділень не знайдено — введіть вручну.' %}"
+            data-hint-branches-fail="{% trans 'Не вдалося завантажити відділення — введіть вручну.' %}"
+            data-hint-streets-off="{% trans 'Підказки вулиць недоступні — введіть вручну.' %}"
+            data-hint-no-streets="{% trans 'Вулиць не знайдено. Уточніть назву або введіть вручну.' %}"
+            data-hint-streets-fail="{% trans 'Не вдалося завантажити вулиці — введіть вручну.' %}"
+            data-hint-pick-city="{% trans 'Оберіть місто зі списку або введіть назву.' %}"
+            data-hint-street-format="{% trans 'Вулиця окремо; будинок і квартиру — у полях праворуч.' %}"
+          >
+            <div class="nd-co-ship-pair">
               <div class="co-suggest">
-                <label class="co-field{% if form.city.errors %} is-invalid{% endif %}" data-field-wrap>
-                  <img class="co-ico" src="{% static 'figma/checkout/a6cfae51-d224-4303-8a57-ef3c65ad5db9.svg' %}" width="22" height="22" alt="">
+                <label class="nd-co-field{% if form.city.errors %} is-invalid{% endif %}" data-field-wrap>
+                  <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
                   <input
                     name="city"
                     type="text"
@@ -102,10 +134,15 @@
                 </label>
                 <ul id="np-city-listbox" class="co-suggest__list" role="listbox" hidden></ul>
               </div>
-              <p class="co-error" id="co-city-error" data-error-for="city"{% if not form.city.errors %} hidden{% endif %}>{% if form.city.errors %}{{ form.city.errors|striptags }}{% endif %}</p>
-              <div class="co-street-line" data-np-street-line>
+              <div class="nd-co-street" data-np-street-line>
                 <div class="co-suggest" data-np-second>
-                  <label class="co-field co-field--plain{% if form.branch.errors %} is-invalid{% endif %}" data-field-wrap>
+                  <label class="nd-co-field nd-co-field--second{% if form.branch.errors %} is-invalid{% endif %}" data-field-wrap>
+                    <svg class="nd-co-field__ico nd-co-field__ico--box" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <svg class="nd-co-field__ico nd-co-field__ico--home" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M3 11l9-7 9 7v9H3zM9 20v-6h6v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
                     <input
                       name="branch"
                       type="text"
@@ -122,11 +159,13 @@
                       placeholder="{% trans 'Відділення' %}"
                       value="{{ form.branch.value|default_if_none:'' }}"
                     >
-                    <img class="co-arrow" data-np-arrow src="{% static 'figma/checkout/ef8b2949-5e35-4987-b356-507e5c04e922.svg' %}" width="15" height="15" alt="">
+                    <svg class="nd-co-field__arrow" data-np-arrow width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
                   </label>
                   <ul id="np-branch-listbox" class="co-suggest__list" role="listbox" hidden></ul>
                 </div>
-                <label class="co-field co-field--house" data-np-house hidden>
+                <label class="nd-co-field nd-co-field--house" data-np-house hidden>
                   <span class="visually-hidden">{% trans "Будинок" %}</span>
                   <input
                     name="house"
@@ -139,7 +178,7 @@
                     value="{{ form.house.value|default_if_none:'' }}"
                   >
                 </label>
-                <label class="co-field co-field--apt" data-np-apt hidden>
+                <label class="nd-co-field nd-co-field--apt" data-np-apt hidden>
                   <span class="visually-hidden">{% trans "Квартира" %}</span>
                   <input
                     name="apartment"
@@ -153,60 +192,61 @@
                   >
                 </label>
               </div>
-              <p class="co-hint" data-np-hint hidden></p>
-              <p class="co-error" id="co-branch-error" data-error-for="branch"{% if not form.branch.errors %} hidden{% endif %}>{% if form.branch.errors %}{{ form.branch.errors|striptags }}{% endif %}</p>
-              {% if form.house.errors %}<p class="co-error">{{ form.house.errors|striptags }}</p>{% endif %}
-              {% if form.apartment.errors %}<p class="co-error">{{ form.apartment.errors|striptags }}</p>{% endif %}
-              {% if form.address.errors %}<p class="co-error">{{ form.address.errors|striptags }}</p>{% endif %}
             </div>
-          </section>
-          <section class="co-sec">
-            <div class="pay__block">
-              <h2 class="co-h" id="pay-label">{% trans "Оплата" %}</h2>
-              <div class="pay__list" role="radiogroup" aria-labelledby="pay-label">
-                {% for value, label in form.payment_method.field.choices %}
-                  <label class="pay__opt">
-                    <input type="radio" name="payment_method" value="{{ value }}" {% if form.payment_method.value == value %}checked{% endif %}>
-                    <span class="pay__dot">
-                      <img class="pay__off" src="{% static 'figma/checkout/8faa76b3-6abd-41ea-b7f2-3bd14a4a106f.svg' %}" width="14" height="14" alt="">
-                      <img class="pay__on" src="{% static 'figma/checkout/ee187a44-fa45-41e5-9a29-7172be70d21b.svg' %}" width="14" height="14" alt="">
-                    </span>
-                    <span>{{ label }}</span>
-                  </label>
-                {% endfor %}
-              </div>
-            </div>
-            {% if form.payment_method.errors %}<p class="co-error">{{ form.payment_method.errors|striptags }}</p>{% endif %}
-            <div class="co-rule" aria-hidden="true">
-              <img src="{% static 'figma/checkout/2202114d-934e-4538-a1cb-21d85f94634c.svg' %}" width="32" height="32" alt="">
-            </div>
-            <label class="co-consent" data-field-wrap>
-              <input type="checkbox" name="consent" data-validate="consent"{% if form.consent.value %} checked{% endif %}>
-              <span class="co-consent__box" aria-hidden="true"></span>
-              <span class="co-consent__text">{% trans "Погоджуюсь на обробку персональних даних згідно з" %} <a href="{% url 'privacy' %}">{% trans "Політикою конфіденційності" %}</a></span>
-            </label>
-            <p class="co-error" data-error-for="consent"{% if not form.consent.errors %} hidden{% endif %}>{% if form.consent.errors %}{{ form.consent.errors|striptags }}{% endif %}</p>
-          </section>
-        </div>
-      </div>
-      <aside class="co-card">
-        <div class="co-card__head">
-          <h2 class="co-card__title">{% trans "Ваше замовлення" %}</h2>
-          <div class="co-lines">
-            {% for row in rows %}
-              <div class="co-line"{% if row.over_stock %} data-over-stock{% endif %}>
-                <p>{{ row.product.name }}</p>
-                <p>{% trans "х" %}{{ row.qty }}</p>
-              </div>
-            {% endfor %}
-            <p class="co-ship">{% trans "Доставка: за тарифом перевізника" %}</p>
+            <p class="nd-co-error" id="co-city-error" data-error-for="city"{% if not form.city.errors %} hidden{% endif %}>{% if form.city.errors %}{{ form.city.errors|striptags }}{% endif %}</p>
+            <p class="nd-co-hint" data-np-hint hidden></p>
+            <p class="nd-co-error" id="co-branch-error" data-error-for="branch"{% if not form.branch.errors %} hidden{% endif %}>{% if form.branch.errors %}{{ form.branch.errors|striptags }}{% endif %}</p>
+            {% if form.house.errors %}<p class="nd-co-error">{{ form.house.errors|striptags }}</p>{% endif %}
+            {% if form.apartment.errors %}<p class="nd-co-error">{{ form.apartment.errors|striptags }}</p>{% endif %}
+            {% if form.address.errors %}<p class="nd-co-error">{{ form.address.errors|striptags }}</p>{% endif %}
           </div>
+        </fieldset>
+
+        <fieldset class="nd-co-sec">
+          <legend class="nd-co-sec__legend" id="pay-label">{% trans "Оплата" %}</legend>
+          <div class="nd-co-pay" role="radiogroup" aria-labelledby="pay-label">
+            {% for value, label in form.payment_method.field.choices %}
+              <label class="nd-co-pay__opt">
+                <input type="radio" name="payment_method" value="{{ value }}" {% if form.payment_method.value == value %}checked{% endif %}>
+                <span class="nd-co-pay__dot" aria-hidden="true"></span>
+                <span>{{ label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          {% if form.payment_method.errors %}<p class="nd-co-error">{{ form.payment_method.errors|striptags }}</p>{% endif %}
+        </fieldset>
+
+        <label class="nd-co-consent" data-field-wrap>
+          <input type="checkbox" name="consent" data-validate="consent"{% if form.consent.value %} checked{% endif %}>
+          <span class="nd-co-consent__box" aria-hidden="true"></span>
+          <span class="nd-co-consent__text">{% trans "Погоджуюсь на обробку персональних даних згідно з" %} <a href="{% url 'privacy' %}">{% trans "Політикою конфіденційності" %}</a></span>
+        </label>
+        <p class="nd-co-error" data-error-for="consent"{% if not form.consent.errors %} hidden{% endif %}>{% if form.consent.errors %}{{ form.consent.errors|striptags }}{% endif %}</p>
+      </div>
+
+      <aside class="nd-co__aside" aria-label="{% trans 'Ваше замовлення' %}">
+        <h2 class="nd-co__aside-title">{% trans "Ваше замовлення" %}</h2>
+        <ul class="nd-co__lines">
+          {% for row in rows %}
+            <li class="nd-co__line"{% if row.over_stock %} data-over-stock{% endif %}>
+              <span>{{ row.product.name }}</span>
+              <span class="nd-co__qty">× {{ row.qty }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="nd-co__ship">{% trans "Доставка: за тарифом перевізника" %}</p>
+        <div class="nd-co__total">
+          <span class="nd-co__total-label">{% trans "Разом:" %}</span>
+          <span class="nd-co__total-value">{% line_uah total %}</span>
         </div>
-        <div class="co-total">
-          <p>{% trans "Разом:" %}</p>
-          <p>{% sum_uah total %}</p>
-        </div>
-        <button class="co-go" type="submit">{% trans "Купити" %}</button>
+        <button
+          class="nd-co__submit"
+          type="submit"
+          data-nd-checkout-submit
+          data-label-place="{% trans 'Оформити замовлення' %}"
+          data-label-pay="{% trans 'Оплатити замовлення' %}"
+        >{% trans "Оформити замовлення" %}</button>
+        <p class="nd-co__note">{% trans "Підтвердження замовлення та деталі оплати надсилаються після оформлення" %}</p>
       </aside>
     </form>
   </div>

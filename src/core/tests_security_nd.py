@@ -1,5 +1,7 @@
 import re
+from pathlib import Path
 
+import django
 from django.core.cache import cache
 from django.template import Context, Template
 from django.test import SimpleTestCase, TestCase
@@ -7,6 +9,11 @@ from django.utils import translation
 from django.utils.html import escape
 
 from src.content.models_thankyou import ThankYouPage
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_DJANGO_REQ_RE = re.compile(
+    r"(?i)^\s*Django\s*>=\s*(\d+)\.(\d+)(?:\.(\d+))?\s*,\s*<\s*\d+",
+)
 
 
 def _render_richhtml_number(body: str, number) -> str:
@@ -100,3 +107,20 @@ class NextPathSecurityTests(TestCase):
         for value in next_values:
             if "katalog" in value:
                 self.assertIn("sort=price", value)
+
+
+class DjangoVersionPinSecurityTests(SimpleTestCase):
+    def test_requirements_django_floor_and_installed(self):
+        req_path = _REPO_ROOT / "requirements.txt"
+        self.assertTrue(req_path.is_file(), req_path)
+        django_lines = [
+            line for line in req_path.read_text(encoding="utf-8").splitlines()
+            if _DJANGO_REQ_RE.match(line)
+        ]
+        self.assertEqual(len(django_lines), 1, django_lines)
+        match = _DJANGO_REQ_RE.match(django_lines[0])
+        self.assertIsNotNone(match, django_lines[0])
+        major, minor, patch = match.groups()
+        floor = (int(major), int(minor), int(patch or 0))
+        self.assertGreaterEqual(floor, (5, 2, 17), floor)
+        self.assertGreaterEqual(django.VERSION[:3], (5, 2, 17), django.VERSION)

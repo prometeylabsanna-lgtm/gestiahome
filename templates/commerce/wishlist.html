@@ -4,13 +4,20 @@
 {% block title %}{% trans "Обране" %}{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/wishlist.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/wishlist.css' %}">
 {% endblock %}
 
 {% block content %}
-  <div class="wish-page" data-qa="wishlist-page">
-    {% trans "Обране" as wish_label %}
-    {% include "partials/crumbs.html" with crumb_current=wish_label %}
+  <div class="nd-wish" data-qa="wishlist-page">
+    <nav class="nd-wish__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-wish__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li aria-current="page">{% trans "Обране" %}</li>
+      </ol>
+    </nav>
     <div id="wish-body">
       {% include "commerce/_wishlist_body.html" %}
     </div>

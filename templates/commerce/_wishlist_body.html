@@ -1,58 +1,82 @@
 {% load i18n static shop_tags %}
+<h1 class="nd-wish__title">
+  {% trans "Обране" %}{% if wishlist_count %} ({{ wishlist_count }}){% endif %}
+</h1>
+
 {% if rows %}
-  <div class="wish-layout">
-    <div class="wish-main">
-      <div class="wish-head">
-        <h1>{% trans "Обране" %} ({{ wishlist_count }})</h1>
-        <div class="wish-items" role="list">
-          {% for row in rows %}
-            <article class="wish-item" role="listitem">
-              <a class="wish-item__photo" href="{{ row.product.get_absolute_url }}">
-                {% with media=row.product.card_media %}
-                  {% if media %}{% include "partials/smart_media.html" with media=media width=96 height=108 alt=row.product.name %}{% endif %}
-                {% endwith %}
-              </a>
-              <div class="wish-item__body">
-                <div class="wish-item__top">
-                  <a class="wish-item__name" href="{{ row.product.get_absolute_url }}">{{ row.product.name }}</a>
-                  <p class="wish-item__price">{% line_uah row.unit %}</p>
-                </div>
-                <div class="wish-item__actions">
-                  <form method="post" action="{% url 'cart_add' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="sku" value="{{ row.sku }}">
-                    <input type="hidden" name="qty" value="1">
-                    <button class="wish-cart" type="submit">{% trans "До кошика" %}</button>
-                  </form>
-                  <form
-                    method="post"
-                    action="{% url 'wishlist_remove' %}"
-                    hx-post="{% url 'wishlist_remove' %}"
-                    hx-target="#wish-body"
-                    hx-swap="innerHTML"
-                  >
-                    {% csrf_token %}
-                    <input type="hidden" name="sku" value="{{ row.sku }}">
-                    <button class="wish-remove" type="submit" aria-label="{% trans 'Прибрати з обраного' %}">
-                      <img src="{% static 'figma/cart/d10fca64-fbb5-441c-bdd0-7a6260fe440f.svg' %}" width="22" height="25" alt="">
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </article>
-            {% if not forloop.last %}
-              <hr class="wish-rule">
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      <a class="wish-continue" href="{% url 'catalog' %}">{% trans "Продовжити покупки" %}</a>
-    </div>
-  </div>
+  <ul class="nd-wish__grid">
+    {% for row in rows %}
+      <li class="nd-wish__item">
+        <form
+          class="nd-wish__remove-form"
+          method="post"
+          action="{% url 'wishlist_remove' %}"
+          hx-post="{% url 'wishlist_remove' %}"
+          hx-target="#wish-body"
+          hx-swap="innerHTML"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="sku" value="{{ row.sku }}">
+          <button
+            class="nd-wish__remove"
+            type="submit"
+            aria-label="{% trans 'Видалити з обраного' %}"
+          >
+            {% include "partials/nd/icons/heart.html" with size=20 filled=True %}
+          </button>
+        </form>
+        <a class="nd-wish__link" href="{{ row.product.get_absolute_url }}">
+          <span class="nd-wish__media">
+            {% with media=row.product.card_media %}
+              {% if media %}
+                {% include "partials/smart_media.html" with media=media width=303 height=342 alt="" %}
+              {% endif %}
+            {% endwith %}
+          </span>
+          <span class="nd-wish__meta">
+            <span class="nd-wish__name">{{ row.product.name }}</span>
+            <span class="nd-wish__price">{% line_uah row.unit %}</span>
+          </span>
+        </a>
+        <form
+          class="nd-wish__cart-form"
+          method="post"
+          action="{% url 'cart_add' %}"
+          hx-post="{% url 'cart_add' %}"
+          hx-target="#cart-count"
+          hx-swap="outerHTML"
+          hx-sync="this:replace"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="sku" value="{{ row.sku }}">
+          <input type="hidden" name="qty" value="1">
+          <button
+            class="nd-wish__cart"
+            type="submit"
+            {% if row.product.stock_status == "out" or row.product.stock_qty <= 0 %}disabled{% endif %}
+          >
+            {% trans "В кошик" %}
+          </button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
 {% else %}
-  <div class="wish-main">
-    <h1>{% trans "Обране" %} (0)</h1>
-    <p class="wish-empty">{% trans "У обраному поки порожньо." %}</p>
-    <a class="wish-continue" href="{% url 'catalog' %}">{% trans "До каталогу" %}</a>
+  <div class="nd-wish__empty">
+    <svg
+      class="nd-wish__empty-ico"
+      width="40"
+      height="40"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+    </svg>
+    <p class="nd-wish__empty-text">{% trans "У вас поки немає обраних товарів" %}</p>
+    <a class="nd-wish__empty-link" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
   </div>
 {% endif %}

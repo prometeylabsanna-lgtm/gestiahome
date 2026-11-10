@@ -103,6 +103,14 @@
   --nd-cart-aside-pad: clamp(20px, 2.2vw, 32px);
   --nd-cart-suggest-top: clamp(48px, 5.6vw, 72px);
   --nd-cart-row-gap: clamp(16px, 2.1vw, 24px);
+
+  --nd-wish-fs-title: clamp(44px, 4.9vw, 70px);
+  --nd-wish-pad-y: clamp(80px, 8.3vw, 120px);
+  --nd-wish-title-top: clamp(32px, 4.2vw, 60px);
+  --nd-wish-grid-top: clamp(32px, 3.9vw, 48px);
+  --nd-wish-gap-y: clamp(20px, 2.1vw, 30px);
+  --nd-wish-gap-x: clamp(12px, 2.1vw, 30px);
+  --nd-wish-card-ratio: 303 / 342;
 }
 
 body {

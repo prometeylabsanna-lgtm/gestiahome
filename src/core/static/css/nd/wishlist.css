@@ -1,0 +1,231 @@
+.page-wishlist {
+  background: var(--nd-surface);
+  color: var(--nd-ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+.nd-wish {
+  padding: 0 var(--nd-gutter) var(--nd-wish-pad-y);
+  padding-left: max(var(--nd-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--nd-gutter), env(safe-area-inset-right, 0px));
+  padding-bottom: max(var(--nd-wish-pad-y), env(safe-area-inset-bottom, 0px));
+  overflow-x: clip;
+}
+
+.nd-wish__crumbs {
+  padding-top: 12px;
+}
+
+.nd-wish__crumbs-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--nd-fs-12);
+  line-height: 1.4;
+}
+
+.nd-wish__crumbs-list a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nd-wish__crumbs-list a:hover,
+.nd-wish__crumbs-list a:focus-visible {
+  text-decoration: underline;
+}
+
+.nd-wish__crumbs-list [aria-current="page"] {
+  color: var(--nd-muted);
+}
+
+.nd-wish__title {
+  margin: var(--nd-wish-title-top) 0 0;
+  font-family: var(--nd-serif);
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: var(--nd-wish-fs-title);
+  line-height: 1;
+  letter-spacing: var(--nd-ls-04);
+}
+
+.nd-wish__grid {
+  margin: var(--nd-wish-grid-top) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--nd-wish-gap-y) var(--nd-wish-gap-x);
+}
+
+.nd-wish__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nd-wish__remove-form {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  margin: 0;
+}
+
+.nd-wish__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--nd-surface);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  filter: var(--nd-wish-shadow);
+}
+
+.nd-wish__remove svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.nd-wish__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nd-wish__link:hover,
+.nd-wish__link:focus-visible {
+  color: inherit;
+}
+
+.nd-wish__media {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--nd-wish-card-ratio);
+  overflow: hidden;
+  background: var(--nd-cat-panel);
+}
+
+.nd-wish__media :is(img, picture, video) {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+
+.nd-wish__media picture img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.nd-wish__meta {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: var(--nd-fs-16);
+  line-height: 1.2;
+}
+
+.nd-wish__name {
+  white-space: pre-line;
+  min-width: 0;
+}
+
+.nd-wish__price {
+  white-space: nowrap;
+  flex: none;
+}
+
+.nd-wish__cart-form {
+  margin-top: 14px;
+}
+
+.nd-wish__cart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--nd-ink);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--nd-fs-14);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nd-wish__cart:hover,
+.nd-wish__cart:focus-visible {
+  background: var(--nd-ink);
+  color: var(--nd-cream);
+}
+
+.nd-wish__cart:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nd-wish__cart:disabled:hover,
+.nd-wish__cart:disabled:focus-visible {
+  background: none;
+  color: inherit;
+}
+
+.nd-wish__empty {
+  margin-top: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.nd-wish__empty-ico {
+  color: var(--nd-ink);
+  display: block;
+}
+
+.nd-wish__empty-text {
+  margin: 0;
+  font-size: var(--nd-fs-16);
+  color: var(--nd-muted);
+}
+
+.nd-wish__empty-link {
+  font-size: var(--nd-fs-16);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 1024px) {
+  .nd-wish__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

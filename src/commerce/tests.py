@@ -359,8 +359,8 @@ class CheckoutTests(TestCase):
     def test_wishlist_session_flow(self):
         empty = self.client.get("/obrane/")
         self.assertEqual(empty.status_code, 200)
-        self.assertContains(empty, "У обраному поки порожньо.")
-        self.assertContains(empty, "css/pages/wishlist.css")
+        self.assertContains(empty, "У вас поки немає обраних товарів")
+        self.assertContains(empty, "css/nd/wishlist.css")
         added = self.client.post("/obrane/toggle/", {"sku": "SNIH"})
         self.assertEqual(added.status_code, 302)
         self.assertEqual(self.client.session["wishlist"], ["SNIH"])

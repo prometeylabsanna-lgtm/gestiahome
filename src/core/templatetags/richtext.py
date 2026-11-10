@@ -11,6 +11,7 @@ register = template.Library()
 _BLOCK_SPLIT = re.compile(r"(?i)</p>\s*<p[^>]*>|<br\s*/?>")
 _STRIP_P = re.compile(r"(?i)</?p[^>]*>")
 _HAS_LIST = re.compile(r"(?i)<(?:ul|ol)\b")
+_TAG_OR_TEXT = re.compile(r"(<[^>]*>)")
 
 
 def _looks_like_html(text: str) -> bool:
@@ -69,6 +70,18 @@ def richinline(value):
     return mark_safe(strip_outer_p(cleaned))
 
 
+def _substitute_number_placeholder(cleaned: str, replacement: str) -> str:
+    """Replace {number} only in text nodes; strip placeholder inside tags."""
+    parts = _TAG_OR_TEXT.split(cleaned)
+    out: list[str] = []
+    for part in parts:
+        if part.startswith("<") and part.endswith(">"):
+            out.append(part.replace("{number}", ""))
+        else:
+            out.append(part.replace("{number}", replacement))
+    return "".join(out)
+
+
 @register.filter(name="richhtml_number")
 def richhtml_number(value, number):
     """Sanitize CMS HTML and safely substitute {number} (escaped, data-qa span)."""
@@ -84,4 +97,4 @@ def richhtml_number(value, number):
         replacement = ""
     if not _looks_like_html(cleaned):
         cleaned = str(linebreaks(cleaned))
-    return mark_safe(cleaned.replace("{number}", replacement))
+    return mark_safe(_substitute_number_placeholder(cleaned, replacement))

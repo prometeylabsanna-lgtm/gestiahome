@@ -323,6 +323,8 @@ def order_pay(request, number):
     if not payments.card_enabled(order.currency):
         return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
     payload = payments.build_checkout(order, request)
+    if order.payment_status == Order.PayStatus.PAID:
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
     return render(
         request,
         "commerce/pay.html",

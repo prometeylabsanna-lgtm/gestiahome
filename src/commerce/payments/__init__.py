@@ -20,6 +20,10 @@ def build_checkout(order, request) -> dict:
     return liqpay.build_checkout(order, request)
 
 
+def ensure_payment_ref(order) -> str:
+    return liqpay.ensure_payment_ref(order)
+
+
 def handle_callback(data: str, signature: str) -> tuple[int, str]:
     return liqpay.handle_callback(data, signature)
 

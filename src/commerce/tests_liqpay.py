@@ -1,13 +1,21 @@
+import base64
+import hashlib
 import os
+import subprocess
+import sys
 import unittest
 from decimal import Decimal
+from pathlib import Path
 
+from django.contrib.admin.sites import AdminSite
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.test import Client, TestCase, override_settings
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
 from src.catalog.models import Category, Product
+from src.commerce.admin import OrderAdmin
 from src.commerce.forms import CheckoutForm
 from src.commerce.models import Order
 from src.commerce.payments import card_enabled
@@ -21,13 +29,40 @@ LIQPAY_ON = override_settings(
     SITE_URL="https://shop.test",
 )
 
+# Public LiqPay docs example (not a secret).
+_DOC_PRIVATE_KEY = "a4825234f4bae72a0be04eafe9e8e2bada209255"
+_DOC_DATA = (
+    "eyJwdWJsaWNfa2V5IjoiaTAwMDAwMDAwIiwidmVyc2lvbiI6NywiYWN0aW9uIjoicGF5IiwiYW1vdW50IjoiMyI"
+    "sImN1cnJlbmN5IjoiVUFIIiwiZGVzY3JpcHRpb24iOiJ0ZXN0Iiwib3JkZXJfaWQiOiIwMDAwMDEifQ=="
+)
+_DOC_SHA3_SIGNATURE = "0adgJ8F2Ds5HCVkcz4AlmdLMRoIJf7IxsL3QmeFRz/s="
 
-def _callback_post(order, *, status="success", amount=None, currency="UAH", payment_id="txn-1", order_id=None):
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _sign_sha1(data: str, private_key: str) -> str:
+    digest = hashlib.sha1(f"{private_key}{data}{private_key}".encode("utf-8")).digest()
+    return base64.b64encode(digest).decode("ascii")
+
+
+def _callback_post(
+    order,
+    *,
+    status="success",
+    amount=None,
+    currency="UAH",
+    payment_id="txn-1",
+    order_id=None,
+    public_key="test_pub",
+    action="pay",
+    private_key="test_priv",
+    algo="sha3",
+):
     ref = order_id or order.payment_ref or f"{order.number}-deadbeef"
     params = {
-        "version": 3,
-        "public_key": "test_pub",
-        "action": "pay",
+        "version": 7,
+        "public_key": public_key,
+        "action": action,
         "amount": str(amount if amount is not None else order.total),
         "currency": currency,
         "order_id": ref,
@@ -35,7 +70,10 @@ def _callback_post(order, *, status="success", amount=None, currency="UAH", paym
         "payment_id": payment_id,
     }
     data = lp.encode_data(params)
-    signature = lp.sign(data, "test_priv")
+    if algo == "sha1":
+        signature = _sign_sha1(data, private_key)
+    else:
+        signature = lp.sign(data, private_key)
     return {"data": data, "signature": signature}
 
 
@@ -46,12 +84,28 @@ class LiqPayAdapterTests(TestCase):
         signature = lp.sign(data)
         self.assertTrue(lp.verify(data, signature))
 
+    def test_sign_matches_liqpay_docs_sha3_vector(self):
+        self.assertEqual(lp.sign(_DOC_DATA, _DOC_PRIVATE_KEY), _DOC_SHA3_SIGNATURE)
+
+    def test_verify_accepts_legacy_sha1(self):
+        data = lp.encode_data({"amount": "10"})
+        signature = _sign_sha1(data, "test_priv")
+        self.assertTrue(lp.verify(data, signature, "test_priv"))
+
     def test_verify_rejects_invalid_and_tampered(self):
         data = lp.encode_data({"amount": "10"})
         signature = lp.sign(data)
         self.assertFalse(lp.verify(data, "not-a-sig"))
         self.assertFalse(lp.verify(data + "x", signature))
         self.assertFalse(lp.verify("", signature))
+
+    def test_verify_false_when_private_key_empty(self):
+        data = lp.encode_data({"amount": "10"})
+        signature = lp.sign(data, "test_priv")
+        self.assertFalse(lp.verify(data, signature, private_key=""))
+        self.assertFalse(lp.verify(data, signature, private_key="   "))
+        empty_sig = lp.sign(data, "")
+        self.assertFalse(lp.verify(data, empty_sig, private_key=""))
 
 
 @LIQPAY_ON
@@ -112,6 +166,7 @@ class LiqPayCheckoutFlowTests(TestCase):
         order.refresh_from_db()
         built = lp.build_checkout(order, None)
         decoded = lp._decode_payload(built["data"])
+        self.assertEqual(decoded["version"], 7)
         self.assertEqual(decoded["amount"], "501.00")
         self.assertEqual(decoded["currency"], "UAH")
         self.assertTrue(decoded["order_id"].startswith(f"{order.number}-"))
@@ -134,9 +189,11 @@ class LiqPayCheckoutFlowTests(TestCase):
         )
         built = lp.build_checkout(order, None)
         decoded = lp._decode_payload(built["data"])
+        self.assertEqual(decoded["version"], 7)
         self.assertEqual(decoded["amount"], "99.50")
         self.assertEqual(decoded["public_key"], "test_pub")
         self.assertNotIn("private", str(decoded).lower())
+        self.assertEqual(built["signature"], lp.sign(built["data"], "test_priv"))
 
 
 @LIQPAY_ON
@@ -314,7 +371,7 @@ class LiqPayCallbackTests(TestCase):
         self.order.total = Decimal("1200.00")
         self.order.save(update_fields=["total"])
         params = {
-            "version": 3,
+            "version": 7,
             "public_key": "test_pub",
             "action": "pay",
             "amount": 1200.0,
@@ -329,6 +386,75 @@ class LiqPayCallbackTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.order.refresh_from_db()
         self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_callback_sha3_marks_paid(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, algo="sha3", payment_id="txn-sha3"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_callback_legacy_sha1_marks_paid(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, algo="sha1", payment_id="txn-sha1"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_callback_wrong_signature_400(self):
+        payload = _callback_post(self.order)
+        payload["signature"] = lp.sign(payload["data"], "other-key")
+        response = self.client.post(reverse("liqpay_callback"), payload)
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+
+    def test_eur_order_currency_rejected(self):
+        self.order.currency = "eur"
+        self.order.save(update_fields=["currency"])
+        response = self.client.post(reverse("liqpay_callback"), _callback_post(self.order))
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+        self.assertNotEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_wrong_public_key_rejected(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, public_key="other_pub"),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+
+    def test_non_pay_action_rejected(self):
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, action="hold"),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+
+    def test_non_ascii_signature_400(self):
+        payload = _callback_post(self.order)
+        payload["signature"] = "é"
+        response = self.client.post(reverse("liqpay_callback"), payload)
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+
+    def test_non_ascii_data_400(self):
+        payload = _callback_post(self.order)
+        payload["data"] = payload["data"] + "ї"
+        response = self.client.post(reverse("liqpay_callback"), payload)
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
 
     def test_callback_csrf_exempt_but_signature_required(self):
         client = Client(enforce_csrf_checks=True)
@@ -528,6 +654,224 @@ class LiqPayThanksAndCspTests(TestCase):
         self.assertEqual(response["Location"], url)
         self.order.refresh_from_db()
         self.assertEqual(self.order.payment_status, before)
+
+
+class LiqPaySecurityFailClosedTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.order = Order.objects.create(
+            number="GS250101-SEC01",
+            source=Order.Source.CART,
+            customer_name="Оля",
+            phone="+380671112233",
+            email="a@b.c",
+            currency="uah",
+            delivery_method=Order.Delivery.BRANCH,
+            delivery_address="Київ",
+            payment_method=Order.Payment.CARD,
+            payment_status=Order.PayStatus.AWAITING,
+            payment_ref="GS250101-SEC01-abcd1234",
+            total=Decimal("100.00"),
+            consent=True,
+        )
+
+    def _assert_disabled_callback(self, *, public_key, private_key, algo):
+        empty_key = ""
+        payload = _callback_post(self.order, private_key=empty_key, algo=algo)
+        with override_settings(
+            LIQPAY_PUBLIC_KEY=public_key,
+            LIQPAY_PRIVATE_KEY=private_key,
+            LIQPAY_SANDBOX=False,
+        ):
+            response = self.client.post(reverse("liqpay_callback"), payload)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.content, b"disabled")
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+        self.assertEqual(self.order.payment_raw_status, "")
+        self.assertEqual(self.order.payment_txn, "")
+
+    def test_disabled_empty_private_with_public_sha3(self):
+        self._assert_disabled_callback(public_key="test_pub", private_key="", algo="sha3")
+
+    def test_disabled_empty_private_with_public_sha1(self):
+        self._assert_disabled_callback(public_key="test_pub", private_key="", algo="sha1")
+
+    def test_disabled_both_keys_empty_sha3(self):
+        self._assert_disabled_callback(public_key="", private_key="", algo="sha3")
+
+    def test_disabled_both_keys_empty_sha1(self):
+        self._assert_disabled_callback(public_key="", private_key="", algo="sha1")
+
+
+@LIQPAY_ON
+class LiqPaySecurityCheckoutLockTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.order = Order.objects.create(
+            number="GS250101-SEC07",
+            source=Order.Source.CART,
+            customer_name="Оля",
+            phone="+380671112233",
+            email="a@b.c",
+            currency="uah",
+            delivery_method=Order.Delivery.BRANCH,
+            delivery_address="Київ",
+            payment_method=Order.Payment.CARD,
+            payment_status=Order.PayStatus.FAILED,
+            payment_ref="GS250101-SEC07-oldref00",
+            total=Decimal("50.00"),
+            consent=True,
+        )
+
+    def test_ensure_payment_ref_paid_race_stays_paid(self):
+        stale = Order.objects.get(pk=self.order.pk)
+        self.assertEqual(stale.payment_status, Order.PayStatus.FAILED)
+        Order.objects.filter(pk=self.order.pk).update(
+            payment_status=Order.PayStatus.PAID,
+            payment_ref="GS250101-SEC07-paidref1",
+        )
+        ref = lp.ensure_payment_ref(stale)
+        self.assertEqual(ref, "GS250101-SEC07-paidref1")
+        self.assertEqual(stale.payment_status, Order.PayStatus.PAID)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+        self.assertEqual(self.order.payment_ref, "GS250101-SEC07-paidref1")
+
+    def test_build_checkout_paid_race_returns_empty_payload(self):
+        stale = Order.objects.get(pk=self.order.pk)
+        self.assertEqual(stale.payment_status, Order.PayStatus.FAILED)
+        Order.objects.filter(pk=self.order.pk).update(payment_status=Order.PayStatus.PAID)
+        payload = lp.build_checkout(stale, None)
+        self.assertEqual(stale.payment_status, Order.PayStatus.PAID)
+        self.assertEqual(payload["data"], "")
+        self.assertEqual(payload["signature"], "")
+
+    def test_order_pay_redirects_when_already_paid(self):
+        session = self.client.session
+        session["orders_done"] = [self.order.number]
+        session.save()
+        Order.objects.filter(pk=self.order.pk).update(payment_status=Order.PayStatus.PAID)
+        response = self.client.get(reverse("order_pay", kwargs={"number": self.order.number}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("thanks"), response["Location"])
+        self.assertIn(self.order.number, response["Location"])
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_build_checkout_refuses_eur(self):
+        self.order.currency = "eur"
+        self.order.payment_status = Order.PayStatus.AWAITING
+        self.order.save(update_fields=["currency", "payment_status"])
+        with self.assertRaises(ValueError):
+            lp.build_checkout(self.order, None)
+
+
+@LIQPAY_ON
+class LiqPayAdminReadonlyTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_superuser(
+            username="lp-admin",
+            email="lp-admin@example.com",
+            password="x",
+        )
+        self.factory = RequestFactory()
+        self.admin = OrderAdmin(Order, AdminSite())
+        self.card_order = Order.objects.create(
+            number="GS250101-ADMIN1",
+            source=Order.Source.CART,
+            customer_name="Оля",
+            phone="+380671112233",
+            email="a@b.c",
+            currency="uah",
+            delivery_method=Order.Delivery.BRANCH,
+            delivery_address="Київ",
+            payment_method=Order.Payment.CARD,
+            payment_status=Order.PayStatus.AWAITING,
+            total=Decimal("10.00"),
+            consent=True,
+        )
+        self.cash_order = Order.objects.create(
+            number="GS250101-ADMIN2",
+            source=Order.Source.CART,
+            customer_name="Оля",
+            phone="+380671112233",
+            email="a@b.c",
+            currency="uah",
+            delivery_method=Order.Delivery.BRANCH,
+            delivery_address="Київ",
+            payment_method=Order.Payment.ON_DELIVERY,
+            payment_status=Order.PayStatus.UNPAID,
+            total=Decimal("10.00"),
+            consent=True,
+        )
+
+    def test_card_order_payment_fields_readonly(self):
+        request = self.factory.get("/admin/")
+        request.user = self.user
+        fields = self.admin.get_readonly_fields(request, self.card_order)
+        for name in ("payment_status", "payment_method", "currency", "total"):
+            self.assertIn(name, fields)
+
+    def test_non_card_order_payment_fields_editable(self):
+        request = self.factory.get("/admin/")
+        request.user = self.user
+        fields = self.admin.get_readonly_fields(request, self.cash_order)
+        self.assertNotIn("payment_status", fields)
+        self.assertNotIn("payment_method", fields)
+        self.assertNotIn("currency", fields)
+        self.assertIn("total", fields)
+
+
+class LiqPayProductionSandboxGuardTests(TestCase):
+    def _run_production_import(self, sandbox_value: str) -> subprocess.CompletedProcess:
+        env = os.environ.copy()
+        env.update(
+            {
+                "DJANGO_SETTINGS_MODULE": "config.settings.production",
+                "SECRET_KEY": "dummy-production-secret-key-for-test",
+                "DATABASE_URL": "postgres://u:p@localhost:5432/db",
+                "ALLOWED_HOSTS": "example.com",
+                "LIQPAY_SANDBOX": sandbox_value,
+                "LIQPAY_PUBLIC_KEY": "",
+                "LIQPAY_PRIVATE_KEY": "",
+                "SECURE_SSL_REDIRECT": "0",
+                "SECURE_HSTS_SECONDS": "0",
+                "SECURE_HSTS_INCLUDE_SUBDOMAINS": "0",
+                "CSRF_TRUSTED_ORIGINS": "",
+                "CSP_REPORT_ONLY": "1",
+                "TRUST_X_FORWARDED_FOR": "0",
+                "SITE_URL": "https://example.com",
+                "ADMIN_URL": "admin/",
+                "DEFAULT_FROM_EMAIL": "shop@example.com",
+                "ORDER_NOTIFY_EMAIL": "",
+                "TELEGRAM_BOT_TOKEN": "",
+                "TELEGRAM_CHAT_ID": "",
+                "NOVA_POSHTA_API_KEY": "",
+            }
+        )
+        code = (
+            "import django\n"
+            "import config.settings.production\n"
+        )
+        return subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=str(_PROJECT_ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def test_production_rejects_liqpay_sandbox(self):
+        result = self._run_production_import("1")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("LIQPAY_SANDBOX", result.stderr)
+
+    def test_production_allows_liqpay_sandbox_off(self):
+        result = self._run_production_import("0")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
 
 
 @unittest.skipUnless(

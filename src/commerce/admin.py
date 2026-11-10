@@ -37,6 +37,14 @@ class OrderAdmin(GestiaModelAdmin):
     inlines = [OrderItemInline]
     date_hierarchy = "created_at"
 
+    def get_readonly_fields(self, request, obj=None):
+        fields = list(super().get_readonly_fields(request, obj))
+        if obj is not None and obj.payment_method == Order.Payment.CARD:
+            for name in ("payment_status", "payment_method", "currency"):
+                if name not in fields:
+                    fields.append(name)
+        return fields
+
 
 @admin.register(Inquiry)
 class InquiryAdmin(GestiaModelAdmin):

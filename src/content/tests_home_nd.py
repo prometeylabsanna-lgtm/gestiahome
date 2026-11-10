@@ -103,6 +103,42 @@ class HomeNdRenderTests(TestCase):
         page = self.client.get("/")
         self.assertContains(page, "Популярні товари")
         self.assertContains(page, "Бокс тест")
-        self.assertContains(page, 'class="wish-toggle"')
+        self.assertContains(page, 'class="wish-toggle wish-toggle--nd"')
         self.assertContains(page, 'name="sku" value="NDPOP1"')
+        self.assertContains(page, 'name="variant" value="nd"')
         self.assertContains(page, reverse("wishlist_toggle"))
+        self.assertContains(page, 'viewBox="0 0 24 24"')
+        self.assertContains(
+            page,
+            'd="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"',
+        )
+        self.assertNotContains(page, 'class="cats"')
+        self.assertNotContains(page, 'class="benefits"')
+        self.assertNotContains(page, 'class="reviews"')
+        self.assertNotContains(page, 'class="callback"')
+
+    def test_wishlist_toggle_nd_returns_svg_variant(self):
+        added = self.client.post(
+            reverse("wishlist_toggle"),
+            {"sku": "NDPOP1", "variant": "nd"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(added.status_code, 200)
+        body = added.content.decode()
+        self.assertIn('class="wish-toggle wish-toggle--nd"', body)
+        self.assertIn('name="variant" value="nd"', body)
+        self.assertIn("<svg", body)
+        self.assertIn('viewBox="0 0 24 24"', body)
+        self.assertIn("is-on", body)
+        self.assertIn('fill="currentColor"', body)
+        removed = self.client.post(
+            reverse("wishlist_toggle"),
+            {"sku": "NDPOP1", "variant": "nd"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(removed.status_code, 200)
+        out = removed.content.decode()
+        self.assertIn('class="wish-toggle wish-toggle--nd"', out)
+        self.assertIn("<svg", out)
+        self.assertIn('fill="none"', out)
+        self.assertNotIn("is-on", out)

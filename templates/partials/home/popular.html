@@ -58,9 +58,9 @@
       <li class="nd-pop__item">
         <div class="nd-pop__wish">
           {% if product.sku in wishlist_skus %}
-            {% include "partials/wishlist_btn.html" with product=product in_wishlist=True %}
+            {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
           {% else %}
-            {% include "partials/wishlist_btn.html" with product=product in_wishlist=False %}
+            {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
           {% endif %}
         </div>
         <a class="nd-pop__card" href="{{ product.get_absolute_url }}">

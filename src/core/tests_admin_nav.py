@@ -25,20 +25,15 @@ class SidebarTreeTests(TestCase):
                 "home_banner",
                 "home_banner_text",
                 "home_collections",
-                "home_categories",
-                "home_mid_banner",
                 "home_popular",
-                "home_advantages",
-                "home_bottom_banner",
-                "home_reviews",
-                "home_callback",
             ],
         )
-        reviews = next(entry for entry in home if entry["key"] == "home_reviews")
-        self.assertEqual(
-            [child["key"] for child in reviews.get("items") or []],
-            ["home_review_list"],
-        )
+        self.assertNotIn("home_categories", keys)
+        self.assertNotIn("home_mid_banner", keys)
+        self.assertNotIn("home_advantages", keys)
+        self.assertNotIn("home_bottom_banner", keys)
+        self.assertNotIn("home_reviews", keys)
+        self.assertNotIn("home_callback", keys)
         self.assertNotIn("home_advantage_cards", keys)
         self.assertNotIn("home_cta", keys)
 
@@ -74,17 +69,19 @@ class SidebarTreeTests(TestCase):
         self.assertIn("Недавні дії", labels)
         self.assertIn("Банер", labels)
         self.assertIn("Текст банера", labels)
-        self.assertIn("Банер середній", labels)
-        self.assertIn("Банер нижній", labels)
-        self.assertIn("Чому обирають", labels)
-        self.assertIn("Список переваг", labels)
-        self.assertIn("Зворотній дзвінок", labels)
-        self.assertIn("Відгуки", labels)
-        self.assertIn("Список відгуків", labels)
+        self.assertIn("Колекції", labels)
+        self.assertIn("Список колекцій", labels)
+        self.assertNotIn("Банер середній", labels)
+        self.assertNotIn("Банер нижній", labels)
+        self.assertNotIn("Чому обирають", labels)
+        self.assertNotIn("Список переваг", labels)
+        self.assertNotIn("Зворотній дзвінок", labels)
         self.assertIn("Інтро", labels)
         self.assertIn("Галерея", labels)
         self.assertIn("Історія", labels)
         self.assertIn("Популярні товари", labels)
+        self.assertIn("Відгуки", labels)
+        self.assertIn("Список відгуків", labels)
         self.assertNotIn("CTA та контактні форми", labels)
         self.assertNotIn("Посилання футера", labels)
         self.assertNotIn("Головний банер", labels)
@@ -100,7 +97,8 @@ class SidebarTreeTests(TestCase):
         self.assertContains(response, "Головна")
         self.assertContains(response, "Текст банера")
         self.assertContains(response, reverse("admin:content_homebannertext_changelist"))
-        self.assertContains(response, reverse("admin:content_homemidbanner_changelist"))
+        self.assertContains(response, reverse("admin:content_homecollectionsblock_changelist"))
+        self.assertContains(response, reverse("admin:content_homepopularblock_changelist"))
         self.assertContains(response, reverse("admin:content_globalpagestyle_changelist"))
         self.assertContains(response, reverse("admin:admin_logentry_changelist"))
         self.assertContains(response, "Недавні дії")
@@ -112,6 +110,7 @@ class SidebarTreeTests(TestCase):
             reverse("admin:content_footerlink_changelist")
         self.assertContains(response, "Інтро")
         self.assertContains(response, reverse("admin:content_aboutintro_changelist"))
+        self.assertContains(response, reverse("admin:content_aboutreviewsblock_changelist"))
         self.assertContains(response, "Замовлення і заявки")
         self.assertContains(response, "Хедер і футер")
         self.assertContains(response, "Користувачі")
@@ -121,6 +120,14 @@ class SidebarTreeTests(TestCase):
         self.assertNotContains(response, "homeheroblock")
         with self.assertRaises(NoReverseMatch):
             reverse("admin:content_homeheroblock_changelist")
+        home_keys = {
+            entry["key"]
+            for entry in next(g["items"] for g in NAV_TREE if g["title"] == "Головна")
+        }
+        self.assertEqual(
+            home_keys,
+            {"home_banner", "home_banner_text", "home_collections", "home_popular"},
+        )
 
     def test_unfold_changelist_actions_are_ukrainian(self):
         page = self.client.get(reverse("admin:catalog_product_changelist"))

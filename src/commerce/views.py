@@ -292,11 +292,14 @@ def wishlist_page(request):
 def wishlist_toggle(request):
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
     active = wish.toggle(request, product.sku)
+    variant = request.POST.get("variant") or ""
+    if variant != "nd":
+        variant = ""
     if _hx(request):
         return render(
             request,
             "partials/wishlist_btn.html",
-            {"product": product, "in_wishlist": active},
+            {"product": product, "in_wishlist": active, "variant": variant},
         )
     next_url = request.POST.get("next") or product.get_absolute_url()
     return HttpResponseRedirect(next_url)

@@ -405,7 +405,9 @@
 }
 
 .nd-pop__wish .wish-toggle,
-.nd-pop__wish .wish-toggle__btn {
+.nd-pop__wish .wish-toggle__btn,
+.wish-toggle--nd,
+.wish-toggle__btn--nd {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -418,13 +420,20 @@
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  color: var(--nd-surface);
   filter: var(--nd-wish-shadow);
 }
 
-.nd-pop__wish .wish-toggle__btn img {
+.wish-toggle__btn--nd svg {
+  display: block;
   width: 20px;
   height: 20px;
-  filter: brightness(0) invert(1);
+  fill: none;
+  stroke: currentColor;
+}
+
+.wish-toggle__btn--nd.is-on svg {
+  fill: currentColor;
 }
 
 .nd-pop__card {

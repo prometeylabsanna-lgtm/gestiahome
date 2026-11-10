@@ -44,63 +44,10 @@ NAV_TREE = [
                 "dynamic": "collections",
             },
             {
-                "key": "home_categories",
-                "title": "Категорії",
-                "icon": "grid_view",
-                "url_name": "admin:content_homecategoriesblock_changelist",
-            },
-            {
-                "key": "home_mid_banner",
-                "title": "Банер середній",
-                "icon": "movie",
-                "url_name": "admin:content_homemidbanner_changelist",
-            },
-            {
                 "key": "home_popular",
                 "title": "Популярні товари",
                 "icon": "star",
                 "url_name": "admin:content_homepopularblock_changelist",
-            },
-            {
-                "key": "home_advantages",
-                "title": "Чому обирають",
-                "icon": "verified",
-                "url_name": "admin:content_homeadvantagesblock_changelist",
-                "items": [
-                    {
-                        "key": "home_advantages_list",
-                        "title": "Список переваг",
-                        "icon": "format_list_bulleted",
-                        "url_name": "admin:content_advantage_changelist",
-                    },
-                ],
-                "dynamic": "advantages",
-            },
-            {
-                "key": "home_bottom_banner",
-                "title": "Банер нижній",
-                "icon": "videocam",
-                "url_name": "admin:content_homebottombanner_changelist",
-            },
-            {
-                "key": "home_reviews",
-                "title": "Відгуки",
-                "icon": "reviews",
-                "url_name": "admin:content_homereviewsblock_changelist",
-                "items": [
-                    {
-                        "key": "home_review_list",
-                        "title": "Список відгуків",
-                        "icon": "format_quote",
-                        "url_name": "admin:content_homereview_changelist",
-                    },
-                ],
-            },
-            {
-                "key": "home_callback",
-                "title": "Зворотній дзвінок",
-                "icon": "call",
-                "url_name": "admin:content_homecallbackblock_changelist",
             },
         ],
     },

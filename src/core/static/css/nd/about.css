@@ -12,7 +12,8 @@
   font-style: normal;
 }
 
-.nd-about p {
+/* :where — щоб не перебивати margin:auto у .nd-about-approach__text / .nd-about-closing */
+.nd-about :where(p) {
   margin: 0;
 }
 

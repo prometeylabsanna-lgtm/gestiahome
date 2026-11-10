@@ -373,7 +373,9 @@
   line-height: normal;
 }
 
-.nd-card__link {
+/* .product-card a (cards.css) ставить display:grid → медіа ширше за колонку на 390 */
+.nd-card__link,
+.product-card .nd-card__link {
   display: block;
   text-decoration: none;
   color: inherit;

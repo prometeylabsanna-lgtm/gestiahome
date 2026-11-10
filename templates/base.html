@@ -47,6 +47,8 @@
   <link rel="stylesheet" href="{% static 'css/nd/header-groups.css' %}">
   <link rel="stylesheet" href="{% static 'css/nd/footer.css' %}">
   <link rel="stylesheet" href="{% static 'css/nd/wish.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/cart.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/cart-drawer.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
@@ -65,6 +67,7 @@
     {% block content %}{% endblock %}
   </main>
   {% include "partials/footer.html" %}
+  {% include "partials/nd/cart_drawer.html" %}
   {% include "partials/home/waitlist_modal.html" %}
   <div hidden data-net-toast-root data-offline="{% trans "Немає з'єднання. Перевірте інтернет і спробуйте ще раз." %}" data-error="{% trans "Сталася помилка. Спробуйте ще раз." %}"></div>
   <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
@@ -73,6 +76,7 @@
   <script src="{% static 'js/form-validate.js' %}" defer></script>
   <script src="{% static 'js/nd/header.js' %}" defer></script>
   <script src="{% static 'js/dialog.js' %}" defer></script>
+  <script type="module" src="{% static 'js/nd/cart-drawer.js' %}"></script>
   {% if discount_modal and discount_modal.enabled %}
     <script src="{% static 'js/pages/waitlist-modal.js' %}" defer></script>
   {% endif %}

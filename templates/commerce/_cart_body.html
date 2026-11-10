@@ -2,69 +2,149 @@
 {% if cart_notice %}
   <p class="co-error" role="alert">{{ cart_notice }}</p>
 {% endif %}
-{% if rows %}
-  <div class="cart-layout">
-    <div class="cart-main">
-      <div class="cart-head">
-        <h1>{% trans "Кошик" %} ({{ cart_count }})</h1>
-        <div class="cart-items" role="list">
-          {% for row in rows %}
-            <article class="cart-item" role="listitem"{% if row.over_stock %} data-over-stock{% endif %}>
-              <div class="cart-item__photo">
-                {% with media=row.product.card_media %}
-                  {% if media %}{% include "partials/smart_media.html" with media=media width=104 height=104 alt=row.product.name %}{% endif %}
-                {% endwith %}
+<div class="nd-cart__grid{% if not rows %} nd-cart__grid--empty{% endif %}">
+  <section class="nd-cart__main" aria-labelledby="cart-title">
+    <h1 class="nd-cart__title" id="cart-title">
+      {% trans "Кошик" %}{% if cart_count %} ({{ cart_count }}){% endif %}
+    </h1>
+
+    {% if rows %}
+      <ul class="nd-cart__list">
+        {% for row in rows %}
+          <li class="nd-cart__item"{% if row.over_stock %} data-over-stock{% endif %}>
+            {% if row.product.card_photo_url %}
+              <img
+                class="nd-cart__photo"
+                src="{{ row.product.card_photo_url }}"
+                alt=""
+                width="150"
+                height="150"
+                loading="lazy"
+              >
+            {% else %}
+              <span class="nd-cart__photo nd-cart__photo--empty" aria-hidden="true"></span>
+            {% endif %}
+            <div class="nd-cart__item-body">
+              <div class="nd-cart__item-top">
+                <h2 class="nd-cart__name">
+                  <a href="{{ row.product.get_absolute_url }}">{{ row.product.name }}</a>
+                </h2>
+                <span class="nd-cart__line">{% line_uah row.line_total %}</span>
               </div>
-              <div class="cart-item__body">
-                <div class="cart-item__top">
-                  <a class="cart-item__name" href="{{ row.product.get_absolute_url }}">{{ row.product.name }}</a>
-                  <p class="cart-item__price">{% line_uah row.unit %}</p>
+              <form
+                class="nd-cart__controls"
+                method="post"
+                action="{% url 'cart_update' %}"
+                hx-post="{% url 'cart_update' %}"
+                hx-target="#cart-body"
+                hx-swap="innerHTML"
+              >
+                {% csrf_token %}
+                <input type="hidden" name="sku" value="{{ row.sku }}">
+                <div class="nd-cart-qty" role="group" aria-label="{% trans 'Кількість' %}">
+                  <button type="button" class="nd-cart-qty__btn" data-qty-step="-1" aria-label="{% trans 'Зменшити кількість' %}">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M1 6h10" stroke="currentColor" stroke-width="1.6"></path>
+                    </svg>
+                  </button>
+                  <label class="visually-hidden" for="qty-{{ row.sku }}">{% trans "Кількість" %}</label>
+                  <input
+                    id="qty-{{ row.sku }}"
+                    class="nd-cart-qty__value"
+                    data-qty-input
+                    name="qty"
+                    type="number"
+                    min="0"
+                    max="{{ row.product.qty_max }}"
+                    inputmode="numeric"
+                    value="{{ row.qty }}"
+                  >
+                  <button type="button" class="nd-cart-qty__btn" data-qty-step="1" aria-label="{% trans 'Збільшити кількість' %}">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.6"></path>
+                    </svg>
+                  </button>
                 </div>
-                <form class="cart-item__controls" method="post" action="{% url 'cart_update' %}" hx-post="{% url 'cart_update' %}" hx-target="#cart-body" hx-swap="innerHTML">
+                <button class="nd-cart__remove" type="button" data-qty-set="0" aria-label="{% trans 'Видалити з кошика' %}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+      <a class="nd-cart__continue" href="{% url 'catalog' %}">{% trans "Продовжити покупки" %}</a>
+
+      {% if suggest %}
+        <div class="nd-cart-suggest">
+          <h2 class="nd-cart-suggest__title">{% trans "Доповнити сет" %}</h2>
+          <ul class="nd-cart-suggest__list">
+            {% for addon in suggest %}
+              <li class="nd-cart-suggest__item">
+                {% if addon.card_photo_url %}
+                  <img
+                    class="nd-cart-suggest__photo"
+                    src="{{ addon.card_photo_url }}"
+                    alt=""
+                    width="200"
+                    height="200"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <span class="nd-cart-suggest__photo nd-cart-suggest__photo--empty" aria-hidden="true"></span>
+                {% endif %}
+                <div class="nd-cart-suggest__meta">
+                  <span class="nd-cart-suggest__name">{{ addon.name }}</span>
+                  <span class="nd-cart-suggest__price">{% home_price addon %}</span>
+                </div>
+                <form
+                  class="nd-cart-suggest__form"
+                  method="post"
+                  action="{% url 'cart_add' %}"
+                  hx-post="{% url 'cart_add' %}"
+                  hx-target="#cart-count"
+                  hx-swap="outerHTML"
+                  hx-sync="this:replace"
+                >
                   {% csrf_token %}
-                  <input type="hidden" name="sku" value="{{ row.sku }}">
-                  <div class="qty">
-                    <button class="qty__btn" type="button" data-qty-step="-1" aria-label="{% trans 'Зменшити кількість' %}">
-                      <img class="qty__ico qty__ico--mob" src="{% static 'figma/cart/bb5f09f7-c721-451c-876e-84339e5e49a4.svg' %}" width="9" height="2" alt="">
-                      <img class="qty__ico qty__ico--desk" src="{% static 'figma/cart/ecbe8065-ed1b-4914-8f81-46aaf04ee155.svg' %}" width="9" height="2" alt="">
-                    </button>
-                    <label class="visually-hidden" for="qty-{{ row.sku }}">{% trans "Кількість" %}</label>
-                    <input id="qty-{{ row.sku }}" data-qty-input name="qty" type="number" min="0" max="{{ row.product.qty_max }}" inputmode="numeric" value="{{ row.qty }}">
-                    <button class="qty__btn" type="button" data-qty-step="1" aria-label="{% trans 'Збільшити кількість' %}">
-                      <img class="qty__ico qty__ico--mob" src="{% static 'figma/cart/696fdddf-66fb-4286-9381-425b0d60c695.svg' %}" width="9" height="8" alt="">
-                      <img class="qty__ico qty__ico--desk" src="{% static 'figma/cart/84034769-eda3-4db0-8f34-b03cdccb6bc8.svg' %}" width="9" height="8" alt="">
-                    </button>
-                  </div>
-                  <button class="cart-remove" type="button" data-qty-set="0" aria-label="{% trans 'Видалити з кошика' %}">
-                    <img src="{% static 'figma/cart/d10fca64-fbb5-441c-bdd0-7a6260fe440f.svg' %}" width="22.0001" height="24.7224" alt="">
+                  <input type="hidden" name="sku" value="{{ addon.sku }}">
+                  <button class="nd-cart-suggest__add" type="submit">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.5"></path>
+                    </svg>
+                    <span>{% trans "Додати" %}</span>
                   </button>
                 </form>
-              </div>
-            </article>
-            {% if not forloop.last %}
-              <img class="cart-rule cart-rule--mob" src="{% static 'figma/cart/afb5ff28-ef16-4752-af1e-60d9937be1cf.svg' %}" width="363" height="1" alt="">
-              <img class="cart-rule cart-rule--desk" src="{% static 'figma/cart/69d9b052-313f-46a0-97ee-7ddfda4ea702.svg' %}" width="859" height="1" alt="">
-            {% endif %}
-          {% endfor %}
+              </li>
+            {% endfor %}
+          </ul>
         </div>
+      {% endif %}
+    {% else %}
+      <div class="nd-cart__empty">
+        <svg class="nd-cart__empty-ico" width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16v14H4z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
+          <path d="M9 10V6a3 3 0 0 1 6 0v4" stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
+        </svg>
+        <p class="nd-cart__empty-text">{% trans "Ваш кошик порожній" %}</p>
+        <a class="nd-cart__empty-link" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
       </div>
-      <a class="cart-continue" href="{% url 'catalog' %}">{% trans "Продовжити покупки" %}</a>
-    </div>
-    <aside class="cart-summary">
-      <div class="cart-summary__row">
-        <p>{% trans "Загальна ціна:" %}</p>
-        <p>{% sum_uah total %}</p>
+    {% endif %}
+  </section>
+
+  {% if rows %}
+    <aside class="nd-cart__aside" aria-label="{% trans 'Підсумок замовлення' %}">
+      <div class="nd-cart__summary-row">
+        <span class="nd-cart__summary-label">{% trans "Загальна ціна" %}</span>
+        <span class="nd-cart__summary-value">{% line_uah total %}</span>
       </div>
-      <a class="cart-go" data-qa="checkout-cta" href="{% url 'checkout' %}">{% trans "Перейти до оформлення" %}</a>
+      <p class="nd-cart__delivery">{% trans "Вартість доставки розраховується за тарифами перевізника" %}</p>
+      <a class="nd-cart__checkout" data-qa="checkout-cta" href="{% url 'checkout' %}">{% trans "Перейти до оформлення" %}</a>
     </aside>
-  </div>
-{% else %}
-  <div class="cart-main">
-    <h1>{% trans "Кошик" %} ({{ cart_count }})</h1>
-    <p class="cart-empty">{% trans "Кошик порожній." %}</p>
-    <a class="cart-continue" href="{% url 'catalog' %}">{% trans "До каталогу" %}</a>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
 {% if request.META.HTTP_HX_REQUEST %}
   <span id="cart-count" class="head-bag__count{% if not cart_count %} is-empty{% endif %}" data-qa="cart-count" hx-swap-oob="outerHTML" aria-hidden="{% if cart_count %}false{% else %}true{% endif %}">{% if cart_count %}{{ cart_count }}{% endif %}</span>
   <span id="cart-count-mobile" class="head-bag__count{% if not cart_count %} is-empty{% endif %}" hx-swap-oob="outerHTML" aria-hidden="{% if cart_count %}false{% else %}true{% endif %}">{% if cart_count %}{{ cart_count }}{% endif %}</span>

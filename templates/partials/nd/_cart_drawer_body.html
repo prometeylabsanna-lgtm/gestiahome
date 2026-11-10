@@ -1,0 +1,166 @@
+{% load i18n static shop_tags %}
+<div class="nd-cart-drawer__head">
+  <h2 class="nd-cart-drawer__title">
+    {% trans "Кошик" %}{% if count_label %} {{ count_label }}{% endif %}
+  </h2>
+  <button
+    type="button"
+    class="nd-cart-drawer__close"
+    data-nd-cart-close
+    aria-label="{% trans 'Закрити кошик' %}"
+  >
+    {% include "partials/nd/icons/close.html" with size=18 %}
+  </button>
+</div>
+
+<div class="nd-cart-drawer__scroll">
+  {% if focus %}
+    <div class="nd-cart-drawer__item">
+      {% if focus.product.card_photo_url %}
+        <img
+          class="nd-cart-drawer__photo"
+          src="{{ focus.product.card_photo_url }}"
+          alt=""
+          width="110"
+          height="138"
+        >
+      {% else %}
+        <span class="nd-cart-drawer__photo nd-cart-drawer__photo--empty" aria-hidden="true"></span>
+      {% endif %}
+      <div class="nd-cart-drawer__info">
+        <p class="nd-cart-drawer__name">{{ focus.product.name }}</p>
+        <p class="nd-cart-drawer__price">{% home_price focus.product %}</p>
+        <form
+          class="nd-cart-drawer__controls"
+          method="post"
+          action="{% url 'cart_update' %}"
+          hx-post="{% url 'cart_update' %}"
+          hx-target="#nd-cart-drawer-body"
+          hx-swap="innerHTML"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="sku" value="{{ focus.sku }}">
+          <input type="hidden" name="panel" value="1">
+          <input type="hidden" name="panel_sku" value="{{ panel_sku }}">
+          <div class="nd-cart-qty" role="group" aria-label="{% trans 'Кількість' %}">
+            <button type="button" class="nd-cart-qty__btn" data-qty-step="-1" aria-label="{% trans 'Зменшити кількість' %}">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M1 6h10" stroke="currentColor" stroke-width="1.6"></path>
+              </svg>
+            </button>
+            <label class="visually-hidden" for="drawer-qty-{{ focus.sku }}">{% trans "Кількість" %}</label>
+            <input
+              id="drawer-qty-{{ focus.sku }}"
+              class="nd-cart-qty__value"
+              data-qty-input
+              name="qty"
+              type="number"
+              min="0"
+              max="{{ focus.product.qty_max }}"
+              inputmode="numeric"
+              value="{{ focus.qty }}"
+            >
+            <button type="button" class="nd-cart-qty__btn" data-qty-step="1" aria-label="{% trans 'Збільшити кількість' %}">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.6"></path>
+              </svg>
+            </button>
+          </div>
+          <button class="nd-cart-drawer__remove" type="button" data-qty-set="0" aria-label="{% trans 'Видалити з кошика' %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if has_addons %}
+    <h3 class="nd-cart-drawer__addons-title">{% trans "Доповнити сет" %}</h3>
+    <ul class="nd-cart-drawer__addons">
+      {% for item in addons %}
+        <li class="nd-cart-drawer__addon">
+          {% if item.product.card_photo_url %}
+            <img
+              class="nd-cart-drawer__addon-photo"
+              src="{{ item.product.card_photo_url }}"
+              alt=""
+              width="72"
+              height="72"
+              loading="lazy"
+            >
+          {% else %}
+            <span class="nd-cart-drawer__addon-photo nd-cart-drawer__addon-photo--empty" aria-hidden="true"></span>
+          {% endif %}
+          <span class="nd-cart-drawer__addon-meta">
+            <span class="nd-cart-drawer__addon-name">{{ item.product.name }}</span>
+            <span class="nd-cart-drawer__addon-price">{% home_price item.product %}</span>
+          </span>
+          {% if item.in_cart %}
+            <form
+              method="post"
+              action="{% url 'cart_update' %}"
+              hx-post="{% url 'cart_update' %}"
+              hx-target="#nd-cart-drawer-body"
+              hx-swap="innerHTML"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="sku" value="{{ item.sku }}">
+              <input type="hidden" name="qty" value="0">
+              <input type="hidden" name="panel" value="1">
+              <input type="hidden" name="panel_sku" value="{{ panel_sku }}">
+              <button
+                class="nd-cart-drawer__addon-btn is-added"
+                type="submit"
+                aria-label="{% blocktrans with name=item.product.name %}Додано: {{ name }}{% endblocktrans %}"
+              >
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M1.5 6.5l3 3 6-7" stroke="currentColor" stroke-width="1.5"></path>
+                </svg>
+                <span>{% trans "Додано" %}</span>
+              </button>
+            </form>
+          {% else %}
+            <form
+              method="post"
+              action="{% url 'cart_add' %}"
+              hx-post="{% url 'cart_add' %}"
+              hx-target="#nd-cart-drawer-body"
+              hx-swap="innerHTML"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="sku" value="{{ item.sku }}">
+              <input type="hidden" name="panel" value="1">
+              <input type="hidden" name="panel_sku" value="{{ panel_sku }}">
+              <button
+                class="nd-cart-drawer__addon-btn"
+                type="submit"
+                aria-label="{% blocktrans with name=item.product.name %}Додати {{ name }}{% endblocktrans %}"
+              >
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.5"></path>
+                </svg>
+                <span>{% trans "Додати" %}</span>
+              </button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+
+<div class="nd-cart-drawer__foot">
+  <div class="nd-cart-drawer__total">
+    <span>{% trans "Підсумок" %}</span>
+    <span>{% line_uah total %}</span>
+  </div>
+  <a class="nd-cart-drawer__checkout" href="{% url 'checkout' %}">{% trans "Перейти до оформлення" %}</a>
+  <a class="nd-cart-drawer__view" href="{% url 'cart' %}">{% trans "Переглянути кошик" %}</a>
+</div>
+
+{% if request.META.HTTP_HX_REQUEST and request.method == "POST" %}
+  <span id="cart-count" class="head-bag__count{% if not cart_count %} is-empty{% endif %}" data-qa="cart-count" hx-swap-oob="outerHTML" aria-hidden="{% if cart_count %}false{% else %}true{% endif %}">{% if cart_count %}({{ cart_count }}){% endif %}</span>
+  <span id="cart-count-mobile" class="head-bag__count{% if not cart_count %} is-empty{% endif %}" hx-swap-oob="outerHTML" aria-hidden="{% if cart_count %}false{% else %}true{% endif %}">{% if cart_count %}({{ cart_count }}){% endif %}</span>
+{% endif %}

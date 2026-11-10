@@ -137,17 +137,17 @@ class CheckoutTests(TestCase):
     def test_cart_and_checkout_pages_render(self):
         empty = self.client.get("/koshik/")
         self.assertEqual(empty.status_code, 200)
-        self.assertContains(empty, "Кошик (0)")
-        self.assertContains(empty, "Кошик порожній.")
-        self.assertContains(empty, "css/pages/cart.css")
+        self.assertContains(empty, "Кошик")
+        self.assertContains(empty, "Ваш кошик порожній")
+        self.assertContains(empty, "css/nd/cart.css")
+        self.assertNotContains(empty, "css/pages/cart.css")
         session = self.client.session
         session["cart"] = {"SNIH": 2}
         session["currency"] = "uah"
         session.save()
         page = self.client.get("/koshik/")
         self.assertContains(page, "Сніг")
-        self.assertContains(page, "100 UAH")
-        self.assertContains(page, "₴ 200 грн")
+        self.assertContains(page, "200 UAH")
         self.assertContains(page, "Перейти до оформлення")
         self.assertNotContains(page, "figma.com")
         checkout = self.client.get("/zamovlennia/")
@@ -305,7 +305,7 @@ class CheckoutTests(TestCase):
             HTTP_HX_REQUEST="true",
         )
         self.assertEqual(cleared.status_code, 200)
-        self.assertContains(cleared, "Кошик порожній.")
+        self.assertContains(cleared, "Ваш кошик порожній")
         self.assertNotIn("SNIH", self.client.session.get("cart", {}))
 
     def test_two_products_totals_match_price_times_qty(self):
@@ -325,21 +325,22 @@ class CheckoutTests(TestCase):
         session.save()
         total = self.product.price_uah * snow_qty + lamp.price_uah * lamp_qty
         self.assertEqual(total, Decimal("4700"))
-        label = f"₴ {int(total):,}".replace(",", " ") + " грн"
+        checkout_label = f"₴ {int(total):,}".replace(",", " ") + " грн"
+        cart_label = f"{int(total):,}".replace(",", " ") + " UAH"
         cart = self.client.get("/koshik/")
         checkout = self.client.get("/zamovlennia/")
         self.assertContains(cart, "Сніг")
         self.assertContains(cart, "Лампа")
-        self.assertContains(cart, "100 UAH")
-        self.assertContains(cart, "1 500 UAH")
+        self.assertContains(cart, "200 UAH")
+        self.assertContains(cart, "4 500 UAH")
         self.assertContains(cart, 'value="2"')
         self.assertContains(cart, 'value="3"')
-        self.assertContains(cart, label)
+        self.assertContains(cart, cart_label)
         self.assertContains(checkout, "Сніг")
         self.assertContains(checkout, "Лампа")
         self.assertContains(checkout, "х2")
         self.assertContains(checkout, "х3")
-        self.assertContains(checkout, label)
+        self.assertContains(checkout, checkout_label)
         self.assertNotContains(cart, "₴ 2300 грн")
         self.assertNotContains(checkout, "₴ 2300 грн")
         self.assertNotContains(cart, "2 450 UAH")

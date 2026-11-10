@@ -4,6 +4,7 @@ from src.commerce import views
 
 urlpatterns = [
     path("koshik/", views.cart_page, name="cart"),
+    path("koshik/panel/", views.cart_panel, name="cart_panel"),
     path("koshik/dodaty/", views.cart_add, name="cart_add"),
     path("koshik/kilkist/", views.cart_update, name="cart_update"),
     path("obrane/", views.wishlist_page, name="wishlist"),

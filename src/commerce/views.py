@@ -1,3 +1,4 @@
+import json
 import secrets
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -8,6 +9,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from src.catalog.models import Product
 from src.commerce.cart import add, clear, lines, set_qty, signature
+from src.commerce.cart_panel import cart_body_context, currency_of, render_panel
 from src.commerce import wishlist as wish
 from src.commerce.forms import (
     BuyNowForm,
@@ -34,12 +36,19 @@ from src.core.utils import format_money
 
 
 def _currency(request):
-    currency = request.session.get("currency", "uah")
-    return currency if currency in {"uah", "eur"} else "uah"
+    return currency_of(request)
 
 
 def _hx(request):
     return request.headers.get("HX-Request")
+
+
+def _panel(request):
+    return request.POST.get("panel") == "1"
+
+
+def _panel_sku(request, fallback=""):
+    return (request.POST.get("panel_sku") or fallback or "").strip()
 
 
 def _pretend_order_thanks(request):
@@ -167,16 +176,10 @@ def _checkout_render(request, form, rows, total, currency):
 def cart_page(request):
     currency = _currency(request)
     rows, total = lines(request, currency)
-    return render(
-        request,
-        "commerce/cart.html",
-        {
-            "rows": rows,
-            "total": total,
-            "total_label": format_money(total, currency),
-            "cart_notice": _cart_notice(request, rows),
-        },
-    )
+    ctx = cart_body_context(request, rows, total, notice=_cart_notice(request, rows))
+    if _hx(request):
+        return render(request, "commerce/_cart_body.html", ctx)
+    return render(request, "commerce/cart.html", ctx)
 
 
 def checkout(request):
@@ -340,12 +343,18 @@ def cart_add(request):
     except (TypeError, ValueError):
         qty = 1
     add(request, product.sku, qty, stock_qty=product.stock_qty)
+    if _hx(request) and _panel(request):
+        response = render_panel(request, _panel_sku(request, product.sku))
+        response["HX-Trigger"] = json.dumps({"nd:cart-changed": True})
+        return response
     if _hx(request):
-        return render(
+        response = render(
             request,
             "partials/cart_count_response.html",
             {"cart_count": sum_count(request)},
         )
+        response["HX-Trigger"] = json.dumps({"nd:cart-added": {"sku": product.sku}})
+        return response
     return HttpResponseRedirect(product.get_absolute_url())
 
 
@@ -353,6 +362,12 @@ def sum_count(request):
     from src.commerce.cart import item_count
 
     return item_count(request)
+
+
+@require_GET
+def cart_panel(request):
+    sku = (request.GET.get("sku") or "").strip()
+    return render_panel(request, sku)
 
 
 @require_POST
@@ -367,21 +382,18 @@ def cart_update(request):
         return HttpResponse(status=422)
     stock_qty = product.stock_qty if product is not None else None
     set_qty(request, sku, qty, stock_qty=stock_qty)
+    if _hx(request) and _panel(request):
+        response = render_panel(request, _panel_sku(request, sku))
+        response["HX-Trigger"] = json.dumps({"nd:cart-changed": True})
+        return response
     if _hx(request):
         currency = _currency(request)
         rows, total = lines(request, currency)
-        response = render(
+        return render(
             request,
             "commerce/_cart_body.html",
-            {
-                "rows": rows,
-                "total": total,
-                "total_label": format_money(total, currency),
-                "cart_count": sum_count(request),
-                "cart_notice": _cart_notice(request, rows),
-            },
+            cart_body_context(request, rows, total, notice=_cart_notice(request, rows)),
         )
-        return response
     return HttpResponseRedirect(reverse("cart"))
 
 

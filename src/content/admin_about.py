@@ -6,15 +6,19 @@ from src.content.admin_limits import tighten
 from src.content.models import AboutPage
 from src.content.models_about import AboutGalleryItem, AboutPopularSlot
 from src.content.proxies import (
+    AboutApproach,
     AboutBanner,
+    AboutClosing,
     AboutGallery,
+    AboutGestia,
     AboutIntro,
     AboutPopularBlock,
     AboutReviewsBlock,
     AboutStory,
+    AboutTogether,
     FooterChrome,
 )
-from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
+from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -56,27 +60,118 @@ class AboutPopularSlotInline(GestiaTabularInline):
 
 @admin.register(AboutIntro)
 class AboutIntroAdmin(_OpenSingleton):
-    text_limits = {"title_uk": 24, "title_en": 24}
+    text_limits = {"title_uk": 40, "title_en": 40}
+    tiny_fields = ("intro_text_uk", "intro_text_en")
     fieldsets = language_tabs(
         uk_fields=(
             "title_uk",
-            "lead_uk",
-            "crumb_uk",
+            "intro_text_uk",
+            "intro_photo_left",
+            "intro_photo_left_alt_uk",
+            "intro_photo_main",
+            "intro_photo_main_alt_uk",
             "seo_title_uk",
             "seo_description_uk",
         ),
         en_fields=(
             "title_en",
-            "lead_en",
-            "crumb_en",
+            "intro_text_en",
+            "intro_photo_left_alt_en",
+            "intro_photo_main_alt_en",
             "seo_title_en",
             "seo_description_en",
         ),
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         return tighten(formfield, self.text_limits.get(db_field.name))
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        return form
+
+
+@admin.register(AboutGestia)
+class AboutGestiaAdmin(_OpenSingleton):
+    tiny_fields = ("gestia_text_uk", "gestia_text_en")
+    fieldsets = language_tabs(
+        uk_fields=(
+            "gestia_quote_uk",
+            "gestia_plate",
+            "gestia_plate_alt_uk",
+            "gestia_photo",
+            "gestia_photo_alt_uk",
+            "gestia_text_uk",
+        ),
+        en_fields=(
+            "gestia_quote_en",
+            "gestia_plate_alt_en",
+            "gestia_photo_alt_en",
+            "gestia_text_en",
+        ),
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        return form
+
+
+@admin.register(AboutApproach)
+class AboutApproachAdmin(_OpenSingleton):
+    fieldsets = language_tabs(
+        uk_fields=("approach_text_uk",),
+        en_fields=("approach_text_en",),
+    )
+
+
+@admin.register(AboutTogether)
+class AboutTogetherAdmin(_OpenSingleton):
+    tiny_fields = ("together_text_uk", "together_text_en")
+    fieldsets = language_tabs(
+        uk_fields=("together_photo", "together_photo_alt_uk", "together_text_uk"),
+        en_fields=("together_photo_alt_en", "together_text_en"),
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        return form
+
+
+@admin.register(AboutClosing)
+class AboutClosingAdmin(_OpenSingleton):
+    tiny_fields = ("closing_text_uk", "closing_text_en")
+    text_limits = {"cta_uk": 40, "cta_en": 40}
+    fieldsets = language_tabs(
+        uk_fields=("closing_text_uk", "cta_uk"),
+        en_fields=("closing_text_en", "cta_en"),
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=False)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return tighten(formfield, self.text_limits.get(db_field.name))
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        force_tinymce(form, self.tiny_fields, short=False)
+        return form
 
 
 @admin.register(AboutGallery)
@@ -175,8 +270,8 @@ class FooterChromeAdmin(_OpenSingleton):
 
 class AboutPageAdmin(_OpenSingleton):
     inlines = (AboutGalleryInline, AboutPopularSlotInline)
-    text_limits = {"title_uk": 24, "title_en": 24}
-    tiny_fields = ("body_uk", "body_en")
+    text_limits = {"title_uk": 40, "title_en": 40}
+    tiny_fields = ("body_uk", "body_en", "intro_text_uk", "intro_text_en")
     fieldsets = language_tabs(
         uk_fields=(
             "title_uk",

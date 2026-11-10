@@ -132,7 +132,8 @@
   }
 
   .nd-mega__all,
-  .nd-mega__cat {
+  .nd-mega__cat,
+  .nd-mega__faq {
     align-self: flex-start;
     text-decoration: none;
     color: var(--nd-ink);
@@ -140,8 +141,10 @@
 
   .nd-mega__all:hover,
   .nd-mega__cat:hover,
+  .nd-mega__faq:hover,
   .nd-mega__all:focus-visible,
-  .nd-mega__cat:focus-visible {
+  .nd-mega__cat:focus-visible,
+  .nd-mega__faq:focus-visible {
     text-decoration: underline;
     text-underline-offset: 5px;
   }

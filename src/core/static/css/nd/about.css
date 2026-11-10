@@ -1,0 +1,268 @@
+.page-about {
+  background: var(--nd-surface);
+  color: var(--nd-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.nd-about {
+  overflow-x: clip;
+}
+
+.nd-about em {
+  font-style: normal;
+}
+
+.nd-about p {
+  margin: 0;
+}
+
+.nd-about-intro {
+  padding: clamp(32px, 4.2vw, 60px) var(--nd-gutter) 0;
+}
+
+.nd-about-intro__title {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--nd-serif);
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: clamp(56px, 12.5vw, 180px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--nd-ink);
+  white-space: nowrap;
+}
+
+.nd-about-intro__grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(16px, 2.1vw, 30px);
+  row-gap: 24px;
+  align-items: start;
+}
+
+.nd-about-intro__photo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+.nd-about-intro__photo--left {
+  display: none;
+  aspect-ratio: 3 / 4;
+}
+
+.nd-about-intro__photo--main {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 4 / 5;
+}
+
+.nd-about-intro__copy {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
+  padding-top: calc(clamp(28px, 3.9vw, 56px) + 32px);
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.4;
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-ink);
+  text-wrap: pretty;
+}
+
+.nd-about-mark {
+  margin-top: clamp(64px, 8.4vw, 120px);
+  display: flex;
+  align-items: flex-end;
+}
+
+.nd-about-mark__line {
+  flex: 1;
+  height: 1px;
+  background: var(--nd-ink);
+  margin-bottom: 4px;
+}
+
+.nd-about-mark__icon {
+  display: block;
+  width: 34px;
+  height: 50px;
+}
+
+.nd-about-gestia {
+  margin-top: 40px;
+  margin-bottom: clamp(64px, 8.4vw, 120px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 40px;
+}
+
+.nd-about-gestia__quote-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: clamp(24px, 4.2vw, 60px) var(--nd-gutter) clamp(24px, 4.2vw, 60px);
+}
+
+.nd-about-gestia__quote {
+  margin: 0;
+  font-family: var(--nd-serif);
+  font-weight: 400;
+  font-size: clamp(30px, 3.3vw, 48px);
+  line-height: 1.12;
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-ink);
+  max-width: 560px;
+  text-wrap: pretty;
+}
+
+.nd-about-gestia__plate {
+  display: block;
+  width: clamp(200px, 22vw, 320px);
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.nd-about-gestia__scene {
+  position: relative;
+  min-height: clamp(520px, 52vw, 760px);
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(28px, 4.2vw, 60px);
+  color: var(--nd-surface);
+}
+
+.nd-about-gestia__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.nd-about-gestia__wash {
+  position: absolute;
+  inset: 0;
+  background: var(--nd-about-gestia-wash);
+}
+
+.nd-about-gestia__copy {
+  position: relative;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.4;
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-surface);
+}
+
+.nd-about-approach {
+  background: var(--nd-ink);
+  color: var(--nd-cream);
+  padding: clamp(28px, 3.3vw, 48px) 0 clamp(36px, 4.2vw, 60px);
+  overflow: hidden;
+}
+
+.nd-about-approach__text {
+  margin: 0 auto;
+  padding: 0 var(--nd-gutter);
+  max-width: calc(620px + 2 * var(--nd-gutter));
+  text-align: center;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.4;
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-cream);
+}
+
+.nd-about-together {
+  padding: clamp(48px, 5.6vw, 80px) var(--nd-gutter) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(24px, 4.2vw, 60px);
+  row-gap: 32px;
+  align-items: center;
+}
+
+.nd-about-together__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.nd-about-together__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 520px;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.4;
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-ink);
+  text-wrap: pretty;
+}
+
+.nd-about-closing {
+  margin: clamp(40px, 4.2vw, 60px) auto 0;
+  padding: 0 16px;
+  max-width: 680px;
+  text-align: center;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.4;
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-ink);
+  text-wrap: pretty;
+}
+
+.nd-about-cta {
+  padding: clamp(48px, 5.6vw, 80px) 16px clamp(64px, 8vw, 115px);
+  display: flex;
+  justify-content: center;
+}
+
+.nd-about-cta__link {
+  font-size: var(--nd-fs-18);
+  letter-spacing: var(--nd-ls-02);
+  color: var(--nd-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+@media (min-width: 700px) {
+  .nd-about-intro__grid {
+    margin-top: calc(-1 * clamp(28px, 3.9vw, 56px));
+    grid-template-columns: minmax(0, 260fr) minmax(0, 520fr) minmax(0, 462fr);
+  }
+
+  .nd-about-intro__photo--left {
+    display: block;
+    margin-top: clamp(80px, 11vw, 160px);
+  }
+
+  .nd-about-gestia {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .nd-about-together {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 390px) {
+  .nd-about-intro__title {
+    font-size: clamp(40px, 14vw, 56px);
+    white-space: normal;
+  }
+}

@@ -1,4 +1,5 @@
 from src.content.models import AboutPage, HomeBlock, Review, SiteSettings
+from src.content.models_faq import FaqPage
 from src.content.models_legal import LegalPage
 
 
@@ -109,6 +110,34 @@ class AboutIntro(AboutPage):
         verbose_name_plural = "Інтро"
 
 
+class AboutGestia(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Гестія"
+        verbose_name_plural = "Гестія"
+
+
+class AboutApproach(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Підхід"
+        verbose_name_plural = "Підхід"
+
+
+class AboutTogether(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Разом"
+        verbose_name_plural = "Разом"
+
+
+class AboutClosing(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Фінал і кнопка"
+        verbose_name_plural = "Фінал і кнопка"
+
+
 class AboutGallery(AboutPage):
     class Meta:
         proxy = True
@@ -146,6 +175,27 @@ class AboutPopularBlock(AboutPage):
 
 # Сумісність зі старими імпортами адмінки.
 AboutPicksBlock = AboutPopularBlock
+
+
+class FaqHeader(FaqPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Шапка і фото"
+        verbose_name_plural = "Шапка і фото"
+
+
+class FaqContact(FaqPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Залишились питання?"
+        verbose_name_plural = "Залишились питання?"
+
+
+class FaqSeo(FaqPage):
+    class Meta:
+        proxy = True
+        verbose_name = "SEO"
+        verbose_name_plural = "SEO"
 
 
 class HomeReview(Review):

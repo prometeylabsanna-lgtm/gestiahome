@@ -10,9 +10,10 @@ from src.commerce.forms import ContactForm, style_form
 from src.commerce.models import Inquiry
 from src.commerce.services import create_inquiry
 from src.commerce.wishlist import sku_set
-from src.content.home_slots import about_popular, home_categories, home_popular
+from src.content.home_slots import home_categories, home_popular
 from src.content.legal_pages import legal_document
 from src.content.models import AboutPage, Advantage, HomeBlock, HomeCollection, Review
+from src.content.models_faq import FaqPage
 from src.content.models_menu import MenuGroupItem
 from src.core.ratelimit import honeypot_filled, reject_if_limited
 
@@ -80,21 +81,18 @@ def _figma_block(key, title, cta=""):
 
 def about(request):
     page = AboutPage.load()
-    popular_title = page.popular_title or "Популярні товари"
-    popular_cta = page.popular_cta or "Перейти до каталогу"
-    reviews_title = page.reviews_title or "Відгуки"
-    reviews = Review.objects.filter(placement=Review.Placement.ABOUT)
-    if not reviews.exists():
-        reviews = Review.objects.filter(placement=Review.Placement.HOME)
+    return render(request, "content/about.html", {"page": page})
+
+
+def faq(request):
+    page = FaqPage.load()
+    items = page.items.filter(is_active=True)
     return render(
         request,
-        "content/about.html",
+        "content/faq.html",
         {
             "page": page,
-            "popular": about_popular(),
-            "reviews": reviews,
-            "popular_block": SimpleNamespace(title=popular_title, cta=popular_cta),
-            "reviews_block": SimpleNamespace(title=reviews_title),
+            "items": items,
         },
     )
 

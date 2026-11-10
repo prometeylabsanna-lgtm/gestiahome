@@ -78,6 +78,13 @@
   --nd-colp-fs-title: clamp(40px, 4.9vw, 70px);
   --nd-colp-fs-story: clamp(15px, 1.25vw, 18px);
   --nd-colp-fs-box: clamp(40px, 4.9vw, 70px);
+
+  --nd-faq-contact-muted: #d8c8b8;
+  --nd-about-gestia-wash: linear-gradient(
+    to top,
+    rgba(37, 16, 8, 0.82),
+    rgba(37, 16, 8, 0.2) 70%
+  );
   --nd-colp-fs-others: clamp(36px, 4.4vw, 64px);
   --nd-colp-fs-addon: clamp(32px, 2.8vw, 40px);
   --nd-colp-fs-other-name: clamp(22px, 1.9vw, 28px);

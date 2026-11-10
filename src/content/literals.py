@@ -99,6 +99,7 @@ LITERALS = {
     "lead": ("Сучасна жінка може все.", "A modern woman can do anything."),
     "credit": ("Зроблено", "Made by"),
     "nav_about": ("Про нас", "About"),
+    "nav_faq": ("Актуальні питання", "FAQ"),
     "nav_all": ("Усі товари", "All products"),
     "menu_title": ("Каталог", "Catalogue"),
     "crumb": ("Головна", "Home"),

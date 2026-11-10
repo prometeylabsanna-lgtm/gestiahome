@@ -19,7 +19,7 @@ from src.core.seo import (
     public_contacts,
 )
 
-CONTENT_URL_NAMES = frozenset({"about", "offer", "privacy", "cookies", "shipping"})
+CONTENT_URL_NAMES = frozenset({"about", "faq", "offer", "privacy", "cookies", "shipping"})
 
 
 def json_ld_script(data: dict) -> str:
@@ -46,6 +46,9 @@ def build_graph(context) -> dict:
     product = _product_node(context, request)
     if product is not None:
         graph.append(product)
+    faq = _faq_node(context, request)
+    if faq is not None:
+        graph.append(faq)
     return {"@context": "https://schema.org", "@graph": graph}
 
 
@@ -140,8 +143,47 @@ def _content_title(context, url_name: str) -> str:
         if page is None:
             return ""
         return " ".join(str(getattr(page, "title", "") or "").split()) or gettext("Про нас")
+    if url_name == "faq":
+        page = context.get("page")
+        if page is None:
+            return ""
+        raw = str(getattr(page, "crumb", "") or getattr(page, "title", "") or "")
+        cleaned = (
+            raw.replace("<br>", " ")
+            .replace("<br/>", " ")
+            .replace("<br />", " ")
+            .replace("<p>", " ")
+            .replace("</p>", " ")
+        )
+        return " ".join(cleaned.split()) or gettext("Актуальні питання")
     doc = context.get("doc") or {}
     return " ".join(str(doc.get("title") or "").split())
+
+
+def _faq_node(context, request):
+    if _url_name(request) != "faq":
+        return None
+    items = list(context.get("items") or [])
+    if not items:
+        return None
+    from django.utils.html import strip_tags
+
+    entities = []
+    for item in items:
+        question = " ".join(str(getattr(item, "question", "") or "").split())
+        answer = " ".join(strip_tags(str(getattr(item, "answer", "") or "")).split())
+        if not question or not answer:
+            continue
+        entities.append(
+            {
+                "@type": "Question",
+                "name": question,
+                "acceptedAnswer": {"@type": "Answer", "text": answer},
+            }
+        )
+    if not entities:
+        return None
+    return {"@type": "FAQPage", "mainEntity": entities}
 
 
 def _product_node(context, request):

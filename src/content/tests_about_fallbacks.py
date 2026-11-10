@@ -1,6 +1,5 @@
 from django.core.cache import cache
 from django.test import TestCase
-from django.urls import reverse
 from django.utils import translation
 
 from src.catalog.models import Category, Product
@@ -10,13 +9,15 @@ from src.content.models_about import AboutPopularSlot
 from src.content.models_home_slots import HomePopularSlot
 
 
-class AboutReviewsFallbackTests(TestCase):
+class AboutReviewsDataTests(TestCase):
+    """Відгуки більше не рендеряться на /pro-nas/, але дані/фільтри лишаються."""
+
     def setUp(self):
         cache.clear()
         translation.activate("uk")
         AboutPage.load()
 
-    def test_about_reviews_use_about_placement_when_present(self):
+    def test_about_placement_reviews_exist_separately_from_home(self):
         Review.objects.create(
             placement=Review.Placement.HOME,
             author_uk="Дім Автор",
@@ -29,23 +30,11 @@ class AboutReviewsFallbackTests(TestCase):
             text_uk="Текст про нас",
             sort=1,
         )
-        page = self.client.get(reverse("about"))
-        self.assertContains(page, "Про Нас Автор")
-        self.assertContains(page, "Текст про нас")
-        self.assertNotContains(page, "Дім Автор")
-        self.assertNotContains(page, "Текст головної")
-
-    def test_about_reviews_fall_back_to_home_when_empty(self):
-        Review.objects.create(
-            placement=Review.Placement.HOME,
-            author_uk="Марія К.",
-            text_uk="Дуже сподобалось",
-            sort=1,
-        )
-        self.assertFalse(Review.objects.filter(placement=Review.Placement.ABOUT).exists())
-        page = self.client.get(reverse("about"))
-        self.assertContains(page, "Марія К.")
-        self.assertContains(page, "Дуже сподобалось")
+        about = Review.objects.filter(placement=Review.Placement.ABOUT)
+        home = Review.objects.filter(placement=Review.Placement.HOME)
+        self.assertEqual(about.count(), 1)
+        self.assertEqual(about.first().author_uk, "Про Нас Автор")
+        self.assertEqual(home.first().author_uk, "Дім Автор")
 
 
 class AboutPopularFallbackTests(TestCase):

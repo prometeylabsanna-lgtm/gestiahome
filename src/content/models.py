@@ -456,8 +456,19 @@ class Advantage(MediaChoice):
 
 
 class AboutPage(MediaChoice, SingletonModel):
-    cache_key = "about_page_v2"
-    rich_text_fields = ("body_uk", "body_en")
+    cache_key = "about_page_v3"
+    rich_text_fields = (
+        "body_uk",
+        "body_en",
+        "intro_text_uk",
+        "intro_text_en",
+        "gestia_text_uk",
+        "gestia_text_en",
+        "together_text_uk",
+        "together_text_en",
+        "closing_text_uk",
+        "closing_text_en",
+    )
     title_uk = models.CharField("Заголовок", max_length=200, default="Про нас")
     title_en = models.CharField("Заголовок (EN)", max_length=200, blank=True)
     lead_uk = models.CharField("Підзаголовок", max_length=40, blank=True)
@@ -468,6 +479,65 @@ class AboutPage(MediaChoice, SingletonModel):
     story_label_en = models.CharField("Назва історії (EN)", max_length=32, blank=True)
     body_uk = models.TextField("Текст", blank=True)
     body_en = models.TextField("Текст (EN)", blank=True)
+    intro_text_uk = models.TextField("Текст інтро", blank=True)
+    intro_text_en = models.TextField("Текст інтро (EN)", blank=True)
+    intro_photo_left = WebPImageField(
+        "Фото інтро (ліве)",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Десктоп. Близько 3:4. JPG або PNG.",
+    )
+    intro_photo_left_alt_uk = models.CharField("Alt лівого фото", max_length=200, blank=True)
+    intro_photo_left_alt_en = models.CharField("Alt лівого фото (EN)", max_length=200, blank=True)
+    intro_photo_main = WebPImageField(
+        "Фото інтро (головне)",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Близько 4:5. JPG або PNG.",
+    )
+    intro_photo_main_alt_uk = models.CharField("Alt головного фото", max_length=200, blank=True)
+    intro_photo_main_alt_en = models.CharField("Alt головного фото (EN)", max_length=200, blank=True)
+    gestia_quote_uk = models.TextField("Цитата Гестії", blank=True)
+    gestia_quote_en = models.TextField("Цитата Гестії (EN)", blank=True)
+    gestia_plate = WebPImageField(
+        "Фото тарілки",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Близько 4:3. JPG або PNG.",
+    )
+    gestia_plate_alt_uk = models.CharField("Alt тарілки", max_length=200, blank=True)
+    gestia_plate_alt_en = models.CharField("Alt тарілки (EN)", max_length=200, blank=True)
+    gestia_photo = WebPImageField(
+        "Фото столу Гестії",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Фон правої колонки. JPG або PNG.",
+    )
+    gestia_photo_alt_uk = models.CharField("Alt столу Гестії", max_length=200, blank=True)
+    gestia_photo_alt_en = models.CharField("Alt столу Гестії (EN)", max_length=200, blank=True)
+    gestia_text_uk = models.TextField("Текст Гестії", blank=True)
+    gestia_text_en = models.TextField("Текст Гестії (EN)", blank=True)
+    approach_text_uk = models.TextField("Текст підходу", blank=True)
+    approach_text_en = models.TextField("Текст підходу (EN)", blank=True)
+    together_photo = WebPImageField(
+        "Фото «Разом»",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Близько 4:5. JPG або PNG.",
+    )
+    together_photo_alt_uk = models.CharField("Alt «Разом»", max_length=200, blank=True)
+    together_photo_alt_en = models.CharField("Alt «Разом» (EN)", max_length=200, blank=True)
+    together_text_uk = models.TextField("Текст «Разом»", blank=True)
+    together_text_en = models.TextField("Текст «Разом» (EN)", blank=True)
+    closing_text_uk = models.TextField("Фінальний текст", blank=True)
+    closing_text_en = models.TextField("Фінальний текст (EN)", blank=True)
+    cta_uk = models.CharField("Кнопка каталогу", max_length=40, blank=True)
+    cta_en = models.CharField("Кнопка каталогу (EN)", max_length=40, blank=True)
     image = models.ImageField(
         "Фото",
         upload_to="about/",
@@ -513,6 +583,54 @@ class AboutPage(MediaChoice, SingletonModel):
     @property
     def body(self):
         return localized(self, "body")
+
+    @property
+    def intro_text(self):
+        return localized(self, "intro_text")
+
+    @property
+    def intro_photo_left_alt(self):
+        return localized(self, "intro_photo_left_alt")
+
+    @property
+    def intro_photo_main_alt(self):
+        return localized(self, "intro_photo_main_alt")
+
+    @property
+    def gestia_quote(self):
+        return localized(self, "gestia_quote")
+
+    @property
+    def gestia_plate_alt(self):
+        return localized(self, "gestia_plate_alt")
+
+    @property
+    def gestia_photo_alt(self):
+        return localized(self, "gestia_photo_alt")
+
+    @property
+    def gestia_text(self):
+        return localized(self, "gestia_text")
+
+    @property
+    def approach_text(self):
+        return localized(self, "approach_text")
+
+    @property
+    def together_photo_alt(self):
+        return localized(self, "together_photo_alt")
+
+    @property
+    def together_text(self):
+        return localized(self, "together_text")
+
+    @property
+    def closing_text(self):
+        return localized(self, "closing_text")
+
+    @property
+    def cta(self):
+        return localized(self, "cta")
 
     @property
     def seo_title(self):
@@ -680,6 +798,7 @@ class ContactForms(SingletonModel):
 
 from src.content import models_about as _about_models  # noqa: E402,F401
 from src.content import models_discount as _discount_models  # noqa: E402,F401
+from src.content import models_faq as _faq_models  # noqa: E402,F401
 from src.content import models_home_slots as _home_slots  # noqa: E402,F401
 from src.content import models_legal as _legal_models  # noqa: E402,F401
 from src.content import models_menu as _menu_models  # noqa: E402,F401

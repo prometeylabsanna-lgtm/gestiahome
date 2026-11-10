@@ -123,6 +123,7 @@
 
 .nd-cart__line {
   font-size: var(--nd-fs-16);
+  line-height: normal;
   white-space: nowrap;
 }
 
@@ -197,6 +198,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--nd-fs-16);
+  line-height: normal;
   text-decoration: none;
   color: inherit;
 }
@@ -259,6 +261,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.nd-cart-suggest__form {
+  margin-top: auto;
+  display: block;
+  width: 100%;
 }
 
 .nd-cart-suggest__photo {
@@ -283,10 +293,10 @@
 }
 
 .nd-cart-suggest__add {
-  margin-top: auto;
   height: 40px;
   border: 1px solid var(--nd-ink);
   font-size: var(--nd-fs-14);
+  line-height: normal;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,6 +340,7 @@
 
 .nd-cart__summary-value {
   font-size: 20px;
+  line-height: normal;
   white-space: nowrap;
 }
 
@@ -349,6 +360,7 @@
   justify-content: center;
   font-size: var(--nd-fs-14);
   font-weight: 500;
+  line-height: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;

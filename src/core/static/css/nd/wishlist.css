@@ -175,6 +175,7 @@
   color: inherit;
   font: inherit;
   font-size: var(--nd-fs-14);
+  line-height: normal;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;

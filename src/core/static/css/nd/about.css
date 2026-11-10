@@ -233,6 +233,7 @@
 
 .nd-about-cta__link {
   font-size: var(--nd-fs-18);
+  line-height: normal;
   letter-spacing: var(--nd-ls-02);
   color: var(--nd-ink);
   text-decoration: underline;
@@ -260,7 +261,7 @@
   }
 }
 
-@media (max-width: 390px) {
+@media (max-width: 379px) {
   .nd-about-intro__title {
     font-size: clamp(40px, 14vw, 56px);
     white-space: normal;

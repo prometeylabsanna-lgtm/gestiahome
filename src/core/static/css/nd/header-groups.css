@@ -1,4 +1,4 @@
-.nd-burger__group-btn {
+.nd-burger .nd-burger__group-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -18,18 +18,18 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.nd-burger__group.is-open .nd-burger__group-btn {
+.nd-burger .nd-burger__group.is-open .nd-burger__group-btn {
   font-weight: 500;
 }
 
-.nd-burger__group-btn .nd-icon-chevron {
+.nd-burger .nd-burger__group-btn .nd-icon-chevron {
   width: 10px;
   height: 10px;
   flex: none;
   transition: transform 0.2s ease;
 }
 
-.nd-burger__group:not(.is-open) .nd-burger__group-btn .nd-icon-chevron {
+.nd-burger .nd-burger__group:not(.is-open) .nd-burger__group-btn .nd-icon-chevron {
   transform: rotate(180deg);
 }
 

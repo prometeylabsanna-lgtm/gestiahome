@@ -11,8 +11,7 @@
   .nd-pdp__chip,
   .nd-pdp__price,
   .nd-pdp__qty-value,
-  .nd-pdp-rail__cta,
-  .nd-card__price
+  .nd-pdp-rail__cta
 ) {
   line-height: normal;
 }

@@ -81,6 +81,7 @@ class CheckoutNdTests(TestCase):
         data.update(extra)
         return data
 
+    @override_settings(LIQPAY_PUBLIC_KEY="test_pub", LIQPAY_PRIVATE_KEY="test_priv")
     def test_checkout_page_renders_nd_markup(self):
         response = self._page()
         self.assertEqual(response.status_code, 200)

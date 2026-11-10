@@ -107,6 +107,9 @@ ORDER_NOTIFY_EMAIL = config("ORDER_NOTIFY_EMAIL", default="")
 TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
 NOVA_POSHTA_API_KEY = config("NOVA_POSHTA_API_KEY", default="")
+LIQPAY_PUBLIC_KEY = str(config("LIQPAY_PUBLIC_KEY", default="") or "").strip()
+LIQPAY_PRIVATE_KEY = str(config("LIQPAY_PRIVATE_KEY", default="") or "").strip()
+LIQPAY_SANDBOX = config("LIQPAY_SANDBOX", default=False, cast=bool)
 
 # Тимчасовий залишок активних товарів, доки адміністратор не виставить реальні кількості.
 STOCK_PLACEHOLDER_QTY = 10
@@ -143,7 +146,7 @@ CSP_POLICY = "; ".join(
     [
         "default-src 'self'",
         "base-uri 'self'",
-        "form-action 'self'",
+        "form-action 'self' https://www.liqpay.ua",
         "frame-ancestors 'none'",
         "script-src 'self'",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",

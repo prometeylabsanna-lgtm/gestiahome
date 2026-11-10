@@ -6,11 +6,13 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from src.catalog.models import Product
 from src.commerce.cart import add, clear, lines, set_qty, signature
 from src.commerce.cart_panel import cart_body_context, currency_of, render_panel
+from src.commerce import payments
 from src.commerce import wishlist as wish
 from src.commerce.forms import (
     BuyNowForm,
@@ -108,6 +110,12 @@ def _order_by_idem(raw):
 def _finish_checkout(request, order):
     clear(request)
     _remember_order(request, order.number)
+    if (
+        order.payment_method == Order.Payment.CARD
+        and order.payment_status != Order.PayStatus.PAID
+        and payments.card_enabled(order.currency)
+    ):
+        return HttpResponseRedirect(reverse("order_pay", kwargs={"number": order.number}))
     return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
 
 
@@ -187,6 +195,7 @@ def cart_page(request):
 
 def checkout(request):
     currency = _currency(request)
+    card_ok = payments.card_enabled(currency)
     if request.method == "POST" and honeypot_filled(request):
         return _pretend_order_thanks(request)
     if request.method == "POST":
@@ -196,7 +205,7 @@ def checkout(request):
     rows, total = lines(request, currency)
     if not rows:
         return HttpResponseRedirect(reverse("cart"))
-    form = style_form(CheckoutForm(request.POST or None))
+    form = style_form(CheckoutForm(request.POST or None, card_enabled=card_ok))
     if request.method == "POST" and reject_if_limited(request, form, "checkout"):
         return render(
             request,
@@ -269,15 +278,61 @@ def thanks(request):
     done = request.session.get("orders_done")
     if not isinstance(done, list) or number not in done:
         number = ""
+    order = None
+    pay_retry_url = ""
+    if number:
+        order = Order.objects.filter(number=number).first()
+        if (
+            order is not None
+            and order.payment_method == Order.Payment.CARD
+            and order.payment_status == Order.PayStatus.FAILED
+            and payments.card_enabled(order.currency)
+        ):
+            pay_retry_url = reverse("order_pay", kwargs={"number": order.number})
     return render(
         request,
         "commerce/thanks.html",
         {
             "kind": kind,
             "number": number,
+            "order": order,
+            "pay_retry_url": pay_retry_url,
             "thanks_page": ThankYouPage.load(),
         },
     )
+
+
+@require_GET
+def order_pay(request, number):
+    done = request.session.get("orders_done")
+    if not isinstance(done, list) or number not in done:
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order")
+    order = get_object_or_404(Order, number=number)
+    if order.payment_method != Order.Payment.CARD or order.payment_status == Order.PayStatus.PAID:
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
+    if not payments.card_enabled(order.currency):
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
+    payload = payments.build_checkout(order, request)
+    return render(
+        request,
+        "commerce/pay.html",
+        {
+            "order": order,
+            "checkout_url": payload["checkout_url"],
+            "data": payload["data"],
+            "signature": payload["signature"],
+        },
+    )
+
+
+@csrf_exempt
+@require_POST
+def liqpay_callback(request):
+    status, body = payments.handle_callback(
+        request.POST.get("data", ""),
+        request.POST.get("signature", ""),
+    )
+    return HttpResponse(body, status=status)
 
 
 def wishlist_page(request):

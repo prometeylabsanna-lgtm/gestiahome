@@ -24,6 +24,18 @@
         <h1 class="nd-thanks__title" id="thanks-title" data-qa="lead-success">{{ thanks_page.order_title }}</h1>
         {% if number %}
           <div class="nd-thanks__text">{{ thanks_page.order_text|richhtml_number:number }}</div>
+          {% if order and order.payment_method == "card" %}
+            {% if order.payment_status == "paid" %}
+              <p class="nd-thanks__text" data-qa="pay-status">{% trans "Оплату отримано" %}</p>
+            {% elif order.payment_status == "failed" %}
+              <p class="nd-thanks__text" data-qa="pay-status">{% trans "Оплата не пройшла" %}</p>
+              {% if pay_retry_url %}
+                <a class="nd-thanks__link" href="{{ pay_retry_url }}" data-qa="pay-retry">{% trans "Спробувати оплатити знову" %}</a>
+              {% endif %}
+            {% else %}
+              <p class="nd-thanks__text" data-qa="pay-status">{% trans "Очікуємо підтвердження оплати" %}</p>
+            {% endif %}
+          {% endif %}
         {% else %}
           <div class="nd-thanks__text">{{ thanks_page.order_text_nonum|richhtml }}</div>
         {% endif %}

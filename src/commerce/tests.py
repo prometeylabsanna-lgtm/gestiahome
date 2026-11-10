@@ -184,9 +184,11 @@ class CheckoutTests(TestCase):
         )
         self.assertNotIn("novaposhta", html.lower())
 
+    @override_settings(LIQPAY_PUBLIC_KEY="test_pub", LIQPAY_PRIVATE_KEY="test_priv")
     def test_checkout_joins_city_and_branch(self):
         session = self.client.session
         session["cart"] = {"SNIH": 1}
+        session["currency"] = "uah"
         session.save()
         response = self.client.post(
             "/zamovlennia/",
@@ -203,6 +205,7 @@ class CheckoutTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         order = Order.objects.get()
+        self.assertIn(f"/zamovlennia/oplata/{order.number}/", response["Location"])
         self.assertEqual(order.delivery_method, "np_locker")
         self.assertEqual(order.delivery_address, "Київ, Поштамат 5")
         self.assertEqual(order.payment_method, Order.Payment.CARD)

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Оплата замовлення" %}{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/nd/thanks.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/nd/liqpay-autosubmit.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+  <div class="nd-thanks" data-qa="pay-page">
+    <section class="nd-thanks__section" aria-labelledby="pay-title">
+      <img
+        class="nd-thanks__mark"
+        src="{% static 'nd/g-mark-light.png' %}"
+        alt=""
+        width="34"
+        height="50"
+      >
+      <h1 class="nd-thanks__title" id="pay-title">{% trans "Оплата замовлення" %}</h1>
+      <div class="nd-thanks__text">
+        <p>{% blocktrans with number=order.number %}Замовлення № {{ number }} — переходимо до безпечної оплати LiqPay.{% endblocktrans %}</p>
+      </div>
+      <form
+        class="nd-thanks__pay-form"
+        method="post"
+        action="{{ checkout_url }}"
+        accept-charset="utf-8"
+        data-liqpay-auto
+      >
+        <input type="hidden" name="data" value="{{ data }}">
+        <input type="hidden" name="signature" value="{{ signature }}">
+        <button class="nd-thanks__link" type="submit">{% trans "Перейти до оплати" %}</button>
+      </form>
+    </section>
+  </div>
+{% endblock %}

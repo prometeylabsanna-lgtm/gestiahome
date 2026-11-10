@@ -25,7 +25,15 @@ class OrderAdmin(GestiaModelAdmin):
     )
     list_filter = ("source", "payment_status", "payment_method", "delivery_method", "currency")
     search_fields = ("number", "customer_name", "phone", "email", "items__sku")
-    readonly_fields = ("number", "created_at", "total")
+    readonly_fields = (
+        "number",
+        "created_at",
+        "total",
+        "payment_ref",
+        "payment_txn",
+        "payment_raw_status",
+        "paid_at",
+    )
     inlines = [OrderItemInline]
     date_hierarchy = "created_at"
 

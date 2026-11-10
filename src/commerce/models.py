@@ -22,6 +22,7 @@ class Order(models.Model):
         UNPAID = "unpaid", "Не оплачено"
         AWAITING = "awaiting", "Очікує оплату"
         PAID = "paid", "Оплачено"
+        FAILED = "failed", _("Помилка оплати")
 
     number = models.CharField("Номер", max_length=24, unique=True)
     idempotency_key = models.CharField(
@@ -46,6 +47,16 @@ class Order(models.Model):
         choices=PayStatus.choices,
         default=PayStatus.UNPAID,
     )
+    payment_ref = models.CharField(
+        "LiqPay order_id",
+        max_length=64,
+        blank=True,
+        default="",
+        db_index=True,
+    )
+    payment_txn = models.CharField("LiqPay payment_id", max_length=64, blank=True, default="")
+    payment_raw_status = models.CharField("LiqPay status", max_length=64, blank=True, default="")
+    paid_at = models.DateTimeField("Оплачено о", null=True, blank=True)
     total = models.DecimalField("Сума", max_digits=12, decimal_places=2)
     consent = models.BooleanField("Згода", default=False)
     created_at = models.DateTimeField("Створено", auto_now_add=True)

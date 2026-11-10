@@ -17,6 +17,7 @@ def shop(request):
     home_blocks = {}
     nav_categories = []
     menu_categories = []
+    menu_groups = []
     menu_cards = []
     footer_columns = {"category": [], "info": [], "legal": []}
     cart_count = 0
@@ -30,6 +31,9 @@ def shop(request):
         from src.commerce.wishlist import item_count as wish_count
         from src.content.footer_nav import build_footer_columns
         from src.content.models import ContactForms, HomeBlock, SiteSettings
+        from django.db.models import Prefetch
+
+        from src.content.models_menu import MenuGroup, MenuGroupItem
 
         site = SiteSettings.load()
         form_copy = ContactForms.load()
@@ -37,6 +41,19 @@ def shop(request):
         nav_categories = list(load_nav())
         menu_categories = list(
             Category.objects.filter(parent__isnull=True, is_active=True).order_by("sort", "name_uk")
+        )
+        menu_groups = list(
+            MenuGroup.objects.filter(is_active=True)
+            .prefetch_related(
+                Prefetch(
+                    "items",
+                    queryset=MenuGroupItem.objects.filter(is_active=True)
+                    .select_related("collection", "collection__category", "category")
+                    .order_by("sort", "id"),
+                    to_attr="active_items",
+                )
+            )
+            .order_by("sort", "id")
         )
         featured = Product.objects.filter(slug="boks-rizdvyanyi-shyshky", is_active=True).prefetch_related("images").first()
         if featured is not None:
@@ -62,6 +79,7 @@ def shop(request):
         "home_blocks": home_blocks,
         "nav_categories": nav_categories,
         "menu_categories": menu_categories,
+        "menu_groups": menu_groups,
         "menu_cards": menu_cards,
         "footer_columns": footer_columns,
         "currency": currency,

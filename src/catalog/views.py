@@ -17,6 +17,7 @@ from src.catalog.selectors import (
     pdp_set_products,
 )
 from src.commerce.forms import BuyNowForm, CallbackForm, style_form
+from src.commerce.wishlist import sku_set
 from src.content.form_labels import apply_labels
 from src.content.models import ContactForms, HomeBlock, Review
 
@@ -65,6 +66,7 @@ def _catalog_context(request, category=None):
         "catalog_bands": bands,
         "show_mosaic": use_mosaic,
         "catalog_cta": block.cta if block else "",
+        "wishlist_skus": sku_set(request),
     }
 
 
@@ -112,5 +114,6 @@ def product_detail(request, slug):
                 style_form(BuyNowForm(initial={"sku": product.sku})),
                 ContactForms.load(),
             ),
+            "wishlist_skus": sku_set(request),
         },
     )

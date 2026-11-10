@@ -47,12 +47,17 @@
   max-width: 95px;
 }
 
+.pdp-card-wrap {
+  position: relative;
+  flex: 0 0 174px;
+  width: 174px;
+}
+
 .pdp-card {
   display: flex;
-  flex: 0 0 174px;
   flex-direction: column;
   gap: 14px;
-  width: 174px;
+  width: 100%;
   color: #000;
   text-decoration: none;
 }
@@ -390,10 +395,13 @@
     overflow-x: auto;
   }
 
-  .pdp-card {
+  .pdp-card-wrap {
     flex-basis: 368px;
-    gap: 10px;
     width: 368px;
+  }
+
+  .pdp-card {
+    gap: 10px;
   }
 
   .pdp-card__media {
@@ -402,7 +410,7 @@
     aspect-ratio: auto;
   }
 
-  .pdp-card:nth-child(even) .pdp-card__media {
+  .pdp-card-wrap:nth-child(even) .pdp-card__media {
     height: 416px;
   }
 

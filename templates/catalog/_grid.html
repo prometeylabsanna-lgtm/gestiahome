@@ -2,6 +2,13 @@
 <ul class="product-grid" data-qa="product-grid">
   {% for product in products %}
     <li class="product-card" data-qa="product-card">
+      <div class="product-card__wish">
+        {% if product.sku in wishlist_skus %}
+          {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
+        {% else %}
+          {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
+        {% endif %}
+      </div>
       <a href="{{ product.get_absolute_url }}">
         <span class="product-card__media">
           {% with media=product.card_media %}

@@ -298,6 +298,13 @@ class HomeCollection(models.Model):
     def alt_small(self):
         return localized(self, "alt_small")
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        if self.category_id:
+            return self.category.get_absolute_url()
+        return reverse("catalog")
+
 
 class Advantage(MediaChoice):
     rich_text_fields = ("text_uk", "text_en")
@@ -572,5 +579,6 @@ from src.content import models_about as _about_models  # noqa: E402,F401
 from src.content import models_discount as _discount_models  # noqa: E402,F401
 from src.content import models_home_slots as _home_slots  # noqa: E402,F401
 from src.content import models_legal as _legal_models  # noqa: E402,F401
+from src.content import models_menu as _menu_models  # noqa: E402,F401
 from src.content import models_styles as _style_models  # noqa: E402,F401
 from src.content import proxies as _home_proxies  # noqa: E402,F401

@@ -1,14 +1,23 @@
 {% load shop_tags %}
-<a class="pdp-card is-{{ item.card_crop }}" href="{{ item.get_absolute_url }}" style="--name-w: {{ item.name_width }}px">
-  <span class="pdp-card__media">
-    {% with media=item.card_media %}
-      {% if media %}
-        {% include "partials/smart_media.html" with media=media width=368 height=415 %}
-      {% endif %}
-    {% endwith %}
-  </span>
-  <span class="pdp-card__meta">
-    <span class="pdp-card__name">{{ item.name }}</span>
-    <span class="pdp-card__price{% if item.price_weight == 500 %} is-medium{% endif %}">{% home_price item %}</span>
-  </span>
-</a>
+<div class="pdp-card-wrap">
+  <div class="pdp-card__wish">
+    {% if item.sku in wishlist_skus %}
+      {% include "partials/wishlist_btn.html" with product=item in_wishlist=True variant="nd" %}
+    {% else %}
+      {% include "partials/wishlist_btn.html" with product=item in_wishlist=False variant="nd" %}
+    {% endif %}
+  </div>
+  <a class="pdp-card is-{{ item.card_crop }}" href="{{ item.get_absolute_url }}" style="--name-w: {{ item.name_width }}px">
+    <span class="pdp-card__media">
+      {% with media=item.card_media %}
+        {% if media %}
+          {% include "partials/smart_media.html" with media=media width=368 height=415 %}
+        {% endif %}
+      {% endwith %}
+    </span>
+    <span class="pdp-card__meta">
+      <span class="pdp-card__name">{{ item.name }}</span>
+      <span class="pdp-card__price{% if item.price_weight == 500 %} is-medium{% endif %}">{% home_price item %}</span>
+    </span>
+  </a>
+</div>

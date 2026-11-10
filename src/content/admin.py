@@ -13,6 +13,7 @@ import src.content.admin_blocks  # noqa: F401, E402
 import src.content.admin_discount  # noqa: F401, E402
 import src.content.admin_home_banners  # noqa: F401, E402
 import src.content.admin_legal  # noqa: F401, E402
+import src.content.admin_menu  # noqa: F401, E402
 import src.content.admin_styles  # noqa: F401, E402
 
 

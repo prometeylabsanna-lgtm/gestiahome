@@ -53,6 +53,7 @@ class SidebarTreeTests(TestCase):
         self.assertNotIn("home_cta", keys)
         self.assertNotIn("chrome_footer_links", keys)
         self.assertIn("chrome_locale", keys)
+        self.assertIn("chrome_menu", keys)
         self.assertNotIn("home_video", keys)
         self.assertNotIn("home_video_2", keys)
 
@@ -113,6 +114,8 @@ class SidebarTreeTests(TestCase):
         self.assertContains(response, reverse("admin:content_aboutreviewsblock_changelist"))
         self.assertContains(response, "Замовлення і заявки")
         self.assertContains(response, "Хедер і футер")
+        self.assertContains(response, "Меню каталогу")
+        self.assertContains(response, reverse("admin:content_menugroup_changelist"))
         self.assertContains(response, "Користувачі")
         self.assertContains(response, "Вийти")
         self.assertContains(response, "Знижка")

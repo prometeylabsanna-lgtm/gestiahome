@@ -126,11 +126,35 @@
       <div class="mega__inner nd-mega__inner">
         <nav class="mega__nav nd-mega__nav" aria-label="{% trans 'Каталог' %}">
           <a class="nd-mega__all" href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
-          <div class="mega__list nd-mega__list">
-            {% for cat in menu_categories %}
-              <a class="nd-mega__cat{% if cat.menu_featured %} is-feature{% endif %}" href="{{ cat.get_absolute_url }}">
-                <span>{{ cat.name }}</span>
-              </a>
+          <div class="mega__list nd-mega__list" data-menu-groups>
+            {% for group in menu_groups %}
+              <div
+                class="nd-mega__group{% if group.open_by_default %} is-open{% endif %}"
+                data-menu-group
+                data-group-id="{{ group.pk }}"
+              >
+                <button
+                  class="nd-mega__group-btn"
+                  type="button"
+                  data-menu-group-toggle
+                  aria-expanded="{% if group.open_by_default %}true{% else %}false{% endif %}"
+                  aria-controls="mega-group-{{ group.pk }}"
+                >
+                  <span>{{ group.title }}</span>
+                  {% include "partials/nd/icons/chevron.html" with size=12 %}
+                </button>
+                <ul
+                  class="nd-mega__group-items"
+                  id="mega-group-{{ group.pk }}"
+                  {% if not group.open_by_default %}hidden{% endif %}
+                >
+                  {% for item in group.active_items %}
+                    <li>
+                      <a class="nd-mega__item" href="{{ item.get_href }}">{{ item.label }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
             {% endfor %}
           </div>
           <ul class="nd-mega__social">
@@ -303,10 +327,36 @@
         <span>{% cms "" "menu_title" %}</span>
         {% include "partials/nd/icons/chevron.html" %}
       </button>
-      <div class="burger__cats nd-burger__cats" id="burger-cats" data-burger-cats>
+      <div class="burger__cats nd-burger__cats" id="burger-cats" data-burger-cats data-menu-groups>
         <a href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
-        {% for cat in menu_categories %}
-          <a class="{% if cat.menu_featured %}is-feature{% endif %}" href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+        {% for group in menu_groups %}
+          <div
+            class="nd-burger__group{% if group.open_by_default %} is-open{% endif %}"
+            data-menu-group
+            data-group-id="{{ group.pk }}"
+          >
+            <button
+              class="nd-burger__group-btn"
+              type="button"
+              data-menu-group-toggle
+              aria-expanded="{% if group.open_by_default %}true{% else %}false{% endif %}"
+              aria-controls="burger-group-{{ group.pk }}"
+            >
+              <span>{{ group.title }}</span>
+              {% include "partials/nd/icons/chevron.html" with size=10 %}
+            </button>
+            <ul
+              class="nd-burger__group-items"
+              id="burger-group-{{ group.pk }}"
+              {% if not group.open_by_default %}hidden{% endif %}
+            >
+              {% for item in group.active_items %}
+                <li>
+                  <a class="nd-burger__item" href="{{ item.get_href }}">{{ item.label }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
         {% endfor %}
       </div>
     </div>

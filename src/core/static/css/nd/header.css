@@ -284,18 +284,13 @@
   flex-direction: column;
 }
 
-.nd-burger__cats a {
+.nd-burger__cats > a {
   display: block;
   padding: 8px 0;
   font-size: var(--nd-fs-18);
   line-height: 1.3;
   color: var(--nd-ink);
   text-decoration: none;
-}
-
-.nd-burger__cats a.is-feature {
-  color: var(--nd-ink);
-  font-weight: 500;
 }
 
 .nd-burger__links {

@@ -1,0 +1,57 @@
+.product-card,
+.catalog-cell-wrap,
+.pdp-card-wrap {
+  position: relative;
+}
+
+.catalog-cell-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.product-card__wish,
+.catalog-cell__wish,
+.pdp-card__wish {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+
+.product-card__wish .wish-toggle,
+.product-card__wish .wish-toggle__btn,
+.catalog-cell__wish .wish-toggle,
+.catalog-cell__wish .wish-toggle__btn,
+.pdp-card__wish .wish-toggle,
+.pdp-card__wish .wish-toggle__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  color: var(--nd-surface);
+  filter: var(--nd-wish-shadow);
+}
+
+.product-card__wish .wish-toggle__btn--nd svg,
+.catalog-cell__wish .wish-toggle__btn--nd svg,
+.pdp-card__wish .wish-toggle__btn--nd svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.product-card__wish .wish-toggle__btn--nd.is-on svg,
+.catalog-cell__wish .wish-toggle__btn--nd.is-on svg,
+.pdp-card__wish .wish-toggle__btn--nd.is-on svg {
+  fill: currentColor;
+}

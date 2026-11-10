@@ -263,6 +263,30 @@
     if (region && !region.hidden && regionChosen()) setRegion(false);
   });
 
+  function setMenuGroup(group, open) {
+    if (!group) return;
+    group.classList.toggle("is-open", open);
+    if (open) group.setAttribute("data-open", "");
+    else group.removeAttribute("data-open");
+    var btn = group.querySelector("[data-menu-group-toggle]");
+    var list = group.querySelector(".nd-mega__group-items, .nd-burger__group-items");
+    if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (list) list.hidden = !open;
+  }
+
+  function onMenuGroupToggle(event) {
+    var toggle = event.target.closest("[data-menu-group-toggle]");
+    if (!toggle) return false;
+    var group = toggle.closest("[data-menu-group]");
+    var root = toggle.closest("[data-menu-groups]");
+    if (!group || !root) return true;
+    var willOpen = toggle.getAttribute("aria-expanded") !== "true";
+    root.querySelectorAll("[data-menu-group]").forEach(function (node) {
+      setMenuGroup(node, willOpen && node === group);
+    });
+    return true;
+  }
+
   if (burger) {
     burger.addEventListener("click", function (event) {
       var toggle = event.target.closest("[data-burger-catalog-toggle]");
@@ -274,12 +298,14 @@
         toggle.setAttribute("aria-expanded", open ? "true" : "false");
         return;
       }
+      if (onMenuGroupToggle(event)) return;
       if (event.target.closest("a")) setBurger(false);
     });
   }
 
   if (mega) {
     mega.addEventListener("click", function (event) {
+      if (onMenuGroupToggle(event)) return;
       if (event.target.closest("a")) setMega(false);
     });
   }

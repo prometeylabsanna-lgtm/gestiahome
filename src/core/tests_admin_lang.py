@@ -38,6 +38,7 @@ from src.content.admin_home_banners import (
     HomeMidBannerAdmin,
 )
 from src.content.admin_legal import LegalPageAdmin
+from src.content.admin_menu import MenuGroupAdmin
 from src.content.models import Advantage, HomeBlock, Review, SiteSettings
 from src.content.models_discount import DiscountModal
 from src.core.admin_lang import assert_language_tab_fieldsets, language_tabs
@@ -105,6 +106,7 @@ class AdminLanguageTabFieldsetTests(TestCase):
             HomeCollectionsAdmin,
             HomeReviewsAdmin,
             HomeCallbackAdmin,
+            MenuGroupAdmin,
             SiteSettingsAdmin,
             HomeBlockAdmin,
             AdvantageAdmin,

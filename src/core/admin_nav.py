@@ -187,6 +187,12 @@ NAV_TREE = [
                 "url_name": "admin:content_sitesettings_changelist",
             },
             {
+                "key": "chrome_menu",
+                "title": "Меню каталогу",
+                "icon": "menu_open",
+                "url_name": "admin:content_menugroup_changelist",
+            },
+            {
                 "key": "chrome_locale",
                 "title": "Країна та мова",
                 "icon": "public",

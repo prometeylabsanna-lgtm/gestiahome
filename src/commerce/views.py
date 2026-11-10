@@ -270,7 +270,15 @@ def np_streets(request):
     return JsonResponse({"items": novaposhta.search_streets(city_ref, query, limit=20)})
 
 
+@csrf_exempt
+@never_cache
 def thanks(request):
+    # LiqPay may POST the buyer to result_url; ignore body and bounce to GET.
+    if request.method == "POST":
+        response = HttpResponseRedirect(request.get_full_path())
+        response.status_code = 303
+        return response
+
     from src.content.models_thankyou import ThankYouPage
 
     kind = request.GET.get("kind", "order")
@@ -302,8 +310,10 @@ def thanks(request):
     )
 
 
+@never_cache
 @require_GET
 def order_pay(request, number):
+    # Session-gated retry link (GET). Failed → awaiting + new payment_ref via ensure_payment_ref.
     done = request.session.get("orders_done")
     if not isinstance(done, list) or number not in done:
         return HttpResponseRedirect(f"{reverse('thanks')}?kind=order")
@@ -326,8 +336,10 @@ def order_pay(request, number):
 
 
 @csrf_exempt
+@never_cache
 @require_POST
 def liqpay_callback(request):
+    # Signature verified inside handle_callback before any order mutation.
     status, body = payments.handle_callback(
         request.POST.get("data", ""),
         request.POST.get("signature", ""),

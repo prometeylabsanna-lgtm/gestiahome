@@ -3,7 +3,7 @@ import unittest
 from decimal import Decimal
 
 from django.core.cache import cache
-from django.test import TestCase, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
@@ -271,6 +271,97 @@ class LiqPayCallbackTests(TestCase):
         response = self.client.post(reverse("liqpay_callback"), payload)
         self.assertEqual(response.status_code, 404)
 
+    def test_stale_failure_records_raw_only(self):
+        current = self.order.payment_ref
+        stale = f"{self.order.number}-oldref00"
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, status="failure", order_id=stale, payment_id="txn-stale"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
+        self.assertEqual(self.order.payment_ref, current)
+        self.assertEqual(self.order.payment_raw_status, "failure")
+        self.assertEqual(self.order.payment_txn, "")
+
+    def test_success_from_older_attempt_marks_paid_keeps_ref(self):
+        current = self.order.payment_ref
+        older = f"{self.order.number}-oldref00"
+        response = self.client.post(
+            reverse("liqpay_callback"),
+            _callback_post(self.order, order_id=older, payment_id="txn-old"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+        self.assertEqual(self.order.payment_ref, current)
+        self.assertEqual(self.order.payment_txn, "txn-old")
+
+    def test_non_card_order_rejected(self):
+        self.order.payment_method = Order.Payment.ON_DELIVERY
+        self.order.payment_status = Order.PayStatus.UNPAID
+        self.order.save(update_fields=["payment_method", "payment_status"])
+        response = self.client.post(reverse("liqpay_callback"), _callback_post(self.order))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, b"not card")
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.UNPAID)
+        self.assertEqual(self.order.payment_raw_status, "")
+        self.assertEqual(self.order.payment_txn, "")
+
+    def test_float_amount_matches_decimal_total(self):
+        self.order.total = Decimal("1200.00")
+        self.order.save(update_fields=["total"])
+        params = {
+            "version": 3,
+            "public_key": "test_pub",
+            "action": "pay",
+            "amount": 1200.0,
+            "currency": "UAH",
+            "order_id": self.order.payment_ref,
+            "status": "success",
+            "payment_id": "txn-float",
+        }
+        data = lp.encode_data(params)
+        payload = {"data": data, "signature": lp.sign(data, "test_priv")}
+        response = self.client.post(reverse("liqpay_callback"), payload)
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_callback_csrf_exempt_but_signature_required(self):
+        client = Client(enforce_csrf_checks=True)
+        url = reverse("liqpay_callback")
+        before_status = self.order.payment_status
+        before_raw = self.order.payment_raw_status
+        before_ref = self.order.payment_ref
+
+        missing = client.post(url, {"data": lp.encode_data({"order_id": self.order.payment_ref})})
+        self.assertEqual(missing.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, before_status)
+        self.assertEqual(self.order.payment_raw_status, before_raw)
+        self.assertEqual(self.order.payment_ref, before_ref)
+
+        forged = _callback_post(self.order)
+        forged["signature"] = "forged-signature"
+        forged_resp = client.post(url, forged)
+        self.assertEqual(forged_resp.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, before_status)
+        self.assertEqual(self.order.payment_raw_status, before_raw)
+        self.assertEqual(self.order.payment_ref, before_ref)
+
+        ok = client.post(url, _callback_post(self.order))
+        self.assertEqual(ok.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PayStatus.PAID)
+
+    def test_callback_rejects_get(self):
+        response = self.client.get(reverse("liqpay_callback"))
+        self.assertEqual(response.status_code, 405)
+
 
 class LiqPayDisabledAndCurrencyTests(TestCase):
     def setUp(self):
@@ -402,6 +493,41 @@ class LiqPayThanksAndCspTests(TestCase):
         self.assertEqual(self.order.payment_status, Order.PayStatus.AWAITING)
         self.assertNotEqual(self.order.payment_ref, old)
         self.assertTrue(self.order.payment_ref.startswith(f"{self.order.number}-"))
+
+    def _assert_never_cache(self, response):
+        cache_control = response.get("Cache-Control", "")
+        self.assertTrue(
+            "no-store" in cache_control
+            or "no-cache" in cache_control
+            or "private" in cache_control
+            or "max-age=0" in cache_control,
+            cache_control,
+        )
+
+    def test_order_pay_and_thanks_never_cache(self):
+        self._session()
+        self.order.payment_ref = f"{self.order.number}-abcd1234"
+        self.order.payment_status = Order.PayStatus.AWAITING
+        self.order.save(update_fields=["payment_ref", "payment_status"])
+        pay = self.client.get(reverse("order_pay", kwargs={"number": self.order.number}))
+        self.assertEqual(pay.status_code, 200)
+        self._assert_never_cache(pay)
+        thanks = self.client.get(f"{reverse('thanks')}?kind=order&number={self.order.number}")
+        self.assertEqual(thanks.status_code, 200)
+        self._assert_never_cache(thanks)
+
+    def test_thanks_post_without_csrf_redirects_303(self):
+        client = Client(enforce_csrf_checks=True)
+        session = client.session
+        session["orders_done"] = [self.order.number]
+        session.save()
+        url = f"{reverse('thanks')}?kind=order&number={self.order.number}"
+        before = self.order.payment_status
+        response = client.post(url, {"status": "success", "order_id": "forged"})
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response["Location"], url)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, before)
 
 
 @unittest.skipUnless(

@@ -154,10 +154,13 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
         if order is None:
             return 404, "not found"
 
-        # Record last verified callback order_id + raw status (never keys/signature).
-        order.payment_ref = order_id
+        if order.payment_method != Order.Payment.CARD:
+            return 400, "not card"
+
+        # Never overwrite payment_ref with callback order_id (may be an older attempt).
         order.payment_raw_status = status
-        fields = ["payment_ref", "payment_raw_status"]
+        fields = ["payment_raw_status"]
+        current_attempt = order_id == (order.payment_ref or "")
 
         if amount != order.total or currency != "UAH":
             logger.warning(
@@ -183,6 +186,7 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
             order.save(update_fields=fields)
             return 200, "OK"
 
+        # success / sandbox: any attempt for this order number → paid
         if status == "success" or (status == "sandbox" and settings.LIQPAY_SANDBOX):
             order.payment_status = Order.PayStatus.PAID
             order.paid_at = timezone.now()
@@ -193,12 +197,14 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
             order.save(update_fields=fields)
             return 200, "OK"
 
+        # failure/error/reversed: only current attempt (payment_ref) may mark failed
         if status in ("failure", "error", "reversed"):
-            order.payment_status = Order.PayStatus.FAILED
-            fields.append("payment_status")
-            if txn:
-                order.payment_txn = txn[:64]
-                fields.append("payment_txn")
+            if current_attempt:
+                order.payment_status = Order.PayStatus.FAILED
+                fields.append("payment_status")
+                if txn:
+                    order.payment_txn = txn[:64]
+                    fields.append("payment_txn")
             order.save(update_fields=fields)
             return 200, "OK"
 

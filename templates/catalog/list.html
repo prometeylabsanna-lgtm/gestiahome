@@ -19,13 +19,13 @@
           <span aria-hidden="true">/</span>
         </li>
         <li>
-          {% if crumbs %}
-            <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
-            <span aria-hidden="true">/</span>
-          {% else %}
-            <span aria-current="page">{% trans "Каталог" %}</span>
-          {% endif %}
+          <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
+          <span aria-hidden="true">/</span>
         </li>
+        {% if not crumbs %}
+          {# дизайн: сторінка каталогу з фільтрами — «Головна/Каталог/Фільтри» #}
+          <li><span aria-current="page">{% trans "Фільтри" %}</span></li>
+        {% endif %}
         {% for crumb in crumbs %}
           <li>
             {% if forloop.last %}

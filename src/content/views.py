@@ -97,6 +97,30 @@ def faq(request):
     )
 
 
+def _collection_addons(collection, limit=3):
+    """«Доповнити сет»: власні доповнення колекції; якщо їх немає — як у дизайні,
+    перші `limit` унікальних доповнень інших активних колекцій."""
+    own = list(collection.addons.filter(is_active=True))
+    if own:
+        return own
+    pool, seen = [], set()
+    others = (
+        HomeCollection.objects.filter(is_active=True)
+        .exclude(pk=collection.pk)
+        .prefetch_related("addons")
+        .order_by("sort", "id")
+    )
+    for other in others:
+        for product in other.addons.all():
+            if not product.is_active or product.pk in seen:
+                continue
+            seen.add(product.pk)
+            pool.append(product)
+            if len(pool) >= limit:
+                return pool
+    return pool
+
+
 def collection_detail(request, slug):
     collection = get_object_or_404(
         HomeCollection.objects.select_related("product", "category").prefetch_related(
@@ -134,7 +158,7 @@ def collection_detail(request, slug):
         {
             "collection": collection,
             "gallery": collection.gallery_photos(),
-            "addons": list(collection.addons.filter(is_active=True)),
+            "addons": _collection_addons(collection),
             "others": others,
             "ship_block": blocks.get("pdp_ship"),
             "pay_block": blocks.get("pdp_pay"),

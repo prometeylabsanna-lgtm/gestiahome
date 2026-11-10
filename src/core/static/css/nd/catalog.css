@@ -428,6 +428,7 @@
   letter-spacing: var(--nd-ls-01);
   white-space: pre-line;
   min-width: 0;
+  max-width: var(--nd-card-name-measure);
 }
 
 .nd-card__price {

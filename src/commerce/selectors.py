@@ -55,7 +55,8 @@ def drawer_addon_items(focus_product, cart_skus):
     else:
         pool = []
     if not pool:
-        pool = _active_addon_products(_all_active_collections())
+        # як у дизайні: без власних доповнень — дві перші загальні позиції
+        pool = _active_addon_products(_all_active_collections())[:2]
     return [
         {"product": product, "in_cart": product.sku in cart_skus, "sku": product.sku}
         for product in pool

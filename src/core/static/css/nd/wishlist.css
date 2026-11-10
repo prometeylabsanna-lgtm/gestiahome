@@ -150,6 +150,7 @@
 
 .nd-wish__name {
   white-space: pre-line;
+  max-width: var(--nd-card-name-measure);
   min-width: 0;
 }
 

@@ -160,7 +160,8 @@
     font-weight: 500;
   }
 
-  .nd-mega__social {
+  /* .nd-header ul {margin:0} має вищу специфічність — потрібен префікс */
+  .nd-header .nd-mega__social {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
@@ -224,11 +225,12 @@
 
   .nd-mega-card__meta .mega-card__name {
     white-space: pre-line;
+    max-width: var(--nd-card-name-measure);
   }
 
   .nd-mega-card__meta .mega-card__price {
     white-space: nowrap;
-    color: var(--nd-price);
+    color: var(--nd-ink);
   }
 
   .nd-mega__cta {

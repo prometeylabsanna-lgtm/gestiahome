@@ -132,10 +132,11 @@
 
 .nd-co-field--second {
   position: relative;
-  padding-right: 36px;
 }
 
+/* у дизайні поле «Відділення» без стрілки */
 .nd-co-field__arrow {
+  display: none;
   position: absolute;
   top: 50%;
   right: 14px;

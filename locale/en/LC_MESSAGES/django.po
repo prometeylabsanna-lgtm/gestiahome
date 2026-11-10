@@ -51,7 +51,7 @@ msgstr "Delivery"
 msgid "Нова пошта (відділення)"
 msgstr "Nova Poshta (branch)"
 
-msgid "Нова пошта (поштамат)"
+msgid "Нова пошта (поштомат)"
 msgstr "Nova Poshta (parcel locker)"
 
 msgid "Кур’єрська доставка"

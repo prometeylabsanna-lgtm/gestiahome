@@ -31,6 +31,7 @@ from src.commerce.services import (
     unavailable_message,
 )
 from src.content.form_labels import label_form
+from src.core.i18n import safe_next
 from src.core.ratelimit import honeypot_filled, reject_if_limited
 from src.core.utils import format_money
 
@@ -310,7 +311,7 @@ def wishlist_toggle(request):
             "partials/wishlist_btn.html",
             {"product": product, "in_wishlist": active, "variant": variant},
         )
-    next_url = request.POST.get("next") or product.get_absolute_url()
+    next_url = safe_next(request.POST.get("next") or product.get_absolute_url())
     return HttpResponseRedirect(next_url)
 
 

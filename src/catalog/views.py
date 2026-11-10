@@ -51,6 +51,33 @@ def _load_all_url(request):
     return f"{request.path}?{encoded}" if encoded else f"{request.path}?all=1"
 
 
+_CURATED_SORT_KEYS = {
+    "price_asc": (lambda p: p.price_uah, False),
+    "price_desc": (lambda p: p.price_uah, True),
+    "name": (lambda p: p.name_uk, False),
+}
+
+
+def _curated_first(matched, sort):
+    """Як у макеті: фільтр/категорія звужує кураторську сітку FILTERS (з її повторами й порядком).
+
+    Товари, що відповідають фільтру, але не стоять у жодній клітинці, додаються в кінці,
+    щоб нові позиції не зникали з категорій. Без клітинок — звичайний список.
+    """
+    curated = curated_catalog_products()
+    if not curated:
+        return matched
+    ids = {product.pk for product in matched}
+    picked = [product for product in curated if product.pk in ids]
+    if not picked:
+        return matched
+    if sort in _CURATED_SORT_KEYS:
+        key, reverse = _CURATED_SORT_KEYS[sort]
+        picked = sorted(picked, key=key, reverse=reverse)
+    seen = {product.pk for product in picked}
+    return picked + [product for product in matched if product.pk not in seen]
+
+
 def _catalog_context(request, category=None):
     parsed = parse_catalog_filters(request.GET)
     qs = base_products()
@@ -63,7 +90,7 @@ def _catalog_context(request, category=None):
     if use_curated:
         all_products = curated_catalog_products()
     else:
-        all_products = list(filtered)
+        all_products = _curated_first(list(filtered), parsed.get("sort") or "")
     show_all = request.GET.get("all") == "1"
     total_count = len(all_products)
     has_more = not show_all and total_count > CATALOG_PAGE_SIZE

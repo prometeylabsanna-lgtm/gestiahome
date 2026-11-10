@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.apps import apps
 from django.http import QueryDict
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import translation
 
 from src.catalog.models import (
@@ -496,3 +497,40 @@ class SaleBadgeTests(TestCase):
         self.assertContains(pages[1], "Бокс без бейджа")
         self.assertContains(pages[2], "Box without a badge")
         self.assertContains(pages[3], "Box without a badge")
+
+
+class CuratedCategoryGridTests(TestCase):
+    """Категорія/фільтр звужує кураторську сітку FILTERS, як у макеті (з повторами)."""
+
+    def setUp(self):
+        self.ny = Category.objects.create(slug="ny", name_uk="Новорічний декор", is_active=True, filter_sort=1)
+        self.other = Category.objects.create(slug="other", name_uk="Інше", is_active=True, filter_sort=2)
+        self.box = Product.objects.create(
+            category=self.ny, sku="NY1", slug="ny1", name_uk="Шишки", price_uah=Decimal("4980"), price_eur=Decimal("1"), is_active=True
+        )
+        self.extra = Product.objects.create(
+            category=self.ny, sku="NY2", slug="ny2", name_uk="Поза сіткою", price_uah=Decimal("10"), price_eur=Decimal("1"), is_active=True
+        )
+        self.gift = Product.objects.create(
+            category=self.other, sku="GF1", slug="gf1", name_uk="Газетний", price_uah=Decimal("5130"), price_eur=Decimal("1"), is_active=True
+        )
+        for sort, product in enumerate([self.box, self.gift, self.box], start=1):
+            CatalogCell.objects.create(
+                product=product,
+                band=0,
+                layout=CatalogCell.Layout.ROW,
+                role=CatalogCell.Role.GRID,
+                surface=CatalogCell.Surface.FILTERS,
+                sort=sort,
+                price_uah=product.price_uah,
+            )
+
+    def test_category_keeps_curated_repeats_then_uncurated(self):
+        page = self.client.get(reverse("category", kwargs={"slug": "ny"}))
+        names = [p.name_uk for p in page.context["products"]]
+        self.assertEqual(names, ["Шишки", "Шишки", "Поза сіткою"])
+
+    def test_filter_param_without_cells_match_falls_back(self):
+        CatalogCell.objects.all().delete()
+        page = self.client.get(reverse("catalog"), {"category": "ny"})
+        self.assertEqual(sorted(p.sku for p in page.context["products"]), ["NY1", "NY2"])

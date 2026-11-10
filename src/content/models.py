@@ -228,7 +228,7 @@ class HomeBlock(MediaChoice):
 
 
 class HomeCollection(models.Model):
-    rich_text_fields = ("text_uk", "text_en")
+    rich_text_fields = ("text_uk", "text_en", "story_uk", "story_en")
     block = models.ForeignKey(
         "content.HomeBlock",
         related_name="collection_cards",
@@ -237,12 +237,32 @@ class HomeCollection(models.Model):
         blank=True,
         verbose_name="Блок",
     )
+    slug = models.SlugField(
+        "Слаг",
+        max_length=120,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="URL: /kolektsiia/<slug>/",
+    )
     label_uk = models.CharField("Підпис", max_length=120, blank=True)
     label_en = models.CharField("Підпис (EN)", max_length=120, blank=True)
     title_uk = models.CharField("Назва", max_length=160)
     title_en = models.CharField("Назва (EN)", max_length=160, blank=True)
     text_uk = models.TextField("Текст", blank=True)
     text_en = models.TextField("Текст (EN)", blank=True)
+    story_uk = models.TextField("Історія", blank=True)
+    story_en = models.TextField("Історія (EN)", blank=True)
+    box_items_uk = models.TextField(
+        "У боксі",
+        blank=True,
+        help_text="Один пункт у рядку.",
+    )
+    box_items_en = models.TextField(
+        "У боксі (EN)",
+        blank=True,
+        help_text="One item per line.",
+    )
     image_large = models.ImageField(
         "Велике фото",
         upload_to="home/collections/",
@@ -267,6 +287,24 @@ class HomeCollection(models.Model):
         related_name="home_collections",
         verbose_name="Категорія",
     )
+    product = models.ForeignKey(
+        "catalog.Product",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="home_collections_as_main",
+        verbose_name="Товар боксу",
+    )
+    addons = models.ManyToManyField(
+        "catalog.Product",
+        blank=True,
+        related_name="home_collections_as_addon",
+        verbose_name="Доповнити сет",
+    )
+    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
     is_active = models.BooleanField("Показувати на сайті", default=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
 
@@ -291,6 +329,15 @@ class HomeCollection(models.Model):
         return localized(self, "text")
 
     @property
+    def story(self):
+        return localized(self, "story")
+
+    @property
+    def box_items(self):
+        raw = localized(self, "box_items")
+        return [line.strip() for line in (raw or "").splitlines() if line.strip()]
+
+    @property
     def alt_large(self):
         return localized(self, "alt_large")
 
@@ -298,12 +345,68 @@ class HomeCollection(models.Model):
     def alt_small(self):
         return localized(self, "alt_small")
 
+    @property
+    def seo_title(self):
+        value = localized(self, "seo_title")
+        if value:
+            return value
+        title = " ".join((self.title or "").split())
+        return f"Колекція «{title}» — Gestia Home"
+
+    @property
+    def seo_description(self):
+        return localized(self, "seo_description")
+
+    def gallery_photos(self):
+        photos = []
+        if self.image_large:
+            photos.append({"url": self.image_large.url, "alt": self.alt_large})
+        if self.image_small:
+            photos.append({"url": self.image_small.url, "alt": self.alt_small})
+        rows = self.gallery_images.all()
+        cached = getattr(self, "_prefetched_objects_cache", {})
+        if "gallery_images" in cached:
+            rows = cached["gallery_images"]
+        for row in rows:
+            if row.image:
+                photos.append({"url": row.image.url, "alt": row.alt})
+        return photos
+
     def get_absolute_url(self):
         from django.urls import reverse
 
-        if self.category_id:
-            return self.category.get_absolute_url()
+        if self.slug:
+            return reverse("collection", kwargs={"slug": self.slug})
         return reverse("catalog")
+
+
+class HomeCollectionImage(models.Model):
+    collection = models.ForeignKey(
+        HomeCollection,
+        related_name="gallery_images",
+        on_delete=models.CASCADE,
+        verbose_name="Колекція",
+    )
+    image = models.ImageField(
+        "Фото",
+        upload_to="home/collections/gallery/",
+        validators=[IMAGE_VALIDATOR],
+    )
+    alt_uk = models.CharField("Alt", max_length=200, blank=True)
+    alt_en = models.CharField("Alt (EN)", max_length=200, blank=True)
+    sort = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["sort", "id"]
+        verbose_name = "Фото колекції"
+        verbose_name_plural = "Фото колекції"
+
+    def __str__(self):
+        return f"{self.collection_id}:{self.pk}"
+
+    @property
+    def alt(self):
+        return localized(self, "alt")
 
 
 class Advantage(MediaChoice):

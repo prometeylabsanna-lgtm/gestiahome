@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 from django.db.utils import OperationalError, ProgrammingError
 from django.http import Http404
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
@@ -94,6 +94,41 @@ def about(request):
             "reviews": reviews,
             "popular_block": SimpleNamespace(title=popular_title, cta=popular_cta),
             "reviews_block": SimpleNamespace(title=reviews_title),
+        },
+    )
+
+
+def collection_detail(request, slug):
+    collection = get_object_or_404(
+        HomeCollection.objects.select_related("product", "category").prefetch_related(
+            "gallery_images",
+            "addons",
+        ),
+        slug=slug,
+        is_active=True,
+    )
+    blocks = {
+        block.key: block
+        for block in HomeBlock.objects.filter(key__in=["pdp_ship", "pdp_pay"])
+    }
+    others = (
+        HomeCollection.objects.filter(is_active=True)
+        .exclude(pk=collection.pk)
+        .exclude(slug="")
+        .exclude(slug__isnull=True)
+        .select_related("category")
+        .order_by("sort", "id")
+    )
+    return render(
+        request,
+        "content/collection.html",
+        {
+            "collection": collection,
+            "gallery": collection.gallery_photos(),
+            "addons": list(collection.addons.filter(is_active=True)),
+            "others": others,
+            "ship_block": blocks.get("pdp_ship"),
+            "pay_block": blocks.get("pdp_pay"),
         },
     )
 

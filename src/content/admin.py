@@ -1,9 +1,17 @@
 from django.contrib import admin
 
 from src.content.admin_limits import tighten
-from src.content.models import Advantage, FooterLink, HomeBlock, HomeCollection, Review, SiteSettings
+from src.content.models import (
+    Advantage,
+    FooterLink,
+    HomeBlock,
+    HomeCollection,
+    HomeCollectionImage,
+    Review,
+    SiteSettings,
+)
 from src.content.proxies import AboutReview, HomeReview
-from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -88,33 +96,56 @@ class HomeBlockAdmin(GestiaModelAdmin):
         return form
 
 
+class HomeCollectionImageInline(GestiaTabularInline):
+    model = HomeCollectionImage
+    extra = 0
+    tab = True
+    verbose_name = "Фото"
+    verbose_name_plural = "Галерея"
+    ordering_field = "sort"
+    hide_ordering_field = True
+    fields = ("image", "alt_uk", "alt_en", "sort")
+
+
 @admin.register(HomeCollection)
 class HomeCollectionAdmin(GestiaModelAdmin):
-    list_display = ("title_uk", "is_active", "sort")
+    list_display = ("title_uk", "slug", "is_active", "sort")
     list_filter = ("is_active",)
-    search_fields = ("title_uk", "title_en", "label_uk")
+    search_fields = ("title_uk", "title_en", "label_uk", "slug")
     ordering = ("sort", "id")
-    autocomplete_fields = ("category",)
-    tiny_fields = ("text_uk", "text_en")
+    autocomplete_fields = ("category", "product", "addons")
+    inlines = (HomeCollectionImageInline,)
+    tiny_fields = ("text_uk", "text_en", "story_uk", "story_en")
     fieldsets = language_tabs(
         uk_fields=(
             "is_active",
             "sort",
+            "slug",
             "label_uk",
             "title_uk",
             "text_uk",
+            "story_uk",
+            "box_items_uk",
             "image_large",
             "image_small",
             "alt_large_uk",
             "alt_small_uk",
             "category",
+            "product",
+            "addons",
+            "seo_title_uk",
+            "seo_description_uk",
         ),
         en_fields=(
             "label_en",
             "title_en",
             "text_en",
+            "story_en",
+            "box_items_en",
             "alt_large_en",
             "alt_small_en",
+            "seo_title_en",
+            "seo_description_en",
         ),
     )
 

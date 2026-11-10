@@ -17,6 +17,7 @@ class MenuGroupRenderTests(TestCase):
             is_active=True,
         )
         self.collection = HomeCollection.objects.create(
+            slug="menu-kvitka-dusha",
             title_uk="Квітка-душа",
             title_en="Soul Flower",
             category=self.category,
@@ -96,7 +97,10 @@ class MenuGroupRenderTests(TestCase):
         self.assertIn('class="nd-burger__group is-open"', html)
 
     def test_item_href_collection_category_catalog(self):
-        self.assertEqual(self.collection_item.get_href(), self.category.get_absolute_url())
+        self.assertEqual(
+            self.collection_item.get_href(),
+            reverse("collection", kwargs={"slug": "menu-kvitka-dusha"}),
+        )
         self.assertEqual(self.category_item.get_href(), self.category.get_absolute_url())
         self.assertEqual(self.catalog_item.get_href(), reverse("catalog"))
         orphan = HomeCollection.objects.create(
@@ -118,5 +122,6 @@ class MenuGroupRenderTests(TestCase):
     def test_header_links_point_to_expected_urls(self):
         page = self.client.get(reverse("home"))
         html = page.content.decode()
+        self.assertIn(f'href="{reverse("collection", kwargs={"slug": "menu-kvitka-dusha"})}"', html)
         self.assertIn(f'href="{self.category.get_absolute_url()}"', html)
         self.assertIn(f'href="{reverse("catalog")}"', html)

@@ -47,6 +47,7 @@ class HomeNdRenderTests(TestCase):
         )
         self.active = HomeCollection.objects.create(
             block=self.collections,
+            slug="nd-kvitka-dusha",
             label_uk="Колекція",
             title_uk="Квітка-душа",
             text_uk="<p>Текст колекції</p>",
@@ -89,12 +90,13 @@ class HomeNdRenderTests(TestCase):
         self.assertContains(page, "Різдвяна колекція святкових боксів")
         self.assertContains(page, "Квітка-душа")
         self.assertContains(page, "Дізнатись детальніше")
-        self.assertContains(page, reverse("category", kwargs={"slug": "rizdvyani-boksy"}))
+        self.assertContains(page, reverse("collection", kwargs={"slug": "nd-kvitka-dusha"}))
         self.assertNotContains(page, "Прихована")
 
-    def test_collection_without_category_links_to_catalog(self):
+    def test_collection_without_slug_links_to_catalog(self):
+        self.active.slug = None
         self.active.category = None
-        self.active.save(update_fields=["category"])
+        self.active.save(update_fields=["slug", "category"])
         page = self.client.get("/")
         self.assertContains(page, reverse("catalog"))
         self.assertContains(page, "Квітка-душа")

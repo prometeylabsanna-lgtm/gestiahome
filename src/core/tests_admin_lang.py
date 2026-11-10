@@ -12,7 +12,13 @@ from src.catalog.admin import (
     ProductSetAdmin,
 )
 from src.catalog.models import Category, Product, ProductAttribute, ProductAttributeGroup, ProductSet
-from src.content.admin import AdvantageAdmin, HomeBlockAdmin, ReviewAdmin, SiteSettingsAdmin
+from src.content.admin import (
+    AdvantageAdmin,
+    HomeBlockAdmin,
+    HomeCollectionAdmin,
+    ReviewAdmin,
+    SiteSettingsAdmin,
+)
 from src.content.admin_about import (
     AboutBannerAdmin,
     AboutGalleryAdmin,
@@ -109,6 +115,7 @@ class AdminLanguageTabFieldsetTests(TestCase):
             MenuGroupAdmin,
             SiteSettingsAdmin,
             HomeBlockAdmin,
+            HomeCollectionAdmin,
             AdvantageAdmin,
             ReviewAdmin,
             CategoryAdmin,

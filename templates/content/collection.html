@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load i18n shop_tags static richtext %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/nd/collection.css' %}">
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static 'js/nd/collection.js' %}" defer></script>
+{% endblock %}
+{% block title %}{{ collection.seo_title }}{% endblock %}
+{% block description %}{{ collection.seo_description }}{% endblock %}
+
+{% block content %}
+  <article class="nd-colp" data-collection>
+    <nav class="nd-colp__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-colp__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li>
+          {% if collection.category_id %}
+            <a href="{{ collection.category.get_absolute_url }}">{{ collection.category.name }}</a>
+          {% else %}
+            <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
+          {% endif %}
+          <span aria-hidden="true">/</span>
+        </li>
+        <li aria-current="page">{{ collection.title }}</li>
+      </ol>
+    </nav>
+
+    <section class="nd-colp__main" aria-labelledby="col-title" data-screen-label="Collection hero">
+      {% if gallery %}
+        <div class="nd-colp-gallery nd-scroll" data-colp-gallery>
+          {% for photo in gallery %}
+            <div class="nd-colp-gallery__item">
+              <img
+                src="{{ photo.url }}"
+                alt="{{ photo.alt }}"
+                width="636"
+                height="770"
+                {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+              >
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="nd-colp__side">
+        <h1 class="nd-colp__title" id="col-title">
+          {% if collection.label %}
+            <span class="nd-colp__label">{{ collection.label }}</span>
+          {% endif %}
+          <span class="nd-colp__name">{{ collection.title }}</span>
+        </h1>
+
+        {% if collection.story %}
+          <div class="nd-colp__story">{{ collection.story|richhtml }}</div>
+        {% endif %}
+
+        {% if collection.product_id %}
+          <p class="nd-colp__price">{% home_price collection.product %}</p>
+          <div class="nd-colp__actions">
+            <form
+              class="nd-colp__cart-form"
+              method="post"
+              action="{% url 'cart_add' %}"
+              hx-post="{% url 'cart_add' %}"
+              hx-target="#cart-count"
+              hx-swap="outerHTML"
+              hx-sync="this:replace"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="sku" value="{{ collection.product.sku }}">
+              <button class="nd-colp__cart" type="submit">
+                <span>{% trans "Додати в кошик" %}</span>
+                {% include "partials/nd/icons/bag.html" with size=16 %}
+              </button>
+            </form>
+            <a class="nd-colp__box-link" href="#box" data-scroll-box>{% trans "Що в боксі" %}</a>
+          </div>
+        {% else %}
+          <div class="nd-colp__actions nd-colp__actions--solo">
+            <a class="nd-colp__box-link" href="#box" data-scroll-box>{% trans "Що в боксі" %}</a>
+          </div>
+        {% endif %}
+
+        {% if addons %}
+          <section class="nd-colp-addons" aria-labelledby="addons-title">
+            <h2 class="nd-colp-addons__title" id="addons-title">{% trans "Доповнити сет" %}</h2>
+            <ul class="nd-colp-addons__list">
+              {% for addon in addons %}
+                <li class="nd-colp-addons__item">
+                  {% if addon.card_photo_url %}
+                    <img
+                      class="nd-colp-addons__img"
+                      src="{{ addon.card_photo_url }}"
+                      alt=""
+                      width="100"
+                      height="100"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <span class="nd-colp-addons__img nd-colp-addons__img--empty" aria-hidden="true"></span>
+                  {% endif %}
+                  <div class="nd-colp-addons__meta">
+                    <span class="nd-colp-addons__name">{{ addon.name }}</span>
+                    <span class="nd-colp-addons__price">{% home_price addon %}</span>
+                  </div>
+                  <form
+                    class="nd-colp-addons__form"
+                    method="post"
+                    action="{% url 'cart_add' %}"
+                    hx-post="{% url 'cart_add' %}"
+                    hx-target="#cart-count"
+                    hx-swap="outerHTML"
+                    hx-sync="this:replace"
+                  >
+                    {% csrf_token %}
+                    <input type="hidden" name="sku" value="{{ addon.sku }}">
+                    <button class="nd-colp-addons__add" type="submit">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.5"></path>
+                      </svg>
+                      <span>{% trans "Додати" %}</span>
+                    </button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if collection.box_items %}
+      <section class="nd-colp-box" id="box" aria-labelledby="box-title" data-screen-label="In the box">
+        <h2 class="nd-colp-box__title" id="box-title">{% trans "У боксі" %}<br>{% trans "ти знайдеш" %}</h2>
+        <ol class="nd-colp-box__list">
+          {% for item in collection.box_items %}
+            <li class="nd-colp-box__row">
+              <span class="nd-colp-box__n">{{ forloop.counter|stringformat:"02d" }}</span>
+              <span class="nd-colp-box__text">{{ item }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      </section>
+    {% endif %}
+
+    {% if ship_block or pay_block %}
+      <section class="nd-colp-notes" aria-label="{% trans 'Доставка та оплата' %}" data-screen-label="Delivery and payment">
+        {% if ship_block %}
+          <div class="nd-colp-note">
+            {% if ship_block.title %}<h2 class="nd-colp-note__title">{{ ship_block.title }}</h2>{% endif %}
+            {% if ship_block.text %}
+              <div class="nd-colp-note__body">{{ ship_block.text|richhtml }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+        {% if pay_block %}
+          <div class="nd-colp-note">
+            {% if pay_block.title %}<h2 class="nd-colp-note__title">{{ pay_block.title }}</h2>{% endif %}
+            {% if pay_block.text %}
+              <div class="nd-colp-note__body">{{ pay_block.text|richhtml }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    {% if others %}
+      <section class="nd-colp-others" aria-labelledby="others-title">
+        <h2 class="nd-colp-others__title" id="others-title">{% trans "Інші колекції" %}</h2>
+        <ul class="nd-colp-others__list">
+          {% for item in others %}
+            <li>
+              <a class="nd-colp-others__card" href="{{ item.get_absolute_url }}">
+                {% if item.image_large %}
+                  <img
+                    class="nd-colp-others__img"
+                    src="{{ item.image_large.url }}"
+                    alt="{{ item.alt_large }}"
+                    width="400"
+                    height="500"
+                    loading="lazy"
+                  >
+                {% endif %}
+                {% if item.label %}
+                  <span class="nd-colp-others__label">{{ item.label }}</span>
+                {% endif %}
+                <span class="nd-colp-others__name">{{ item.title }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    <div class="nd-colp__foot">
+      <a class="nd-colp__catalog" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
+    </div>
+  </article>
+{% endblock %}

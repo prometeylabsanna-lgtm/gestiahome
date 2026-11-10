@@ -1,9 +1,10 @@
-"""Vercel demo settings. Runtime works with zero env vars (test/demo project)."""
+"""Vercel demo settings. Runtime requires SECRET_KEY from Vercel env (GST-DEMO-SEC-01)."""
 
 from __future__ import annotations
 
 import logging
 import os
+import secrets
 import shutil
 from pathlib import Path
 from urllib.parse import urlparse
@@ -19,10 +20,6 @@ logger = logging.getLogger(__name__)
 
 DEBUG = False
 
-# demo only, Vercel test project
-DEMO_SECRET_KEY = (
-    "zGWU9thFpLz_B3PdvIuzdKApucgdkzzzoQf5C7RHD32BSv_2q6hLsqO29szXgVo242MRwF_rSHdr422IFTa9YA"
-)
 
 DEMO_DB_SOURCE = BASE_DIR / "demo" / "gestia_demo.sqlite3"
 DEMO_DB_RUNTIME = Path("/tmp/gestia_demo.sqlite3")
@@ -44,7 +41,16 @@ def _https_origin(host: str) -> str:
 
 
 _secret = (config("SECRET_KEY", default="") or "").strip()
-SECRET_KEY = _secret or DEMO_SECRET_KEY
+_is_build_phase = os.environ.get("DJANGO_BUILD_PHASE") == "1"
+if _secret:
+    SECRET_KEY = _secret
+elif _is_build_phase:
+    # Throwaway random key only for the build step (collectstatic); never used at runtime.
+    SECRET_KEY = "build-only-" + secrets.token_urlsafe(48)
+else:
+    raise ImproperlyConfigured(
+        "SECRET_KEY must be set in the Vercel Environment Variables (demo too)."
+    )
 
 _hosts: list[str] = [
     item.strip()

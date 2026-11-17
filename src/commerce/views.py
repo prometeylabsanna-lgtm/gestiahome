@@ -378,15 +378,6 @@ def wishlist_toggle(request):
     if variant != "nd":
         variant = ""
     if _hx(request):
-        count = wish.item_count(request)
-        # #region agent log
-        try:
-            import json, time
-            with open("/Users/olegbonislavskyi/Sites/Gestia/Gestia/.cursor/debug-3759d8.log", "a") as _dbg:
-                _dbg.write(json.dumps({"sessionId": "3759d8", "runId": "local", "hypothesisId": "D", "location": "views.py:wishlist_toggle", "message": "toggle hx response", "data": {"sku": product.sku, "active": active, "wishlist_count": count, "template": "wishlist_toggle_response.html"}, "timestamp": int(time.time() * 1000)}) + "\n")
-        except Exception:
-            pass
-        # #endregion
         return render(
             request,
             "partials/wishlist_toggle_response.html",
@@ -394,7 +385,7 @@ def wishlist_toggle(request):
                 "product": product,
                 "in_wishlist": active,
                 "variant": variant,
-                "wishlist_count": count,
+                "wishlist_count": wish.item_count(request),
             },
         )
     next_url = safe_next(request.POST.get("next") or product.get_absolute_url())

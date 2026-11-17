@@ -1,17 +1,26 @@
-<a class="catalog-cell catalog-cell--{{ cell.role }} is-{{ cell.crop }}" href="{{ cell.product.get_absolute_url }}" style="--name-w: {{ cell.name_width }}px">
-  <span class="catalog-cell__media">
-    {% if cell.image %}
-      <img src="{{ cell.image.url }}" alt="" width="{% if cell.role == 'feature' %}635{% else %}303{% endif %}" height="{% if cell.role == 'feature' %}770{% else %}342{% endif %}">
-    {% elif cell.media_item %}
-      {% if cell.role == "feature" %}
-        {% include "partials/smart_media.html" with media=cell.media_item width=635 height=770 %}
-      {% else %}
-        {% include "partials/smart_media.html" with media=cell.media_item width=303 height=342 %}
-      {% endif %}
+<div class="catalog-cell-wrap">
+  <div class="catalog-cell__wish">
+    {% if cell.product.sku in wishlist_skus %}
+      {% include "partials/wishlist_btn.html" with product=cell.product in_wishlist=True variant="nd" %}
+    {% else %}
+      {% include "partials/wishlist_btn.html" with product=cell.product in_wishlist=False variant="nd" %}
     {% endif %}
-  </span>
-  <span class="catalog-cell__meta">
-    <span class="catalog-cell__name">{{ cell.label }}</span>
-    <span class="catalog-cell__price">{{ cell.price_label }}</span>
-  </span>
-</a>
+  </div>
+  <a class="catalog-cell catalog-cell--{{ cell.role }} is-{{ cell.crop }}" href="{{ cell.product.get_absolute_url }}" style="--name-w: {{ cell.name_width }}px">
+    <span class="catalog-cell__media">
+      {% if cell.image %}
+        <img src="{{ cell.image.url }}" alt="" width="{% if cell.role == 'feature' %}635{% else %}303{% endif %}" height="{% if cell.role == 'feature' %}770{% else %}342{% endif %}">
+      {% elif cell.media_item %}
+        {% if cell.role == "feature" %}
+          {% include "partials/smart_media.html" with media=cell.media_item width=635 height=770 %}
+        {% else %}
+          {% include "partials/smart_media.html" with media=cell.media_item width=303 height=342 %}
+        {% endif %}
+      {% endif %}
+    </span>
+    <span class="catalog-cell__meta">
+      <span class="catalog-cell__name">{{ cell.label }}</span>
+      <span class="catalog-cell__price">{{ cell.price_label }}</span>
+    </span>
+  </a>
+</div>

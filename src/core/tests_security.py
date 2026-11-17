@@ -91,6 +91,7 @@ class CspHeaderTests(TestCase):
         self.assertIn("default-src 'self'", policy)
         self.assertIn("frame-ancestors 'none'", policy)
         self.assertIn("form-action 'self'", policy)
+        self.assertIn("https://www.liqpay.ua", policy)
         self.assertIn("script-src 'self'", policy)
         self.assertNotIn("script-src 'self' 'unsafe-inline'", policy)
         self.assertNotIn("Content-Security-Policy", response)

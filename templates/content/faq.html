@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load i18n static richtext %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/nd/faq.css' %}">
+{% endblock %}
+{% block extra_js %}
+  <script type="module" src="{% static 'js/nd/faq.js' %}"></script>
+{% endblock %}
+
+{% block title %}{{ page.seo_title }}{% endblock %}
+{% block description %}{{ page.seo_description }}{% endblock %}
+
+{% block content %}
+  <div class="nd-faq" data-faq>
+    <nav class="nd-faq__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-faq__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li aria-current="page">{% if page.crumb %}{{ page.crumb }}{% else %}{{ page.title|striptags }}{% endif %}</li>
+      </ol>
+    </nav>
+
+    <div class="nd-faq__layout">
+      <div class="nd-faq__aside">
+        {% if page.title %}
+          <h1 class="nd-faq__title">{{ page.title|richinline }}</h1>
+        {% endif %}
+        {% if page.image %}
+          <img
+            class="nd-faq__photo"
+            src="{{ page.image.url }}"
+            alt="{{ page.image_alt }}"
+            width="560"
+            height="420"
+            loading="lazy"
+          >
+        {% endif %}
+      </div>
+
+      <div class="nd-faq__main">
+        <ul class="nd-faq__list">
+          {% for item in items %}
+            <li class="nd-faq__item" data-faq-item>
+              <h2 class="nd-faq__question-wrap">
+                <button
+                  class="nd-faq__question"
+                  type="button"
+                  id="faq-q{{ forloop.counter0 }}"
+                  aria-expanded="true"
+                  aria-controls="faq-a{{ forloop.counter0 }}"
+                  data-faq-toggle
+                >
+                  <span class="nd-faq__question-text">{{ item.question }}</span>
+                  <svg class="nd-faq__icon" width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path class="nd-faq__icon-path" d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.1"></path>
+                  </svg>
+                </button>
+              </h2>
+              <div
+                class="nd-faq__panel"
+                id="faq-a{{ forloop.counter0 }}"
+                role="region"
+                aria-labelledby="faq-q{{ forloop.counter0 }}"
+                data-faq-panel
+              >
+                {{ item.answer|richhtml }}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+        {% if page.contact_title or page.contact_text %}
+          <div class="nd-faq__contact">
+            <div class="nd-faq__contact-copy">
+              {% if page.contact_title %}
+                <h2 class="nd-faq__contact-title">{{ page.contact_title }}</h2>
+              {% endif %}
+              {% if page.contact_text %}
+                <div class="nd-faq__contact-text">{{ page.contact_text|richhtml }}</div>
+              {% endif %}
+            </div>
+            <div class="nd-faq__contact-links">
+              {% if site_settings.email %}
+                <a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>
+              {% endif %}
+              <a
+                href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Instagram</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="nd-faq__spacer" aria-hidden="true"></div>
+  </div>
+{% endblock %}

@@ -92,6 +92,21 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
         initial=Order.Payment.ON_DELIVERY,
     )
 
+    def __init__(self, *args, card_enabled=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        on_delivery = (Order.Payment.ON_DELIVERY, _("При отриманні (інший погоджений спосіб)"))
+        if card_enabled:
+            self.fields["payment_method"].choices = [
+                (Order.Payment.CARD, _("Онлайн карткою на сайті")),
+                on_delivery,
+            ]
+            if not self.is_bound:
+                self.fields["payment_method"].initial = Order.Payment.CARD
+        else:
+            self.fields["payment_method"].choices = [on_delivery]
+            if not self.is_bound:
+                self.fields["payment_method"].initial = Order.Payment.ON_DELIVERY
+
     def clean(self):
         cleaned = super().clean()
         address = (cleaned.get("address") or "").strip()

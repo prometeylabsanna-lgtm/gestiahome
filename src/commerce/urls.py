@@ -4,12 +4,15 @@ from src.commerce import views
 
 urlpatterns = [
     path("koshik/", views.cart_page, name="cart"),
+    path("koshik/panel/", views.cart_panel, name="cart_panel"),
     path("koshik/dodaty/", views.cart_add, name="cart_add"),
     path("koshik/kilkist/", views.cart_update, name="cart_update"),
     path("obrane/", views.wishlist_page, name="wishlist"),
     path("obrane/toggle/", views.wishlist_toggle, name="wishlist_toggle"),
     path("obrane/prybraty/", views.wishlist_remove, name="wishlist_remove"),
     path("zamovlennia/", views.checkout, name="checkout"),
+    path("zamovlennia/oplata/<str:number>/", views.order_pay, name="order_pay"),
+    path("zamovlennia/liqpay/callback/", views.liqpay_callback, name="liqpay_callback"),
     path("zamovlennia/np/cities/", views.np_cities, name="np_cities"),
     path("zamovlennia/np/warehouses/", views.np_warehouses, name="np_warehouses"),
     path("zamovlennia/np/streets/", views.np_streets, name="np_streets"),

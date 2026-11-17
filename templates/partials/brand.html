@@ -1,18 +1,8 @@
-{% load static %}
-<a class="brand brand--{{ kind }}" href="{% url 'home' %}">
-  <span class="brand__photo">
-    {% if site_settings.logo %}
-      <img src="{{ site_settings.logo.url }}" alt="Gestia Home"{% if kind == "footer" %} width="191" height="73"{% else %} width="113" height="43"{% endif %}>
-    {% else %}
-      <img src="{% static 'figma/desktop/5493c.png' %}" alt="Gestia Home"{% if kind == "footer" %} width="191" height="73"{% else %} width="113" height="43"{% endif %}>
-    {% endif %}
-  </span>
-  {% if kind == "footer" %}
-    <span class="brand__gold brand__gold--footer" aria-hidden="true"></span>
-    <span class="brand__cream brand__cream--a" aria-hidden="true"></span>
-    <span class="brand__cream brand__cream--b" aria-hidden="true"></span>
+{% load i18n static %}
+<a class="brand brand--{{ kind }}" href="{% url 'home' %}" aria-label="{% trans 'Gestia Home — на головну' %}">
+  {% if site_settings.logo %}
+    <img class="brand__img" src="{{ site_settings.logo.url }}" alt="Gestia Home" width="136" height="56">
   {% else %}
-    <span class="brand__gold brand__gold--desk" aria-hidden="true"></span>
-    <span class="brand__gold brand__gold--mob" aria-hidden="true"></span>
+    <img class="brand__img" src="{% static 'nd/logo.png' %}" alt="Gestia Home" width="136" height="56">
   {% endif %}
 </a>

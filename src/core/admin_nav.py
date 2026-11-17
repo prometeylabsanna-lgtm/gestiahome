@@ -29,63 +29,25 @@ NAV_TREE = [
                 "url_name": "admin:content_homebannertext_changelist",
             },
             {
-                "key": "home_categories",
-                "title": "Категорії",
-                "icon": "grid_view",
-                "url_name": "admin:content_homecategoriesblock_changelist",
-            },
-            {
-                "key": "home_mid_banner",
-                "title": "Банер середній",
-                "icon": "movie",
-                "url_name": "admin:content_homemidbanner_changelist",
+                "key": "home_collections",
+                "title": "Колекції",
+                "icon": "collections",
+                "url_name": "admin:content_homecollectionsblock_changelist",
+                "items": [
+                    {
+                        "key": "home_collection_list",
+                        "title": "Список колекцій",
+                        "icon": "format_list_bulleted",
+                        "url_name": "admin:content_homecollection_changelist",
+                    },
+                ],
+                "dynamic": "collections",
             },
             {
                 "key": "home_popular",
                 "title": "Популярні товари",
                 "icon": "star",
                 "url_name": "admin:content_homepopularblock_changelist",
-            },
-            {
-                "key": "home_advantages",
-                "title": "Чому обирають",
-                "icon": "verified",
-                "url_name": "admin:content_homeadvantagesblock_changelist",
-                "items": [
-                    {
-                        "key": "home_advantages_list",
-                        "title": "Список переваг",
-                        "icon": "format_list_bulleted",
-                        "url_name": "admin:content_advantage_changelist",
-                    },
-                ],
-                "dynamic": "advantages",
-            },
-            {
-                "key": "home_bottom_banner",
-                "title": "Банер нижній",
-                "icon": "videocam",
-                "url_name": "admin:content_homebottombanner_changelist",
-            },
-            {
-                "key": "home_reviews",
-                "title": "Відгуки",
-                "icon": "reviews",
-                "url_name": "admin:content_homereviewsblock_changelist",
-                "items": [
-                    {
-                        "key": "home_review_list",
-                        "title": "Список відгуків",
-                        "icon": "format_quote",
-                        "url_name": "admin:content_homereview_changelist",
-                    },
-                ],
-            },
-            {
-                "key": "home_callback",
-                "title": "Зворотній дзвінок",
-                "icon": "call",
-                "url_name": "admin:content_homecallbackblock_changelist",
             },
         ],
     },
@@ -99,42 +61,74 @@ NAV_TREE = [
                 "url_name": "admin:content_aboutintro_changelist",
             },
             {
-                "key": "about_gallery",
-                "title": "Галерея",
-                "icon": "photo_library",
-                "url_name": "admin:content_aboutgallery_changelist",
+                "key": "about_gestia",
+                "title": "Гестія",
+                "icon": "auto_awesome",
+                "url_name": "admin:content_aboutgestia_changelist",
             },
             {
-                "key": "about_story",
-                "title": "Історія",
-                "icon": "menu_book",
-                "url_name": "admin:content_aboutstory_changelist",
+                "key": "about_approach",
+                "title": "Підхід",
+                "icon": "dark_mode",
+                "url_name": "admin:content_aboutapproach_changelist",
             },
             {
-                "key": "about_banner",
-                "title": "Банер",
-                "icon": "image",
-                "url_name": "admin:content_aboutbanner_changelist",
+                "key": "about_together",
+                "title": "Разом",
+                "icon": "favorite",
+                "url_name": "admin:content_abouttogether_changelist",
             },
             {
-                "key": "about_reviews",
-                "title": "Відгуки",
-                "icon": "reviews",
-                "url_name": "admin:content_aboutreviewsblock_changelist",
-                "items": [
-                    {
-                        "key": "about_review_list",
-                        "title": "Список відгуків",
-                        "icon": "format_quote",
-                        "url_name": "admin:content_aboutreview_changelist",
-                    },
-                ],
+                "key": "about_closing",
+                "title": "Фінал і кнопка",
+                "icon": "arrow_forward",
+                "url_name": "admin:content_aboutclosing_changelist",
+            },
+        ],
+    },
+    {
+        "title": "Актуальні питання",
+        "items": [
+            {
+                "key": "faq_header",
+                "title": "Шапка і фото",
+                "icon": "title",
+                "url_name": "admin:content_faqheader_changelist",
             },
             {
-                "key": "about_popular",
-                "title": "Популярні товари",
-                "icon": "star",
-                "url_name": "admin:content_aboutpopularblock_changelist",
+                "key": "faq_items",
+                "title": "Питання",
+                "icon": "help",
+                "url_name": "admin:content_faqitem_changelist",
+            },
+            {
+                "key": "faq_contact",
+                "title": "Залишились питання?",
+                "icon": "mail",
+                "url_name": "admin:content_faqcontact_changelist",
+            },
+            {
+                "key": "faq_seo",
+                "title": "SEO",
+                "icon": "search",
+                "url_name": "admin:content_faqseo_changelist",
+            },
+        ],
+    },
+    {
+        "title": "Сторінка подяки",
+        "items": [
+            {
+                "key": "thankyou_order",
+                "title": "Замовлення",
+                "icon": "check_circle",
+                "url_name": "admin:content_thankyouorder_changelist",
+            },
+            {
+                "key": "thankyou_contact",
+                "title": "Повідомлення / контакт",
+                "icon": "mail",
+                "url_name": "admin:content_thankyoucontact_changelist",
             },
         ],
     },
@@ -223,6 +217,18 @@ NAV_TREE = [
                 "title": "Шапка і контакти",
                 "icon": "web_asset",
                 "url_name": "admin:content_sitesettings_changelist",
+            },
+            {
+                "key": "chrome_menu",
+                "title": "Меню каталогу",
+                "icon": "menu_open",
+                "url_name": "admin:content_menugroup_changelist",
+            },
+            {
+                "key": "chrome_locale",
+                "title": "Країна та мова",
+                "icon": "public",
+                "url_name": "admin:content_homelocaleblock_changelist",
             },
             {
                 "key": "chrome_footer",
@@ -325,13 +331,19 @@ def _walk(entries):
 
 def _with_dynamic_children(entry):
     kind = entry.get("dynamic") or ""
-    if kind != "advantages":
-        return entry
-    children = list(entry.get("items") or [])
-    children.extend(_advantage_nav_items())
-    expanded = dict(entry)
-    expanded["items"] = children
-    return expanded
+    if kind == "advantages":
+        children = list(entry.get("items") or [])
+        children.extend(_advantage_nav_items())
+        expanded = dict(entry)
+        expanded["items"] = children
+        return expanded
+    if kind == "collections":
+        children = list(entry.get("items") or [])
+        children.extend(_collection_nav_items())
+        expanded = dict(entry)
+        expanded["items"] = children
+        return expanded
+    return entry
 
 
 def _advantage_nav_items():
@@ -352,6 +364,30 @@ def _advantage_nav_items():
                 "title": title[:48],
                 "icon": "workspace_premium",
                 "url_name": "admin:content_advantage_change",
+                "url_args": (row.pk,),
+            }
+        )
+    return items
+
+
+def _collection_nav_items():
+    try:
+        from src.content.models import HomeCollection
+    except Exception:
+        return []
+    try:
+        rows = list(HomeCollection.objects.order_by("sort", "id").only("id", "title_uk"))
+    except Exception:
+        return []
+    items = []
+    for row in rows:
+        title = (row.title_uk or "").strip().replace("\n", " ") or f"Колекція #{row.pk}"
+        items.append(
+            {
+                "key": f"home_collection_{row.pk}",
+                "title": title[:48],
+                "icon": "auto_awesome",
+                "url_name": "admin:content_homecollection_change",
                 "url_args": (row.pk,),
             }
         )

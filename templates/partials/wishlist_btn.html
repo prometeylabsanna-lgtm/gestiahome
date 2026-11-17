@@ -1,6 +1,6 @@
 {% load i18n static %}
 <form
-  class="wish-toggle"
+  class="wish-toggle{% if variant == 'nd' %} wish-toggle--nd{% endif %}"
   method="post"
   action="{% url 'wishlist_toggle' %}"
   hx-post="{% url 'wishlist_toggle' %}"
@@ -10,12 +10,19 @@
   {% csrf_token %}
   <input type="hidden" name="sku" value="{{ product.sku }}">
   <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% if variant == "nd" %}
+    <input type="hidden" name="variant" value="nd">
+  {% endif %}
   <button
-    class="wish-toggle__btn{% if in_wishlist %} is-on{% endif %}"
+    class="wish-toggle__btn{% if variant == 'nd' %} wish-toggle__btn--nd{% endif %}{% if in_wishlist %} is-on{% endif %}"
     type="submit"
     aria-pressed="{% if in_wishlist %}true{% else %}false{% endif %}"
     aria-label="{% if in_wishlist %}{% trans 'Прибрати з обраного' %}{% else %}{% trans 'Додати в обране' %}{% endif %}"
   >
-    <img src="{% static 'figma/desktop/dba9b.svg' %}" width="21" height="21" alt="">
+    {% if variant == "nd" %}
+      {% include "partials/nd/icons/heart.html" with size=20 filled=in_wishlist %}
+    {% else %}
+      <img src="{% static 'figma/desktop/dba9b.svg' %}" width="21" height="21" alt="">
+    {% endif %}
   </button>
 </form>

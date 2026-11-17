@@ -1,0 +1,128 @@
+:root {
+  --nd-ink: #251008;
+  --nd-cream: #feedda;
+  --nd-muted: #665852;
+  --nd-off: #9a8f8a;
+  --nd-price: #8b7e78;
+  --nd-gold: #e3c39a;
+  --nd-header-border: #f1ece8;
+  --nd-footer-rule: #917f71;
+  --nd-footer-link: #a89585;
+  --nd-footer-link-hover: #cdb9a8;
+  --nd-mobile-divider: #d9d2cd;
+  --nd-dialog-border: #e8e0da;
+  --nd-dialog-row: #efe9e4;
+  --nd-btn-hover: #3a1d10;
+  --nd-scrim: rgba(37, 16, 8, 0.25);
+  --nd-dialog-shadow: 0 8px 24px rgba(37, 16, 8, 0.12);
+  --nd-wish-shadow: drop-shadow(0 0 2px rgba(37, 16, 8, 0.45));
+  --nd-surface: #fff;
+  --nd-flag-blue: #0057b7;
+  --nd-flag-yellow: #ffd700;
+
+  --nd-serif: "Cormorant Garamond", serif;
+  --nd-sans: Inter, system-ui, sans-serif;
+
+  --nd-fs-12: 12px;
+  --nd-fs-13: 13px;
+  --nd-fs-14: 14px;
+  --nd-fs-15: 15px;
+  --nd-fs-16: 16px;
+  --nd-fs-17: 17px;
+  --nd-fs-18: 18px;
+  --nd-fs-26: 26px;
+  --nd-fs-28: 28px;
+  --nd-fs-40: 40px;
+  --nd-fs-70: 70px;
+  --nd-fs-80: 80px;
+
+  --nd-ls-01: -0.01em;
+  --nd-ls-02: -0.02em;
+  --nd-ls-03: -0.03em;
+  --nd-ls-04: -0.04em;
+  --nd-ls-btn: 0.04em;
+
+  --nd-gutter: clamp(16px, 4.8vw, 69px);
+  --nd-header-h: 80px;
+  --nd-header-h-compact: 72px;
+
+  --nd-cat-panel: #faf9f8;
+  --nd-cat-border: #e3ddd8;
+  --nd-cat-sort-shadow: 0 8px 24px rgba(37, 16, 8, 0.1);
+  --nd-cat-aside-top: 100px;
+  --nd-cat-aside-max: calc(100vh - 120px);
+  --nd-cat-card-ratio: 303 / 342;
+  --nd-cat-gap: 30px;
+  --nd-cat-gap-mobile: 12px;
+  --nd-cat-row-gap: 20px;
+
+  --nd-pdp-gallery-ratio: 636 / 770;
+  --nd-pdp-rail-ratio: 368 / 415;
+  --nd-pdp-sticky-top: 104px;
+  --nd-pdp-action-qty: 92px;
+  --nd-pdp-gap: 30px;
+  --nd-pdp-gallery-gap-mobile: 12px;
+  --nd-pdp-fs-title: clamp(36px, 3.9vw, 56px);
+  --nd-pdp-fs-note: 32px;
+  --nd-pdp-fs-rail: clamp(36px, 4.4vw, 64px);
+
+  --nd-gallery-wash: #f3eee9;
+  --nd-box-rule: #6b5546;
+  --nd-box-num: #c9a882;
+  --nd-fs-22: 22px;
+  --nd-colp-sticky-top: 104px;
+  --nd-colp-gallery-ratio: 636 / 770;
+  --nd-colp-gap: 30px;
+  --nd-colp-gallery-gap: 12px;
+  --nd-colp-fs-label: clamp(18px, 1.9vw, 27px);
+  --nd-colp-fs-title: clamp(40px, 4.9vw, 70px);
+  --nd-colp-fs-story: clamp(15px, 1.25vw, 18px);
+  --nd-colp-fs-box: clamp(40px, 4.9vw, 70px);
+
+  --nd-faq-contact-muted: #d8c8b8;
+  --nd-about-gestia-wash: linear-gradient(
+    to top,
+    rgba(37, 16, 8, 0.82),
+    rgba(37, 16, 8, 0.2) 70%
+  );
+  --nd-colp-fs-others: clamp(36px, 4.4vw, 64px);
+  --nd-colp-fs-addon: clamp(32px, 2.8vw, 40px);
+  --nd-colp-fs-other-name: clamp(22px, 1.9vw, 28px);
+  --nd-colp-fs-box-item: clamp(16px, 1.4vw, 20px);
+  --nd-colp-addon-img: clamp(80px, 7vw, 100px);
+
+  --nd-danger: #9b2c1f;
+
+  --nd-cart-border: #e3ddd8;
+  --nd-cart-overlay: rgba(37, 16, 8, 0.4);
+  --nd-cart-drawer-w: min(460px, 100vw);
+  --nd-cart-sticky-top: 112px;
+  --nd-cart-fs-title: clamp(44px, 4.9vw, 70px);
+  --nd-cart-fs-name: clamp(20px, 1.9vw, 28px);
+  --nd-cart-fs-suggest: clamp(30px, 2.8vw, 40px);
+  --nd-cart-gap: clamp(24px, 2.8vw, 40px);
+  --nd-cart-pad-y: clamp(80px, 8.3vw, 120px);
+  --nd-cart-aside-pad: clamp(20px, 2.2vw, 32px);
+  --nd-cart-suggest-top: clamp(48px, 5.6vw, 72px);
+  --nd-cart-row-gap: clamp(16px, 2.1vw, 24px);
+
+  --nd-wish-fs-title: clamp(44px, 4.9vw, 70px);
+  --nd-wish-pad-y: clamp(80px, 8.3vw, 120px);
+  --nd-wish-title-top: clamp(32px, 4.2vw, 60px);
+  --nd-wish-grid-top: clamp(32px, 3.9vw, 48px);
+  --nd-wish-gap-y: clamp(20px, 2.1vw, 30px);
+  --nd-wish-gap-x: clamp(12px, 2.1vw, 30px);
+  --nd-wish-card-ratio: 303 / 342;
+}
+
+body {
+  font-family: var(--nd-sans);
+  color: var(--nd-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Крихти: у дизайні <a>…</a><span>/</span> без пробілу — flex прибирає пробіл між тегами в шаблонах */
+[class*="__crumbs-list"] > li {
+  display: flex;
+  align-items: baseline;
+}

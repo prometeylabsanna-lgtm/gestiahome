@@ -64,6 +64,35 @@ class RichTextSanitizeTests(TestCase):
         self.assertIn("рядок один", html)
         self.assertIn("рядок два", html)
 
+    def test_richlines_splits_plain_newlines_and_br(self):
+        plain = Template("{% load richtext %}{{ body|richlines }}").render(
+            Context(
+                {
+                    "body": (
+                        "Доставка «Новою поштою»\n"
+                        "Термін доставки — 1–3 дні\n"
+                        "Вартість за тарифами"
+                    )
+                }
+            )
+        )
+        self.assertEqual(plain.count("<p>"), 3)
+        self.assertIn("Доставка «Новою поштою»</p>", plain)
+        self.assertIn("Термін доставки — 1–3 дні</p>", plain)
+
+        with_br = Template("{% load richtext %}{{ body|richlines }}").render(
+            Context({"body": "<p>Онлайн-оплата<br>Оплата за реквізитами</p>"})
+        )
+        self.assertEqual(with_br.count("<p>"), 2)
+        self.assertIn("Онлайн-оплата</p>", with_br)
+        self.assertIn("Оплата за реквізитами</p>", with_br)
+
+        listed = Template("{% load richtext %}{{ body|richlines }}").render(
+            Context({"body": "<ul><li>один</li><li>два</li></ul>"})
+        )
+        self.assertIn("<ul>", listed)
+        self.assertIn("<li>один</li>", listed)
+
     def test_richinline_unwraps_single_paragraph(self):
         html = Template("{% load richtext %}{{ body|richinline }}").render(
             Context({"body": "<p>коротко <strong>тут</strong></p>"})

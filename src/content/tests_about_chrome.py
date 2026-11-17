@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils import translation
 
 from src.content.media import MediaChoice
-from src.content.models import AboutPage, HomeBlock, SiteSettings
+from src.content.models import AboutPage, FooterLink, HomeBlock, SiteSettings
 
 
 class AboutRenderTests(TestCase):
@@ -12,33 +12,37 @@ class AboutRenderTests(TestCase):
         cache.clear()
         translation.activate("uk")
         self.page = AboutPage.load()
-
-    def test_model_lead_replaces_the_literal(self):
-        self.page.lead_uk = "Короткий рядок"
-        self.page.lead_en = "A short line"
+        self.page.title_uk = "Hi, I’m Gestia"
+        self.page.intro_text_uk = "<p>Інтро з CMS</p>"
+        self.page.cta_uk = "Перейти до каталогу"
         self.page.save()
-        page = self.client.get(reverse("about"))
-        self.assertContains(page, "Короткий рядок")
-        self.assertNotContains(page, "Сучасна жінка може все.")
 
-    def test_empty_lead_falls_back(self):
-        self.page.lead_uk = ""
-        self.page.lead_en = ""
+    def test_model_intro_renders_from_cms(self):
+        page = self.client.get(reverse("about"))
+        self.assertContains(page, "Hi, I’m Gestia")
+        self.assertContains(page, "Інтро з CMS")
+        self.assertContains(page, "Перейти до каталогу")
+
+    def test_empty_intro_does_not_use_old_story_fallback(self):
+        self.page.intro_text_uk = ""
+        self.page.intro_text_en = ""
         self.page.body_uk = ""
         self.page.body_en = ""
         self.page.save()
         page = self.client.get(reverse("about"))
-        self.assertContains(page, "Сучасна жінка може все.")
-        self.assertContains(page, "Вона будує кар’єру")
+        self.assertNotContains(page, "Сучасна жінка може все.")
+        self.assertNotContains(page, "Вона будує кар’єру")
 
-    def test_english_story_uses_the_english_field(self):
+    def test_english_uses_en_fields_when_set(self):
+        self.page.title_en = "Hello Gestia"
+        self.page.intro_text_en = "<p>English intro line</p>"
+        self.page.save()
         page = self.client.get("/en/pro-nas/")
-        self.assertContains(page, "A modern woman can do anything.")
-        self.assertContains(page, "She builds a career")
-        self.assertContains(page, "About Gestia Home")
+        self.assertContains(page, "Hello Gestia")
+        self.assertContains(page, "English intro line")
         self.assertContains(page, "All products")
         self.assertContains(page, "Privacy Policy")
-        self.assertNotContains(page, "Сучасна жінка може все.")
+        self.assertNotContains(page, "Hi, I’m Gestia")
 
 
 class HeaderFooterRenderTests(TestCase):
@@ -46,6 +50,21 @@ class HeaderFooterRenderTests(TestCase):
         cache.clear()
         translation.activate("uk")
         self.site = SiteSettings.load()
+        HomeBlock.objects.get_or_create(
+            key="locale",
+            defaults={
+                "sort": 8,
+                "title_uk": "Країна та мова",
+                "text_uk": "Україна/Гривня",
+                "cta_uk": "Підтвердити",
+                "link_uk": "Змінити",
+                "note_uk": "Оберіть місце доставки",
+                "lines_uk": (
+                    "Місце доставки\nУкраїна\nМіжнародна доставка\n"
+                    "Мова сайту\nОберіть мову / Choose language\nУкраїнська\nEnglish"
+                ),
+            },
+        )
 
     def test_nav_labels_use_fixed_literals(self):
         self.site.nav_about_uk = "Історія"
@@ -55,11 +74,12 @@ class HeaderFooterRenderTests(TestCase):
         self.site.menu_title_en = "Boxes"
         self.site.save()
         page = self.client.get("/")
-        self.assertContains(page, 'class="head-nav__about"')
+        self.assertContains(page, 'class="head-nav__about')
         self.assertContains(page, ">Про нас</a>")
         self.assertContains(page, ">Усі товари</a>")
         self.assertContains(page, "<span>Каталог</span>")
-        self.assertContains(page, 'class="head-nav__catalog"')
+        self.assertContains(page, 'class="head-nav__catalog')
+        self.assertContains(page, ">Актуальні питання</a>")
         self.assertNotContains(page, ">Історія</a>")
         self.assertNotContains(page, "<span>Бокси</span>")
         english = self.client.get("/en/")
@@ -67,6 +87,7 @@ class HeaderFooterRenderTests(TestCase):
         self.assertContains(english, ">All products</a>")
         self.assertContains(english, "<span>Catalogue</span>")
         self.assertContains(english, "Catalogue")
+        self.assertContains(english, ">FAQ</a>")
         self.assertNotContains(english, ">Story</a>")
 
     def test_credit_and_logo_fall_back(self):
@@ -76,17 +97,40 @@ class HeaderFooterRenderTests(TestCase):
         self.site.save()
         page = self.client.get("/")
         self.assertContains(page, "Зроблено")
-        self.assertContains(page, "figma/desktop/5493c.png")
+        self.assertContains(page, "nd/logo.png")
         english = self.client.get("/en/")
         self.assertContains(english, "Made by")
 
-    def test_telegram_url_in_social_row(self):
+    def test_telegram_url_in_footer_contacts(self):
         self.site.telegram_url = "https://t.me/gestia_home"
         self.site.save()
         page = self.client.get("/")
         self.assertContains(page, 'href="https://t.me/gestia_home"')
         self.assertContains(page, ">Telegram</span>")
 
+    def test_phone_tel_links_in_menu_and_footer_not_header_icon(self):
+        self.site.phone = "+380 67 111 22 33"
+        self.site.save()
+        page = self.client.get("/")
+        html = page.content.decode()
+        self.assertNotIn('aria-label="Зателефонувати"', html)
+        self.assertIn('href="tel:+380671112233"', html)
+        self.assertIn('class="nd-mega__social"', html)
+        self.assertIn('class="nd-burger__foot"', html)
+        self.assertIn('class="nd-footer__address"', html)
+        self.assertGreaterEqual(html.count('href="tel:+380671112233"'), 3)
+
+    def test_footer_info_column_renders_cms_links(self):
+        FooterLink.objects.create(
+            column="info",
+            label_uk="Про нас",
+            label_en="About",
+            url_name="about",
+            sort=1,
+        )
+        page = self.client.get("/")
+        self.assertContains(page, 'aria-label="Інформація"')
+        self.assertContains(page, ">Про нас</a>")
 
 
 class MediaChoiceTests(TestCase):

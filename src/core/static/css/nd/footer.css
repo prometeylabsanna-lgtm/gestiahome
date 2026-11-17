@@ -1,0 +1,136 @@
+.nd-footer {
+  background: var(--nd-ink);
+  color: var(--nd-cream);
+  padding: 55px var(--nd-gutter) 0;
+  font-family: var(--nd-sans);
+  line-height: normal;
+  --nd-pin-inner: var(--nd-ink);
+}
+
+.nd-footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nd-footer p,
+.nd-footer address {
+  margin: 0;
+  font-style: normal;
+}
+
+.nd-footer__mark {
+  display: flex;
+  align-items: flex-end;
+}
+
+.nd-footer__rule {
+  flex: 1;
+  height: 1px;
+  background: var(--nd-footer-rule);
+  margin-bottom: 4px;
+}
+
+.nd-footer__g {
+  display: block;
+  width: 34px;
+  height: 50px;
+}
+
+.nd-footer__grid {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 40px;
+  column-gap: 24px;
+}
+
+.nd-footer__col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: var(--nd-fs-18);
+  letter-spacing: var(--nd-ls-01);
+}
+
+.nd-footer__col a {
+  color: var(--nd-footer-link);
+  text-decoration: none;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s ease;
+}
+
+.nd-footer__col a:hover,
+.nd-footer__col a:focus-visible {
+  color: var(--nd-footer-link-hover);
+  text-decoration: underline;
+}
+
+.nd-footer__address ul {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: var(--nd-fs-16);
+}
+
+.nd-footer__address a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--nd-cream);
+  text-decoration: none;
+}
+
+.nd-footer__address a:hover,
+.nd-footer__address a:focus-visible {
+  text-decoration: underline;
+}
+
+.nd-footer__mail {
+  word-break: break-all;
+}
+
+.nd-footer__mail svg {
+  flex: none;
+}
+
+.nd-footer__bottom {
+  margin-top: 60px;
+  border-top: 1px solid var(--nd-footer-rule);
+  padding: 20px 0 60px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--nd-fs-12);
+  color: var(--nd-footer-link);
+}
+
+.nd-footer__lead {
+  text-transform: uppercase;
+}
+
+.nd-footer__credit,
+.nd-footer__credit a,
+.nd-footer__credit .site-footer__credit-name {
+  color: var(--nd-footer-link);
+  text-decoration: none;
+}
+
+.nd-footer__credit a:hover,
+.nd-footer__credit a:focus-visible {
+  text-decoration: underline;
+}
+
+@media (min-width: 700px) {
+  .nd-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .nd-footer__grid {
+    grid-template-columns: minmax(0, 319fr) minmax(0, 312fr) minmax(0, 404fr) minmax(0, 267fr);
+  }
+}

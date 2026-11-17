@@ -1,30 +1,17 @@
-{% load i18n static %}
-<section class="pdp-band {{ band_class }}">
-  <h2>
-    <span class="pdp-only-desk">{{ title }}</span>
-    <span class="pdp-only-mob">{{ mobile_title|default:title }}</span>
-  </h2>
-  {% if products %}
-    <div class="pdp-rail pdp-rail--desk">
-      {% for item in products %}
-        {% include "catalog/_pdp_card.html" with item=item %}
-      {% endfor %}
-    </div>
+{% load i18n %}
+<section class="nd-pdp-rail {{ band_class }}"{% if rail_id %} aria-labelledby="{{ rail_id }}"{% endif %}>
+  {% if title %}
+    <h2 class="nd-pdp-rail__title"{% if rail_id %} id="{{ rail_id }}"{% endif %}>{{ title }}</h2>
   {% endif %}
-  <div class="pdp-rail pdp-rail--mob">
+  <ul class="nd-pdp-rail__list nd-scroll">
     {% for item in products %}
-      {% include "catalog/_pdp_card.html" with item=item %}
+      {% include "partials/nd/product_card.html" with product=item modifier="rail" %}
     {% endfor %}
-  </div>
+    <li class="nd-pdp-rail__spacer" aria-hidden="true"></li>
+  </ul>
   {% if cta %}
-    <div class="pdp-more" data-pdp-more>
-      <a class="figma-btn pdp-cta" href="{% url 'catalog' %}"><span>{{ cta }}</span></a>
-      <button class="pdp-arrow" type="button" data-rail-prev aria-label="{% trans 'Попередні товари' %}">
-        <img src="{% static 'figma/v2/product/2fa2c.svg' %}" width="15" height="15" alt="">
-      </button>
-      <button class="pdp-arrow pdp-arrow--next" type="button" data-rail-next aria-label="{% trans 'Наступні товари' %}">
-        <img src="{% static 'figma/v2/product/2fa2c.svg' %}" width="15" height="15" alt="">
-      </button>
+    <div class="nd-pdp-rail__more">
+      <a class="nd-pdp-rail__cta" href="{% url 'catalog' %}">{{ cta }}</a>
     </div>
   {% endif %}
 </section>

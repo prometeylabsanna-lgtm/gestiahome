@@ -1,5 +1,7 @@
 from src.content.models import AboutPage, HomeBlock, Review, SiteSettings
+from src.content.models_faq import FaqPage
 from src.content.models_legal import LegalPage
+from src.content.models_thankyou import ThankYouPage
 
 
 class HomeBannerMedia(HomeBlock):
@@ -23,6 +25,13 @@ class HomeHeroBlock(HomeBlock):
         proxy = True
         verbose_name = "Текст банера"
         verbose_name_plural = "Текст банера"
+
+
+class HomeCollectionsBlock(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Колекції"
+        verbose_name_plural = "Колекції"
 
 
 class HomeCategoriesBlock(HomeBlock):
@@ -88,11 +97,46 @@ class HomeCallbackBlock(HomeBlock):
         verbose_name_plural = "Зворотній дзвінок"
 
 
+class HomeLocaleBlock(HomeBlock):
+    class Meta:
+        proxy = True
+        verbose_name = "Країна та мова"
+        verbose_name_plural = "Країна та мова"
+
+
 class AboutIntro(AboutPage):
     class Meta:
         proxy = True
         verbose_name = "Інтро"
         verbose_name_plural = "Інтро"
+
+
+class AboutGestia(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Гестія"
+        verbose_name_plural = "Гестія"
+
+
+class AboutApproach(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Підхід"
+        verbose_name_plural = "Підхід"
+
+
+class AboutTogether(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Разом"
+        verbose_name_plural = "Разом"
+
+
+class AboutClosing(AboutPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Фінал і кнопка"
+        verbose_name_plural = "Фінал і кнопка"
 
 
 class AboutGallery(AboutPage):
@@ -132,6 +176,27 @@ class AboutPopularBlock(AboutPage):
 
 # Сумісність зі старими імпортами адмінки.
 AboutPicksBlock = AboutPopularBlock
+
+
+class FaqHeader(FaqPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Шапка і фото"
+        verbose_name_plural = "Шапка і фото"
+
+
+class FaqContact(FaqPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Залишились питання?"
+        verbose_name_plural = "Залишились питання?"
+
+
+class FaqSeo(FaqPage):
+    class Meta:
+        proxy = True
+        verbose_name = "SEO"
+        verbose_name_plural = "SEO"
 
 
 class HomeReview(Review):
@@ -181,3 +246,17 @@ class FooterChrome(SiteSettings):
         proxy = True
         verbose_name = "Тексти підвалу"
         verbose_name_plural = "Тексти підвалу"
+
+
+class ThankYouOrder(ThankYouPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Замовлення"
+        verbose_name_plural = "Замовлення"
+
+
+class ThankYouContact(ThankYouPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Повідомлення / контакт"
+        verbose_name_plural = "Повідомлення / контакт"

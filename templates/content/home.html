@@ -2,41 +2,27 @@
 {% load content_tags static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/figma/home.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/home-form.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/home-desk.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/home-desk-1440.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/home.css' %}">
 {% endblock %}
 
 {% block title %}{% if home_blocks.hero.seo_title %}{{ home_blocks.hero.seo_title }}{% elif home_blocks.hero %}{% cms home_blocks.hero.title "hero_title" %}{% else %}Gestia Home{% endif %}{% endblock %}
 {% block description %}{% if home_blocks.hero.seo_description %}{{ home_blocks.hero.seo_description }}{% elif home_blocks.hero %}{{ home_blocks.hero.text|striptags }}{% endif %}{% endblock %}
 
 {% block content %}
+  {% if home_form.non_field_errors %}
+    <p class="visually-hidden" role="alert">{{ home_form.non_field_errors|striptags }}</p>
+  {% endif %}
   {% if not home_blocks.hero %}
     <h1 class="visually-hidden">Gestia Home</h1>
   {% endif %}
-  <div class="home-frame">
-    {% if home_blocks.hero %}
-      {% include "partials/home/hero.html" with block=home_blocks.hero %}
-    {% endif %}
-    {% include "partials/home/categories.html" %}
-    {% if home_blocks.video %}
-      {% include "partials/home/video_banner.html" with block=home_blocks.video %}
-    {% endif %}
-    {% if home_blocks.popular %}
-      {% include "partials/home/popular.html" with block=home_blocks.popular %}
-    {% endif %}
-    {% if home_blocks.advantages %}
-      {% include "partials/home/benefits.html" with block=home_blocks.advantages %}
-    {% endif %}
-    {% if home_blocks.video_2 %}
-      {% include "partials/home/video_banner.html" with block=home_blocks.video_2 %}
-    {% endif %}
-    {% if home_blocks.reviews %}
-      {% include "partials/home/reviews.html" with block=home_blocks.reviews %}
-    {% endif %}
-    {% if home_blocks.callback %}
-      {% include "partials/home/callback.html" with block=home_blocks.callback %}
-    {% endif %}
-  </div>
+  {% if home_blocks.hero %}
+    {% include "partials/home/hero.html" with block=home_blocks.hero %}
+  {% endif %}
+  {% if home_blocks.collections or collections %}
+    {% include "partials/home/collections.html" with block=home_blocks.collections %}
+  {% endif %}
+  {% if home_blocks.popular %}
+    {% include "partials/home/popular.html" with block=home_blocks.popular %}
+  {% endif %}
 {% endblock %}
+

@@ -1,13 +1,18 @@
+import json
 import secrets
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from src.catalog.models import Product
 from src.commerce.cart import add, clear, lines, set_qty, signature
+from src.commerce.cart_panel import cart_body_context, currency_of, render_panel
+from src.commerce import payments
 from src.commerce import wishlist as wish
 from src.commerce.forms import (
     BuyNowForm,
@@ -29,17 +34,25 @@ from src.commerce.services import (
     unavailable_message,
 )
 from src.content.form_labels import label_form
+from src.core.i18n import safe_next
 from src.core.ratelimit import honeypot_filled, reject_if_limited
 from src.core.utils import format_money
 
 
 def _currency(request):
-    currency = request.session.get("currency", "uah")
-    return currency if currency in {"uah", "eur"} else "uah"
+    return currency_of(request)
 
 
 def _hx(request):
     return request.headers.get("HX-Request")
+
+
+def _panel(request):
+    return request.POST.get("panel") == "1"
+
+
+def _panel_sku(request, fallback=""):
+    return (request.POST.get("panel_sku") or fallback or "").strip()
 
 
 def _pretend_order_thanks(request):
@@ -97,6 +110,12 @@ def _order_by_idem(raw):
 def _finish_checkout(request, order):
     clear(request)
     _remember_order(request, order.number)
+    if (
+        order.payment_method == Order.Payment.CARD
+        and order.payment_status != Order.PayStatus.PAID
+        and payments.card_enabled(order.currency)
+    ):
+        return HttpResponseRedirect(reverse("order_pay", kwargs={"number": order.number}))
     return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
 
 
@@ -164,23 +183,19 @@ def _checkout_render(request, form, rows, total, currency):
     }
 
 
+@never_cache
 def cart_page(request):
     currency = _currency(request)
     rows, total = lines(request, currency)
-    return render(
-        request,
-        "commerce/cart.html",
-        {
-            "rows": rows,
-            "total": total,
-            "total_label": format_money(total, currency),
-            "cart_notice": _cart_notice(request, rows),
-        },
-    )
+    ctx = cart_body_context(request, rows, total, notice=_cart_notice(request, rows))
+    if _hx(request):
+        return render(request, "commerce/_cart_body.html", ctx)
+    return render(request, "commerce/cart.html", ctx)
 
 
 def checkout(request):
     currency = _currency(request)
+    card_ok = payments.card_enabled(currency)
     if request.method == "POST" and honeypot_filled(request):
         return _pretend_order_thanks(request)
     if request.method == "POST":
@@ -190,7 +205,7 @@ def checkout(request):
     rows, total = lines(request, currency)
     if not rows:
         return HttpResponseRedirect(reverse("cart"))
-    form = style_form(CheckoutForm(request.POST or None))
+    form = style_form(CheckoutForm(request.POST or None, card_enabled=card_ok))
     if request.method == "POST" and reject_if_limited(request, form, "checkout"):
         return render(
             request,
@@ -255,17 +270,83 @@ def np_streets(request):
     return JsonResponse({"items": novaposhta.search_streets(city_ref, query, limit=20)})
 
 
+@csrf_exempt
+@never_cache
 def thanks(request):
+    # LiqPay may POST the buyer to result_url; ignore body and bounce to GET.
+    if request.method == "POST":
+        response = HttpResponseRedirect(request.get_full_path())
+        response.status_code = 303
+        return response
+
+    from src.content.models_thankyou import ThankYouPage
+
     kind = request.GET.get("kind", "order")
     number = (request.GET.get("number") or "").strip()
     done = request.session.get("orders_done")
     if not isinstance(done, list) or number not in done:
         number = ""
+    order = None
+    pay_retry_url = ""
+    if number:
+        order = Order.objects.filter(number=number).first()
+        if (
+            order is not None
+            and order.payment_method == Order.Payment.CARD
+            and order.payment_status == Order.PayStatus.FAILED
+            and payments.card_enabled(order.currency)
+        ):
+            pay_retry_url = reverse("order_pay", kwargs={"number": order.number})
     return render(
         request,
         "commerce/thanks.html",
-        {"kind": kind, "number": number},
+        {
+            "kind": kind,
+            "number": number,
+            "order": order,
+            "pay_retry_url": pay_retry_url,
+            "thanks_page": ThankYouPage.load(),
+        },
     )
+
+
+@never_cache
+@require_GET
+def order_pay(request, number):
+    # Session-gated retry link (GET). Failed → awaiting + new payment_ref via ensure_payment_ref.
+    done = request.session.get("orders_done")
+    if not isinstance(done, list) or number not in done:
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order")
+    order = get_object_or_404(Order, number=number)
+    if order.payment_method != Order.Payment.CARD or order.payment_status == Order.PayStatus.PAID:
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
+    if not payments.card_enabled(order.currency):
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
+    payload = payments.build_checkout(order, request)
+    if order.payment_status == Order.PayStatus.PAID:
+        return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
+    return render(
+        request,
+        "commerce/pay.html",
+        {
+            "order": order,
+            "checkout_url": payload["checkout_url"],
+            "data": payload["data"],
+            "signature": payload["signature"],
+        },
+    )
+
+
+@csrf_exempt
+@never_cache
+@require_POST
+def liqpay_callback(request):
+    # Signature verified inside handle_callback before any order mutation.
+    status, body = payments.handle_callback(
+        request.POST.get("data", ""),
+        request.POST.get("signature", ""),
+    )
+    return HttpResponse(body, status=status)
 
 
 def wishlist_page(request):
@@ -288,20 +369,30 @@ def wishlist_page(request):
     )
 
 
+@never_cache
 @require_POST
 def wishlist_toggle(request):
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
     active = wish.toggle(request, product.sku)
+    variant = request.POST.get("variant") or ""
+    if variant != "nd":
+        variant = ""
     if _hx(request):
         return render(
             request,
-            "partials/wishlist_btn.html",
-            {"product": product, "in_wishlist": active},
+            "partials/wishlist_toggle_response.html",
+            {
+                "product": product,
+                "in_wishlist": active,
+                "variant": variant,
+                "wishlist_count": wish.item_count(request),
+            },
         )
-    next_url = request.POST.get("next") or product.get_absolute_url()
+    next_url = safe_next(request.POST.get("next") or product.get_absolute_url())
     return HttpResponseRedirect(next_url)
 
 
+@never_cache
 @require_POST
 def wishlist_remove(request):
     sku = request.POST.get("sku", "")
@@ -327,6 +418,7 @@ def wishlist_remove(request):
     return HttpResponseRedirect(reverse("wishlist"))
 
 
+@never_cache
 @require_POST
 def cart_add(request):
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
@@ -337,12 +429,18 @@ def cart_add(request):
     except (TypeError, ValueError):
         qty = 1
     add(request, product.sku, qty, stock_qty=product.stock_qty)
+    if _hx(request) and _panel(request):
+        response = render_panel(request, _panel_sku(request, product.sku))
+        response["HX-Trigger"] = json.dumps({"nd:cart-changed": True})
+        return response
     if _hx(request):
-        return render(
+        response = render(
             request,
             "partials/cart_count_response.html",
             {"cart_count": sum_count(request)},
         )
+        response["HX-Trigger"] = json.dumps({"nd:cart-added": {"sku": product.sku}})
+        return response
     return HttpResponseRedirect(product.get_absolute_url())
 
 
@@ -352,6 +450,14 @@ def sum_count(request):
     return item_count(request)
 
 
+@never_cache
+@require_GET
+def cart_panel(request):
+    sku = (request.GET.get("sku") or "").strip()
+    return render_panel(request, sku)
+
+
+@never_cache
 @require_POST
 def cart_update(request):
     sku = request.POST.get("sku", "")
@@ -364,21 +470,18 @@ def cart_update(request):
         return HttpResponse(status=422)
     stock_qty = product.stock_qty if product is not None else None
     set_qty(request, sku, qty, stock_qty=stock_qty)
+    if _hx(request) and _panel(request):
+        response = render_panel(request, _panel_sku(request, sku))
+        response["HX-Trigger"] = json.dumps({"nd:cart-changed": True})
+        return response
     if _hx(request):
         currency = _currency(request)
         rows, total = lines(request, currency)
-        response = render(
+        return render(
             request,
             "commerce/_cart_body.html",
-            {
-                "rows": rows,
-                "total": total,
-                "total_label": format_money(total, currency),
-                "cart_count": sum_count(request),
-                "cart_notice": _cart_notice(request, rows),
-            },
+            cart_body_context(request, rows, total, notice=_cart_notice(request, rows)),
         )
-        return response
     return HttpResponseRedirect(reverse("cart"))
 
 

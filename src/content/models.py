@@ -121,6 +121,7 @@ class SiteSettings(SingletonModel):
 class HomeBlock(MediaChoice):
     class Key(models.TextChoices):
         HERO = "hero", "Головний банер"
+        COLLECTIONS = "collections", "Колекції"
         CATEGORIES = "categories", "Категорії"
         VIDEO = "video", "Відео 1"
         POPULAR = "popular", "Популярні товари"
@@ -223,7 +224,189 @@ class HomeBlock(MediaChoice):
         parts = localized(self, "lines").splitlines()
         while len(parts) < 3:
             parts.append("")
-        return parts[:3]
+        return parts
+
+
+class HomeCollection(models.Model):
+    rich_text_fields = ("text_uk", "text_en", "story_uk", "story_en")
+    block = models.ForeignKey(
+        "content.HomeBlock",
+        related_name="collection_cards",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Блок",
+    )
+    slug = models.SlugField(
+        "Слаг",
+        max_length=120,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="URL: /kolektsiia/<slug>/",
+    )
+    label_uk = models.CharField("Підпис", max_length=120, blank=True)
+    label_en = models.CharField("Підпис (EN)", max_length=120, blank=True)
+    title_uk = models.CharField("Назва", max_length=160)
+    title_en = models.CharField("Назва (EN)", max_length=160, blank=True)
+    text_uk = models.TextField("Текст", blank=True)
+    text_en = models.TextField("Текст (EN)", blank=True)
+    story_uk = models.TextField("Історія", blank=True)
+    story_en = models.TextField("Історія (EN)", blank=True)
+    box_items_uk = models.TextField(
+        "У боксі",
+        blank=True,
+        help_text="Один пункт у рядку.",
+    )
+    box_items_en = models.TextField(
+        "У боксі (EN)",
+        blank=True,
+        help_text="One item per line.",
+    )
+    image_large = models.ImageField(
+        "Велике фото",
+        upload_to="home/collections/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+    )
+    image_small = models.ImageField(
+        "Мале фото",
+        upload_to="home/collections/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+    )
+    alt_large_uk = models.CharField("Alt великого фото", max_length=200, blank=True)
+    alt_large_en = models.CharField("Alt великого фото (EN)", max_length=200, blank=True)
+    alt_small_uk = models.CharField("Alt малого фото", max_length=200, blank=True)
+    alt_small_en = models.CharField("Alt малого фото (EN)", max_length=200, blank=True)
+    category = models.ForeignKey(
+        "catalog.Category",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="home_collections",
+        verbose_name="Категорія",
+    )
+    product = models.ForeignKey(
+        "catalog.Product",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="home_collections_as_main",
+        verbose_name="Товар боксу",
+    )
+    addons = models.ManyToManyField(
+        "catalog.Product",
+        blank=True,
+        related_name="home_collections_as_addon",
+        verbose_name="Доповнити сет",
+    )
+    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
+    is_active = models.BooleanField("Показувати на сайті", default=True)
+    sort = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["sort", "id"]
+        verbose_name = "Колекція"
+        verbose_name_plural = "Колекції"
+
+    def __str__(self):
+        return self.title_uk
+
+    @property
+    def label(self):
+        return localized(self, "label")
+
+    @property
+    def title(self):
+        return localized(self, "title")
+
+    @property
+    def text(self):
+        return localized(self, "text")
+
+    @property
+    def story(self):
+        return localized(self, "story")
+
+    @property
+    def box_items(self):
+        raw = localized(self, "box_items")
+        return [line.strip() for line in (raw or "").splitlines() if line.strip()]
+
+    @property
+    def alt_large(self):
+        return localized(self, "alt_large")
+
+    @property
+    def alt_small(self):
+        return localized(self, "alt_small")
+
+    @property
+    def seo_title(self):
+        value = localized(self, "seo_title")
+        if value:
+            return value
+        title = " ".join((self.title or "").split())
+        return f"Колекція «{title}» — Gestia Home"
+
+    @property
+    def seo_description(self):
+        return localized(self, "seo_description")
+
+    def gallery_photos(self):
+        photos = []
+        if self.image_large:
+            photos.append({"url": self.image_large.url, "alt": self.alt_large})
+        if self.image_small:
+            photos.append({"url": self.image_small.url, "alt": self.alt_small})
+        rows = self.gallery_images.all()
+        cached = getattr(self, "_prefetched_objects_cache", {})
+        if "gallery_images" in cached:
+            rows = cached["gallery_images"]
+        for row in rows:
+            if row.image:
+                photos.append({"url": row.image.url, "alt": row.alt})
+        return photos
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        if self.slug:
+            return reverse("collection", kwargs={"slug": self.slug})
+        return reverse("catalog")
+
+
+class HomeCollectionImage(models.Model):
+    collection = models.ForeignKey(
+        HomeCollection,
+        related_name="gallery_images",
+        on_delete=models.CASCADE,
+        verbose_name="Колекція",
+    )
+    image = models.ImageField(
+        "Фото",
+        upload_to="home/collections/gallery/",
+        validators=[IMAGE_VALIDATOR],
+    )
+    alt_uk = models.CharField("Alt", max_length=200, blank=True)
+    alt_en = models.CharField("Alt (EN)", max_length=200, blank=True)
+    sort = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["sort", "id"]
+        verbose_name = "Фото колекції"
+        verbose_name_plural = "Фото колекції"
+
+    def __str__(self):
+        return f"{self.collection_id}:{self.pk}"
+
+    @property
+    def alt(self):
+        return localized(self, "alt")
 
 
 class Advantage(MediaChoice):
@@ -273,8 +456,19 @@ class Advantage(MediaChoice):
 
 
 class AboutPage(MediaChoice, SingletonModel):
-    cache_key = "about_page_v2"
-    rich_text_fields = ("body_uk", "body_en")
+    cache_key = "about_page_v3"
+    rich_text_fields = (
+        "body_uk",
+        "body_en",
+        "intro_text_uk",
+        "intro_text_en",
+        "gestia_text_uk",
+        "gestia_text_en",
+        "together_text_uk",
+        "together_text_en",
+        "closing_text_uk",
+        "closing_text_en",
+    )
     title_uk = models.CharField("Заголовок", max_length=200, default="Про нас")
     title_en = models.CharField("Заголовок (EN)", max_length=200, blank=True)
     lead_uk = models.CharField("Підзаголовок", max_length=40, blank=True)
@@ -285,6 +479,65 @@ class AboutPage(MediaChoice, SingletonModel):
     story_label_en = models.CharField("Назва історії (EN)", max_length=32, blank=True)
     body_uk = models.TextField("Текст", blank=True)
     body_en = models.TextField("Текст (EN)", blank=True)
+    intro_text_uk = models.TextField("Текст інтро", blank=True)
+    intro_text_en = models.TextField("Текст інтро (EN)", blank=True)
+    intro_photo_left = WebPImageField(
+        "Фото інтро (ліве)",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Десктоп. Близько 3:4. JPG або PNG.",
+    )
+    intro_photo_left_alt_uk = models.CharField("Alt лівого фото", max_length=200, blank=True)
+    intro_photo_left_alt_en = models.CharField("Alt лівого фото (EN)", max_length=200, blank=True)
+    intro_photo_main = WebPImageField(
+        "Фото інтро (головне)",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Близько 4:5. JPG або PNG.",
+    )
+    intro_photo_main_alt_uk = models.CharField("Alt головного фото", max_length=200, blank=True)
+    intro_photo_main_alt_en = models.CharField("Alt головного фото (EN)", max_length=200, blank=True)
+    gestia_quote_uk = models.TextField("Цитата Гестії", blank=True)
+    gestia_quote_en = models.TextField("Цитата Гестії (EN)", blank=True)
+    gestia_plate = WebPImageField(
+        "Фото тарілки",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Близько 4:3. JPG або PNG.",
+    )
+    gestia_plate_alt_uk = models.CharField("Alt тарілки", max_length=200, blank=True)
+    gestia_plate_alt_en = models.CharField("Alt тарілки (EN)", max_length=200, blank=True)
+    gestia_photo = WebPImageField(
+        "Фото столу Гестії",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Фон правої колонки. JPG або PNG.",
+    )
+    gestia_photo_alt_uk = models.CharField("Alt столу Гестії", max_length=200, blank=True)
+    gestia_photo_alt_en = models.CharField("Alt столу Гестії (EN)", max_length=200, blank=True)
+    gestia_text_uk = models.TextField("Текст Гестії", blank=True)
+    gestia_text_en = models.TextField("Текст Гестії (EN)", blank=True)
+    approach_text_uk = models.TextField("Текст підходу", blank=True)
+    approach_text_en = models.TextField("Текст підходу (EN)", blank=True)
+    together_photo = WebPImageField(
+        "Фото «Разом»",
+        upload_to="about/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Близько 4:5. JPG або PNG.",
+    )
+    together_photo_alt_uk = models.CharField("Alt «Разом»", max_length=200, blank=True)
+    together_photo_alt_en = models.CharField("Alt «Разом» (EN)", max_length=200, blank=True)
+    together_text_uk = models.TextField("Текст «Разом»", blank=True)
+    together_text_en = models.TextField("Текст «Разом» (EN)", blank=True)
+    closing_text_uk = models.TextField("Фінальний текст", blank=True)
+    closing_text_en = models.TextField("Фінальний текст (EN)", blank=True)
+    cta_uk = models.CharField("Кнопка каталогу", max_length=40, blank=True)
+    cta_en = models.CharField("Кнопка каталогу (EN)", max_length=40, blank=True)
     image = models.ImageField(
         "Фото",
         upload_to="about/",
@@ -330,6 +583,54 @@ class AboutPage(MediaChoice, SingletonModel):
     @property
     def body(self):
         return localized(self, "body")
+
+    @property
+    def intro_text(self):
+        return localized(self, "intro_text")
+
+    @property
+    def intro_photo_left_alt(self):
+        return localized(self, "intro_photo_left_alt")
+
+    @property
+    def intro_photo_main_alt(self):
+        return localized(self, "intro_photo_main_alt")
+
+    @property
+    def gestia_quote(self):
+        return localized(self, "gestia_quote")
+
+    @property
+    def gestia_plate_alt(self):
+        return localized(self, "gestia_plate_alt")
+
+    @property
+    def gestia_photo_alt(self):
+        return localized(self, "gestia_photo_alt")
+
+    @property
+    def gestia_text(self):
+        return localized(self, "gestia_text")
+
+    @property
+    def approach_text(self):
+        return localized(self, "approach_text")
+
+    @property
+    def together_photo_alt(self):
+        return localized(self, "together_photo_alt")
+
+    @property
+    def together_text(self):
+        return localized(self, "together_text")
+
+    @property
+    def closing_text(self):
+        return localized(self, "closing_text")
+
+    @property
+    def cta(self):
+        return localized(self, "cta")
 
     @property
     def seo_title(self):
@@ -497,7 +798,10 @@ class ContactForms(SingletonModel):
 
 from src.content import models_about as _about_models  # noqa: E402,F401
 from src.content import models_discount as _discount_models  # noqa: E402,F401
+from src.content import models_faq as _faq_models  # noqa: E402,F401
 from src.content import models_home_slots as _home_slots  # noqa: E402,F401
 from src.content import models_legal as _legal_models  # noqa: E402,F401
+from src.content import models_menu as _menu_models  # noqa: E402,F401
 from src.content import models_styles as _style_models  # noqa: E402,F401
+from src.content import models_thankyou as _thankyou_models  # noqa: E402,F401
 from src.content import proxies as _home_proxies  # noqa: E402,F401

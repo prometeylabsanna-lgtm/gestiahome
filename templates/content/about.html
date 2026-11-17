@@ -1,133 +1,147 @@
 {% extends "base.html" %}
-{% load i18n static content_tags richtext %}
+{% load i18n static richtext %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/figma/home.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/home-desk.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/home-desk-1440.css' %}">
-  <link rel="stylesheet" href="{% static 'css/pages/about.css' %}">
-  <link rel="stylesheet" href="{% static 'css/pages/about-2.css' %}">
-  <link rel="stylesheet" href="{% static 'css/pages/about-1440.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/about.css' %}">
 {% endblock %}
 
 {% block title %}{{ page.seo_title }}{% endblock %}
 {% block description %}{{ page.seo_description }}{% endblock %}
 
 {% block content %}
-  <div class="about-frame">
-    {% cms_field page "lead" as about_lead %}
-    <p class="about-crumb"><a href="{% url 'home' %}">{% cms_field page "crumb" %}</a>/<span aria-current="page">{% if page.title %}{{ page.title }}{% else %}{% trans "Про нас" %}{% endif %}</span></p>
-
-    <div class="about-intro">
-      <section class="about-lead about-lead--intro">
-        <h1>{% if page.title %}{{ page.title }}{% else %}{% trans "Про нас" %}{% endif %}</h1>
-        <p class="about-lead__copy">{{ about_lead }}</p>
-      </section>
-
-      <div class="about-gallery">
-        {% for item in page.gallery.all %}
-          <div class="about-gallery__item about-gallery__item--{{ item.slot }}">
-            {% if item.shows_video %}
-              <video class="about-gallery__desk" autoplay muted loop playsinline preload="metadata" {% if item.poster %}poster="{{ item.poster.url }}"{% elif item.image %}poster="{{ item.image.url }}"{% endif %}>
-                <source src="{{ item.video.url }}" type="{% if '.webm' in item.video.name %}video/webm{% else %}video/mp4{% endif %}">
-              </video>
-            {% else %}
-              {% if item.image %}
-                <img class="about-gallery__desk" src="{{ item.image.url }}" alt="" {% if item.slot == "b" %}width="414" height="543"{% elif item.slot == "c" %}width="414" height="545"{% else %}width="414" height="547"{% endif %}>
-                <img class="about-gallery__mob" src="{{ item.image.url }}" alt="" {% if item.slot == "b" %}width="174" height="228"{% else %}width="174" height="227"{% endif %}>
-              {% endif %}
-            {% endif %}
+  <div class="nd-about">
+    <section class="nd-about-intro" aria-labelledby="about-title" data-screen-label="About intro">
+      {% if page.title %}
+        <h1 class="nd-about-intro__title" id="about-title">{{ page.title }}</h1>
+      {% endif %}
+      <div class="nd-about-intro__grid">
+        {% if page.intro_photo_left %}
+          <img
+            class="nd-about-intro__photo nd-about-intro__photo--left"
+            src="{{ page.intro_photo_left.url }}"
+            alt="{{ page.intro_photo_left_alt }}"
+            width="260"
+            height="347"
+          >
+        {% endif %}
+        {% if page.intro_photo_main %}
+          <img
+            class="nd-about-intro__photo nd-about-intro__photo--main"
+            src="{{ page.intro_photo_main.url }}"
+            alt="{{ page.intro_photo_main_alt }}"
+            width="520"
+            height="650"
+          >
+        {% endif %}
+        {% if page.intro_text %}
+          <div class="nd-about-intro__copy">
+            {{ page.intro_text|richhtml }}
           </div>
-        {% empty %}
-          <div class="about-gallery__item about-gallery__item--a">
-            <img class="about-gallery__desk" src="{% static 'figma/about/a2cf0f5d-9c1a-47ff-aaed-2afbac11b22f.png' %}" alt="" width="414" height="547">
-            <img class="about-gallery__mob" src="{% static 'figma/about/m/fccc8521-cf11-462b-85fa-e0d07c703f08.png' %}" alt="" width="174" height="227">
-          </div>
-          <div class="about-gallery__item about-gallery__item--b">
-            <img class="about-gallery__desk" src="{% static 'figma/about/a525d82b-e09d-4310-8f4a-19715ec6c1f5.png' %}" alt="" width="414" height="543">
-            <img class="about-gallery__mob" src="{% static 'figma/about/m/f0ca6cde-a948-49e9-9e4d-9a810a91bbfd.png' %}" alt="" width="174" height="228">
-          </div>
-          <div class="about-gallery__item about-gallery__item--c">
-            <img class="about-gallery__desk" src="{% static 'figma/about/a2ae4add-c09a-41ec-9363-635510bbc5f9.png' %}" alt="" width="414" height="545">
-          </div>
-        {% endfor %}
+        {% endif %}
       </div>
-    </div>
+      <div class="nd-about-mark" aria-hidden="true">
+        <div class="nd-about-mark__line"></div>
+        <img
+          class="nd-about-mark__icon"
+          src="{% static 'nd/g-mark-light.png' %}"
+          alt=""
+          width="34"
+          height="50"
+        >
+        <div class="nd-about-mark__line"></div>
+      </div>
+    </section>
 
-    <section class="about-lead about-lead--story" aria-label="{% cms_field page 'story_label' %}">
-      <div class="about-lead__text">
-        {% if page.body %}
-          {{ page.body|richhtml }}
-        {% else %}
-        <p>{% trans "Вона будує кар’єру, подорожує, реалізує свої мрії, виховує дітей, відкриває світ і щодня обирає, яким буде сьогодні її день." %}</p>
-        <p>{% trans "Серед безлічі можливостей, які відкриває для неї сучасний світ, є одна особлива роль — бути" %} <strong>{% trans "жінкою, яка створює дім" %}</strong>.</p>
-        <p>{% trans "І це не про особливий статус, великий будинок чи вишуканий інтер’єр, це про дім, який стає важливою частиною особистого стилю, як мода, подорожі чи мистецтво." %}</p>
-        <p>{% trans "Дім, який не є місцем нескінченних обов’язків, а є простором творчості, натхнення, любові та самовираження." %}</p>
-        <p>{% trans "Наче давньогрецька богиня Гестія, вона стає берегинею родинного тепла, гармонії та священного вогню, що об’єднує людей, друзів та зв’язок між поколіннями." %}</p>
-        <p>{% trans "Вона збирає близьких за одним столом та створює незабутні моменти й традиції своєї родини. Зі своїми правилами, зі своїм власним стилем та світоглядом." %}</p>
-        <p>{% trans "І як прекрасно, що сучасна Гестія не зобов’язана робити все самостійно. Вона може розділяти домашні турботи з партнером, залучати дітей, замовляти готові страви або звертатися по допомогу." %}</p>
-        <p>{% trans "Адже її головна роль — не виконувати нескінченний перелік справ, а" %} <strong>{% trans "надихати, об’єднувати та створювати приємну атмосферу" %}</strong>.</p>
-        <p>{% trans "Саме для того, щоб допомогти кожній жінці відчути себе Гестією, але не витрачати нескінченні години на пошук ідей до свята, підбір деталей для святкового столу чи складну підготовку, і було створено бренд GESTIA HOME." %}</p>
-        <p>{% trans "Ми хочемо повернути моду на домашні вечері, спонтанні зустрічі, великі сімейні свята та маленькі щоденні приводи бути разом." %}</p>
-        <p>{% trans "Бо красиво накритий стіл — це не демонстрація достатку. Це жест уваги." %}</p>
-        <p>{% trans "Саме за столом народжуються дружба, довіра, сімейні історії та спогади." %}</p>
-        <p>{% trans "Це спосіб сказати без слів: «Я рада, що ти сьогодні тут»." %}</p>
-        <p>{% trans "Ми впевнені, що сучасна жінка може бути успішною в усьому, що вона сама обирає. І, погодьтесь, бути натхненною господинею власного дому — один із найкрасивіших її виборів." %}</p>
-        <p><strong>{% trans "Всесвіт Gestia Home — це:" %}</strong></p>
-        <ul class="about-lead__list">
-          <li><strong>{% trans "Красиві речі для дому." %}</strong> {% trans "Столовий текстиль, квіти, свічки, декор і продумані деталі, які створюють настрій та роблять кожну зустріч особливою." %}</li>
-          <li><strong>{% trans "Мистецтво сервірування." %}</strong> {% trans "Ідеї, як поєднувати кольори, фактури, посуд і квіти, щоб навіть найпростіший стіл виглядав вишукано." %}</li>
-          <li><strong>{% trans "Натхнення для свят." %}</strong> {% trans "Від романтичної вечері на двох до великого родинного Різдва, від літнього пікніка до вечірки з друзями." %}</li>
-          <li><strong>{% trans "Знання та традиції." %}</strong> {% trans "Знайомство з європейською культурою гостинності, флористикою, етикетом і мистецтвом організації домашніх подій." %}</li>
-          <li><strong>{% trans "Нові ідеї для сім’ї." %}</strong> {% trans "Маленькі ритуали та традиції, які легко впровадити у своє життя й передати дітям." %}</li>
-        </ul>
-        <p>{% trans "Ми хочемо, щоб кожна жінка відчувала: створювати красу вдома може бути легко, захопливо й неймовірно приємно." %}</p>
-        <p>{% trans "Для цього не потрібно бути професійною декораторкою, флористкою чи організаторкою свят." %}</p>
-        <p>{% trans "Достатньо бажання. А ідеї, натхнення та красиві деталі ви знайдете разом із GESTIA HOME." %}</p>
+    <section class="nd-about-gestia" aria-label="{% trans 'Гестія' %}" data-screen-label="Gestia">
+      <div class="nd-about-gestia__quote-col">
+        {% if page.gestia_quote %}
+          <blockquote class="nd-about-gestia__quote">{{ page.gestia_quote }}</blockquote>
+        {% endif %}
+        {% if page.gestia_plate %}
+          <img
+            class="nd-about-gestia__plate"
+            src="{{ page.gestia_plate.url }}"
+            alt="{{ page.gestia_plate_alt }}"
+            width="320"
+            height="240"
+            loading="lazy"
+          >
+        {% endif %}
+      </div>
+      <div class="nd-about-gestia__scene">
+        {% if page.gestia_photo %}
+          <img
+            class="nd-about-gestia__bg"
+            src="{{ page.gestia_photo.url }}"
+            alt="{{ page.gestia_photo_alt }}"
+            width="720"
+            height="760"
+            loading="lazy"
+          >
+        {% endif %}
+        <div class="nd-about-gestia__wash" aria-hidden="true"></div>
+        {% if page.gestia_text %}
+          <div class="nd-about-gestia__copy">
+            {{ page.gestia_text|richhtml }}
+          </div>
         {% endif %}
       </div>
     </section>
 
-    <section class="vbanner" aria-hidden="true">
-      {% if page.shows_video %}
-        <video class="vbanner__img" autoplay muted loop playsinline preload="metadata" {% if page.poster %}poster="{{ page.poster.url }}"{% elif page.image %}poster="{{ page.image.url }}"{% endif %}>
-          <source src="{{ page.video.url }}" type="{% if '.webm' in page.video.name %}video/webm{% else %}video/mp4{% endif %}">
-        </video>
-      {% elif page.image %}
-        <img class="vbanner__img vbanner__img--mob" src="{{ page.image.url }}" alt="" width="393" height="735">
-        <img class="vbanner__img vbanner__img--desk" src="{{ page.image.url }}" alt="" width="1442" height="871">
-      {% else %}
-        <img class="vbanner__img vbanner__img--mob" src="{% static 'figma/about/m/1c65c9d9-7443-4409-aeec-78269a2a6038.png' %}" alt="" width="393" height="735">
-        <img class="vbanner__img vbanner__img--desk" src="{% static 'figma/about/e6ffe24a-dab5-4cc2-8155-190e3c001158.png' %}" alt="" width="1442" height="871">
+    {% if page.approach_text %}
+      <section
+        class="nd-about-approach"
+        aria-label="{% trans 'Разом з Gestia home' %}"
+        data-screen-label="Approach"
+      >
+        <p class="nd-about-approach__text">{{ page.approach_text }}</p>
+      </section>
+    {% endif %}
+
+    <section
+      class="nd-about-together"
+      aria-label="{% trans 'Бути разом' %}"
+      data-screen-label="Together"
+    >
+      {% if page.together_photo %}
+        <img
+          class="nd-about-together__photo"
+          src="{{ page.together_photo.url }}"
+          alt="{{ page.together_photo_alt }}"
+          width="640"
+          height="800"
+          loading="lazy"
+        >
+      {% endif %}
+      {% if page.together_text %}
+        <div class="nd-about-together__copy">
+          {{ page.together_text|richhtml }}
+        </div>
       {% endif %}
     </section>
 
-    <section class="reviews">
-      {% if reviews_block.title or reviews %}
-        <h2{% if not reviews_block.title %} class="visually-hidden"{% endif %}>{% if reviews_block.title %}{{ reviews_block.title }}{% else %}{% trans "Відгуки" %}{% endif %}</h2>
-      {% endif %}
-      <div class="review-rail" data-reviews-track>
-        {% for review in reviews %}
-          <article class="review-card">
-            <header>
-              <h3>{{ review.author }}</h3>
-              {% if review.rating_kind == "black5" %}
-                <img class="rating rating--desk" src="{% static 'figma/desktop/37153.svg' %}" width="98" height="18" alt="">
-                <img class="rating rating--mob" src="{% static 'figma/mobile/1796c.svg' %}" width="83" height="15" alt="">
-              {% else %}
-                <img class="rating rating--desk" src="{% static 'figma/desktop/93b89.svg' %}" width="98" height="18" alt="">
-                <img class="rating rating--mob" src="{% static 'figma/mobile/b07a3.svg' %}" width="83" height="15" alt="">
-              {% endif %}
-            </header>
-            <div>{{ review.text|richhtml }}</div>
-          </article>
-        {% endfor %}
+    <div class="nd-about-mark" aria-hidden="true">
+      <div class="nd-about-mark__line"></div>
+      <img
+        class="nd-about-mark__icon"
+        src="{% static 'nd/g-mark-light.png' %}"
+        alt=""
+        width="34"
+        height="50"
+      >
+      <div class="nd-about-mark__line"></div>
+    </div>
+
+    {% if page.closing_text %}
+      <div class="nd-about-closing">
+        {{ page.closing_text|richhtml }}
       </div>
-    </section>
-    {% include "partials/home/popular.html" with block=popular_block pop_nav=True %}
-  </div>
-{% endblock %}
+    {% endif %}
 
-{% block extra_js %}
-  <script src="{% static 'js/pages/about.js' %}" defer></script>
+    {% if page.cta %}
+      <div class="nd-about-cta">
+        <a class="nd-about-cta__link" href="{% url 'catalog' %}">{{ page.cta }}</a>
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}

@@ -7,12 +7,14 @@ from unfold.widgets import UnfoldAdminTextInputWidget
 from src.content.admin_keyed import KeyedBlockAdmin
 from src.content.admin_limits import tighten
 from src.content.home_slots import sync_category_home_sort, sync_popular_flags
-from src.content.models import ContactForms, HomeBlock
+from src.content.models import ContactForms, HomeBlock, HomeCollection
 from src.content.models_home_slots import HomeCategorySlot, HomePopularSlot
 from src.content.proxies import (
     HomeAdvantagesBlock,
     HomeCallbackBlock,
     HomeCategoriesBlock,
+    HomeCollectionsBlock,
+    HomeLocaleBlock,
     HomePopularBlock,
     HomeReviewsBlock,
 )
@@ -108,6 +110,60 @@ class HomePopularSlotInline(GestiaTabularInline):
     hide_ordering_field = True
     autocomplete_fields = ("product",)
     fields = ("product", "sort")
+
+
+class HomeCollectionInline(GestiaStackedInline):
+    model = HomeCollection
+    extra = 0
+    tab = True
+    verbose_name = "Колекція"
+    verbose_name_plural = "Колекції"
+    ordering_field = "sort"
+    hide_ordering_field = True
+    autocomplete_fields = ("category",)
+    tiny_fields = ("text_uk", "text_en")
+    fields = (
+        "is_active",
+        "sort",
+        "label_uk",
+        "label_en",
+        "title_uk",
+        "title_en",
+        "text_uk",
+        "text_en",
+        "image_large",
+        "image_small",
+        "alt_large_uk",
+        "alt_large_en",
+        "alt_small_uk",
+        "alt_small_en",
+        "category",
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.tiny_fields:
+            kwargs["widget"] = tinymce_widget(short=True)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+@admin.register(HomeCollectionsBlock)
+class HomeCollectionsAdmin(KeyedBlockAdmin):
+    block_key = HomeBlock.Key.COLLECTIONS
+    default_sort = 2
+    inlines = (HomeCollectionInline,)
+    text_limits = {
+        "title_uk": 80,
+        "title_en": 80,
+        "link_uk": 80,
+        "link_en": 80,
+        "cta_uk": 40,
+        "cta_en": 40,
+    }
+    tiny_fields = ()
+    fieldsets = language_tabs(
+        uk_fields=("title_uk", "link_uk", "cta_uk"),
+        en_fields=("title_en", "link_en", "cta_en"),
+    )
 
 
 class HomeCallbackForm(forms.ModelForm):
@@ -313,6 +369,73 @@ class HomeCallbackAdmin(KeyedBlockAdmin):
         for name, limit in self.text_limits.items():
             if name in form.base_fields:
                 tighten(form.base_fields[name], limit)
+        return form
+
+
+LOCALE_FIELD_META = {
+    "title_uk": ("Заголовок діалогу", "Крок «Підтвердити»: «Країна та мова»."),
+    "title_en": ("Dialog title", "Confirm step heading."),
+    "text_uk": ("Поточний регіон", "Рядок під заголовком, напр. «Україна/Гривня»."),
+    "text_en": ("Current region", "Line under the title, e.g. «Ukraine/Hryvnia»."),
+    "cta_uk": ("Кнопка підтвердження", "Текст кнопки «Підтвердити»."),
+    "cta_en": ("Confirm button", "Confirm button label."),
+    "link_uk": ("Посилання «Змінити»", "Відкриває крок вибору регіону."),
+    "link_en": ("Change link", "Opens the region step."),
+    "note_uk": (
+        "Опис кроку регіону",
+        "Текст під «Місце доставки» про ціни й доставку.",
+    ),
+    "note_en": ("Region step description", "Copy under the delivery place heading."),
+    "lines_uk": (
+        "Рядки діалогу (по одному в рядку)",
+        "1) Місце доставки 2) Україна 3) Міжнародна доставка "
+        "4) Мова сайту 5) Оберіть мову / Choose language 6) Українська 7) English",
+    ),
+    "lines_en": (
+        "Dialog lines (one per row)",
+        "1) Delivery place 2) Ukraine 3) International delivery "
+        "4) Site language 5) Choose language 6) Українська 7) English",
+    ),
+}
+
+
+@admin.register(HomeLocaleBlock)
+class HomeLocaleAdmin(KeyedBlockAdmin):
+    block_key = HomeBlock.Key.LOCALE
+    default_sort = 8
+    tiny_fields = ()
+    fieldsets = language_tabs(
+        uk_fields=(
+            "title_uk",
+            "text_uk",
+            "cta_uk",
+            "link_uk",
+            "note_uk",
+            "lines_uk",
+        ),
+        en_fields=(
+            "title_en",
+            "text_en",
+            "cta_en",
+            "link_en",
+            "note_en",
+            "lines_en",
+        ),
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        meta = LOCALE_FIELD_META.get(db_field.name)
+        if formfield is not None and meta:
+            formfield.label, formfield.help_text = meta
+        return formfield
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        for name, (label, help_text) in LOCALE_FIELD_META.items():
+            if name in form.base_fields:
+                form.base_fields[name].label = label
+                form.base_fields[name].help_text = help_text
         return form
 
 

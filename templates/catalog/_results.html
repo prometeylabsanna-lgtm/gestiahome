@@ -1,9 +1,22 @@
 {% load i18n %}
-{% if show_mosaic %}
-  {% include "catalog/_mosaic.html" %}
-{% else %}
-  {% include "catalog/_grid.html" %}
-  {% if not products %}
-    <p class="empty">{% trans "Товарів немає." %}</p>
+{% if products %}
+  <ul class="nd-cat__grid product-grid" data-qa="product-grid">
+    {% for product in products %}
+      {% include "partials/nd/product_card.html" %}
+    {% endfor %}
+  </ul>
+  {% if has_more and catalog_cta %}
+    <div class="nd-cat__more">
+      <a
+        class="nd-cat__more-btn"
+        href="{{ load_all_url }}"
+        hx-get="{{ load_all_url }}"
+        hx-target="#catalog-results"
+        hx-push-url="true"
+        hx-swap="innerHTML"
+      >{{ catalog_cta }}</a>
+    </div>
   {% endif %}
+{% else %}
+  <p class="nd-cat__empty">{% trans "Товарів немає." %}</p>
 {% endif %}

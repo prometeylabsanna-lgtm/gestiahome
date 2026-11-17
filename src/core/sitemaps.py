@@ -9,7 +9,16 @@ from src.catalog.models import Category, Product
 from src.core.middleware import language_enabled
 from src.core.seo import configured_origin
 
-STATIC_PAGES = ("home", "catalog", "about", "shipping", "offer", "privacy", "cookies")
+STATIC_PAGES = (
+    "home",
+    "catalog",
+    "about",
+    "faq",
+    "shipping",
+    "offer",
+    "privacy",
+    "cookies",
+)
 
 
 class LocalizedSitemap(Sitemap):

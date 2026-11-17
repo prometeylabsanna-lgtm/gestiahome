@@ -15,6 +15,11 @@ from django.core.exceptions import ImproperlyConfigured
 from .base import *  # noqa: F403
 from .base import BASE_DIR, MIDDLEWARE, _normalize_admin_url
 
+# Public Vercel demo: LiqPay always disabled (LP2-SEC-04)
+LIQPAY_PUBLIC_KEY = ""
+LIQPAY_PRIVATE_KEY = ""
+LIQPAY_SANDBOX = False
+
 logger = logging.getLogger(__name__)
 
 DEBUG = False

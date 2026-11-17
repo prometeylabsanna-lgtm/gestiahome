@@ -33,19 +33,22 @@
   <link rel="icon" href="{% static 'images/favicon.ico' %}" sizes="any">
   <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-  {% if theme_font == "inter" %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500&display=swap">
-  {% endif %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@400;500&display=swap">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}">
   <link rel="stylesheet" href="{% static 'css/reset.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}">
   <link rel="stylesheet" href="{% static 'css/figma/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/header-menu.css' %}">
-  <link rel="stylesheet" href="{% static 'css/figma/footer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/header-2.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/header-groups.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/footer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/wish.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/cart.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/cart-drawer.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
@@ -58,20 +61,22 @@
   <link rel="stylesheet" href="{% url 'theme_css' %}">
   {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if request.resolver_match.url_name == 'home' %}page-home{% elif request.resolver_match.url_name == 'catalog' or request.resolver_match.url_name == 'category' %}page-catalog{% elif request.resolver_match.url_name == 'product' %}page-product{% elif request.resolver_match.url_name == 'cart' %}page-cart{% elif request.resolver_match.url_name == 'wishlist' %}page-wishlist{% elif request.resolver_match.url_name == 'checkout' %}page-checkout{% elif request.resolver_match.url_name == 'thanks' or request.resolver_match.url_name == 'thanks_legacy' %}page-thanks{% elif request.resolver_match.url_name == 'about' %}page-about{% elif request.resolver_match.url_name == 'privacy' or request.resolver_match.url_name == 'offer' or request.resolver_match.url_name == 'cookies' or request.resolver_match.url_name == 'shipping' %}page-legal{% endif %}"{% if page_style_key %} data-page="{{ page_style_key }}"{% endif %}>
+<body class="{% if request.resolver_match.url_name == 'home' %}page-home{% elif request.resolver_match.url_name == 'catalog' or request.resolver_match.url_name == 'category' %}page-catalog{% elif request.resolver_match.url_name == 'product' %}page-product{% elif request.resolver_match.url_name == 'collection' %}page-collection{% elif request.resolver_match.url_name == 'cart' %}page-cart{% elif request.resolver_match.url_name == 'wishlist' %}page-wishlist{% elif request.resolver_match.url_name == 'checkout' %}page-checkout{% elif request.resolver_match.url_name == 'thanks' or request.resolver_match.url_name == 'thanks_legacy' %}page-thanks{% elif request.resolver_match.url_name == 'about' %}page-about{% elif request.resolver_match.url_name == 'faq' %}page-faq{% elif request.resolver_match.url_name == 'privacy' or request.resolver_match.url_name == 'offer' or request.resolver_match.url_name == 'cookies' or request.resolver_match.url_name == 'shipping' %}page-legal{% endif %}"{% if page_style_key %} data-page="{{ page_style_key }}"{% endif %}>
   {% include "partials/header.html" %}
   <main id="main">
     {% block content %}{% endblock %}
   </main>
   {% include "partials/footer.html" %}
+  {% include "partials/nd/cart_drawer.html" %}
   {% include "partials/home/waitlist_modal.html" %}
   <div hidden data-net-toast-root data-offline="{% trans "Немає з'єднання. Перевірте інтернет і спробуйте ще раз." %}" data-error="{% trans "Сталася помилка. Спробуйте ще раз." %}"></div>
   <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/htmx-errors.js' %}" defer></script>
   <script src="{% static 'js/utils.js' %}" defer></script>
   <script src="{% static 'js/form-validate.js' %}" defer></script>
-  <script src="{% static 'js/nav.js' %}" defer></script>
+  <script src="{% static 'js/nd/header.js' %}" defer></script>
   <script src="{% static 'js/dialog.js' %}" defer></script>
+  <script type="module" src="{% static 'js/nd/cart-drawer.js' %}"></script>
   {% if discount_modal and discount_modal.enabled %}
     <script src="{% static 'js/pages/waitlist-modal.js' %}" defer></script>
   {% endif %}

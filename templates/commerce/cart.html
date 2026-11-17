@@ -2,18 +2,29 @@
 {% load i18n static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/cart.css' %}">
+  <link rel="stylesheet" href="{% static 'css/nd/cart.css' %}">
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'js/pages/cart.js' %}" defer></script>
+  <script type="module" src="{% static 'js/nd/cart.js' %}"></script>
 {% endblock %}
 {% block title %}{% trans "Кошик" %}{% endblock %}
 
 {% block content %}
-  <div class="cart-page" data-qa="cart-page">
-    {% trans "Кошик" as cart_label %}
-    {% include "partials/crumbs.html" with crumb_current=cart_label %}
-    <div id="cart-body">
+  <div class="nd-cart" data-qa="cart-page" data-nd-cart>
+    <nav class="nd-cart__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-cart__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li>
+          <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li aria-current="page">{% trans "Кошик" %}</li>
+      </ol>
+    </nav>
+    <div id="cart-body" data-cart-url="{% url 'cart' %}">
       {% include "commerce/_cart_body.html" %}
     </div>
   </div>

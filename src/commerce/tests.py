@@ -137,30 +137,31 @@ class CheckoutTests(TestCase):
     def test_cart_and_checkout_pages_render(self):
         empty = self.client.get("/koshik/")
         self.assertEqual(empty.status_code, 200)
-        self.assertContains(empty, "Кошик (0)")
-        self.assertContains(empty, "Кошик порожній.")
-        self.assertContains(empty, "css/pages/cart.css")
+        self.assertContains(empty, "Кошик")
+        self.assertContains(empty, "Ваш кошик порожній")
+        self.assertContains(empty, "css/nd/cart.css")
+        self.assertNotContains(empty, "css/pages/cart.css")
         session = self.client.session
         session["cart"] = {"SNIH": 2}
         session["currency"] = "uah"
         session.save()
         page = self.client.get("/koshik/")
         self.assertContains(page, "Сніг")
-        self.assertContains(page, "100 UAH")
-        self.assertContains(page, "₴ 200 грн")
+        self.assertContains(page, "200 UAH")
         self.assertContains(page, "Перейти до оформлення")
         self.assertNotContains(page, "figma.com")
         checkout = self.client.get("/zamovlennia/")
         self.assertEqual(checkout.status_code, 200)
-        self.assertContains(checkout, "Купити")
+        self.assertContains(checkout, "Оформити замовлення")
         self.assertNotContains(checkout, "Перейти до оформлення")
         self.assertContains(checkout, "Контактні дані")
         self.assertContains(checkout, "Кур\u2019єрська доставка")
         self.assertNotContains(checkout, "Контактні данні")
         self.assertNotContains(checkout, "Курєрська доставка")
         self.assertContains(checkout, "Ваше замовлення")
-        self.assertContains(checkout, "х2")
-        self.assertContains(checkout, "css/pages/checkout.css")
+        self.assertContains(checkout, "× 2")
+        self.assertContains(checkout, "css/nd/checkout.css")
+        self.assertNotContains(checkout, "css/pages/checkout.css")
         self.assertNotContains(checkout, "figma.com")
         html = checkout.content.decode()
         field_at = html.find('name="branch"')
@@ -183,9 +184,11 @@ class CheckoutTests(TestCase):
         )
         self.assertNotIn("novaposhta", html.lower())
 
+    @override_settings(LIQPAY_PUBLIC_KEY="test_pub", LIQPAY_PRIVATE_KEY="test_priv")
     def test_checkout_joins_city_and_branch(self):
         session = self.client.session
         session["cart"] = {"SNIH": 1}
+        session["currency"] = "uah"
         session.save()
         response = self.client.post(
             "/zamovlennia/",
@@ -202,6 +205,7 @@ class CheckoutTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         order = Order.objects.get()
+        self.assertIn(f"/zamovlennia/oplata/{order.number}/", response["Location"])
         self.assertEqual(order.delivery_method, "np_locker")
         self.assertEqual(order.delivery_address, "Київ, Поштамат 5")
         self.assertEqual(order.payment_method, Order.Payment.CARD)
@@ -305,7 +309,7 @@ class CheckoutTests(TestCase):
             HTTP_HX_REQUEST="true",
         )
         self.assertEqual(cleared.status_code, 200)
-        self.assertContains(cleared, "Кошик порожній.")
+        self.assertContains(cleared, "Ваш кошик порожній")
         self.assertNotIn("SNIH", self.client.session.get("cart", {}))
 
     def test_two_products_totals_match_price_times_qty(self):
@@ -325,23 +329,25 @@ class CheckoutTests(TestCase):
         session.save()
         total = self.product.price_uah * snow_qty + lamp.price_uah * lamp_qty
         self.assertEqual(total, Decimal("4700"))
-        label = f"₴ {int(total):,}".replace(",", " ") + " грн"
+        total_label = f"{int(total):,}".replace(",", " ") + " UAH"
         cart = self.client.get("/koshik/")
         checkout = self.client.get("/zamovlennia/")
         self.assertContains(cart, "Сніг")
         self.assertContains(cart, "Лампа")
-        self.assertContains(cart, "100 UAH")
-        self.assertContains(cart, "1 500 UAH")
+        self.assertContains(cart, "200 UAH")
+        self.assertContains(cart, "4 500 UAH")
         self.assertContains(cart, 'value="2"')
         self.assertContains(cart, 'value="3"')
-        self.assertContains(cart, label)
+        self.assertContains(cart, total_label)
         self.assertContains(checkout, "Сніг")
         self.assertContains(checkout, "Лампа")
-        self.assertContains(checkout, "х2")
-        self.assertContains(checkout, "х3")
-        self.assertContains(checkout, label)
+        self.assertContains(checkout, "× 2")
+        self.assertContains(checkout, "× 3")
+        self.assertContains(checkout, total_label)
         self.assertNotContains(cart, "₴ 2300 грн")
         self.assertNotContains(checkout, "₴ 2300 грн")
+        self.assertNotContains(cart, "₴ 4 700 грн")
+        self.assertNotContains(checkout, "₴ 4 700 грн")
         self.assertNotContains(cart, "2 450 UAH")
         self.assertNotContains(checkout, "2 450 UAH")
 
@@ -358,8 +364,8 @@ class CheckoutTests(TestCase):
     def test_wishlist_session_flow(self):
         empty = self.client.get("/obrane/")
         self.assertEqual(empty.status_code, 200)
-        self.assertContains(empty, "У обраному поки порожньо.")
-        self.assertContains(empty, "css/pages/wishlist.css")
+        self.assertContains(empty, "У вас поки немає обраних товарів")
+        self.assertContains(empty, "css/nd/wishlist.css")
         added = self.client.post("/obrane/toggle/", {"sku": "SNIH"})
         self.assertEqual(added.status_code, 302)
         self.assertEqual(self.client.session["wishlist"], ["SNIH"])
@@ -376,10 +382,10 @@ class CheckoutTests(TestCase):
         session.save()
         page = self.client.get("/thank-you/?kind=order&number=G-100")
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, "Дякуємо за замовлення")
+        self.assertContains(page, "Раді стати частиною ваших традицій!")
         self.assertContains(page, "G-100")
-        self.assertContains(page, "До каталогу")
-        self.assertContains(page, "css/pages/utility.css")
+        self.assertContains(page, "На головну")
+        self.assertContains(page, "css/nd/thanks.css")
         legacy = self.client.get("/diakuiemo/?kind=order&number=G-100")
         self.assertEqual(legacy.status_code, 200)
 
@@ -570,8 +576,11 @@ class ThanksGuardTests(TestCase):
     def test_hides_foreign_number(self):
         page = self.client.get("/thank-you/?kind=order&number=GS-FOREIGN")
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, "Дякуємо за замовлення")
-        self.assertNotContains(page, "Номер замовлення")
+        self.assertContains(page, "Раді стати частиною ваших традицій!")
+        self.assertContains(
+            page,
+            "Замовлення оформлено. Після відправлення ви отримаєте номер",
+        )
         self.assertNotContains(page, 'data-qa="order-number"')
 
 

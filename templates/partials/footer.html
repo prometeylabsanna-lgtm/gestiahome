@@ -1,51 +1,116 @@
 {% load i18n static content_tags %}
-<footer class="site-footer">
-  <div class="site-footer__bar">
-    <div class="site-footer__top">
-    {% include "partials/brand.html" with kind="footer" %}
-    <nav class="site-footer__cols" aria-label="{% trans 'Підвал' %}">
-      <div class="site-footer__col">
+<footer class="site-footer nd-footer">
+  <div class="nd-footer__mark" aria-hidden="true">
+    <div class="nd-footer__rule"></div>
+    <img class="nd-footer__g" src="{% static 'nd/g-mark-dark.png' %}" alt="" width="34" height="50">
+    <div class="nd-footer__rule"></div>
+  </div>
+
+  <div class="nd-footer__grid">
+    <nav class="nd-footer__col" aria-label="{% trans 'Каталог' %}">
+      <ul>
         {% for link in footer_columns.category %}
-          {% if link.href %}
-            <a href="{{ link.href }}">{{ link.label }}</a>
-          {% else %}
-            <span>{{ link.label }}</span>
-          {% endif %}
+          <li>
+            {% if link.href %}
+              <a href="{{ link.href }}">{{ link.label }}</a>
+            {% else %}
+              <span>{{ link.label }}</span>
+            {% endif %}
+          </li>
         {% endfor %}
-      </div>
-      <div class="site-footer__col site-footer__col--legal">
-        {% for link in footer_columns.legal %}
-          {% if link.href %}<a href="{{ link.href }}">{{ link.label }}</a>{% else %}<span>{{ link.label }}</span>{% endif %}
-        {% endfor %}
-      </div>
-      {% include "partials/social_row.html" with tone="cream" %}
+      </ul>
     </nav>
-    </div>
-    <div class="site-footer__copy">
-      <img class="site-footer__rule site-footer__rule--desk" src="{% static 'figma/desktop/7c534.svg' %}" width="1302" height="1" alt="">
-      <img class="site-footer__rule site-footer__rule--mob" src="{% static 'figma/mobile/14854.svg' %}" width="362" height="1" alt="">
-      <div class="site-footer__legal">
-        {% if site_settings %}
-          {% if site_settings.copyright_lead or site_settings.copyright_tail %}
-            <p>
-              <span class="site-footer__lead">{{ site_settings.copyright_lead }}</span><span class="site-footer__tail">{{ site_settings.copyright_tail }}</span>
-            </p>
-          {% endif %}
+
+    <nav class="nd-footer__col" aria-label="{% trans 'Інформація' %}">
+      <ul>
+        {% for link in footer_columns.info %}
+          <li>
+            {% if link.href %}
+              <a href="{{ link.href }}">{{ link.label }}</a>
+            {% else %}
+              <span>{{ link.label }}</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <nav class="nd-footer__col" aria-label="{% trans 'Документи' %}">
+      <ul>
+        {% for link in footer_columns.legal %}
+          <li>
+            {% if link.href %}
+              <a href="{{ link.href }}">{{ link.label }}</a>
+            {% else %}
+              <span>{{ link.label }}</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <address class="nd-footer__address">
+      <ul>
+        <li>
+          <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
+            {% include "partials/nd/icons/instagram.html" %}
+            <span>Instagram</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}" target="_blank" rel="noopener noreferrer">
+            {% include "partials/nd/icons/pinterest.html" %}
+            <span>Pinterest</span>
+          </a>
+        </li>
+        {% if site_settings.telegram_url %}
+          <li>
+            <a href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener noreferrer">
+              {% include "partials/nd/icons/telegram.html" %}
+              <span>Telegram</span>
+            </a>
+          </li>
         {% endif %}
-        <p class="site-footer__credit">
-          {% cms_field site_settings "credit" %}
-          {% if request.resolver_match.url_name == "home" %}
-            <a
-              class="site-footer__credit-link"
-              href="https://www.prometeylabs.com/internet-shop-v2/"
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-            >PrometeyLabs</a>
-          {% else %}
-            <span class="site-footer__credit-name">PrometeyLabs</span>
-          {% endif %}
+        {% if site_settings.phone %}
+          <li>
+            <a href="tel:{{ site_settings.phone|cut:' ' }}">
+              {% include "partials/nd/icons/phone.html" %}
+              <span>{{ site_settings.phone }}</span>
+            </a>
+          </li>
+        {% endif %}
+        {% if site_settings.email %}
+          <li>
+            <a class="nd-footer__mail" href="mailto:{{ site_settings.email }}">
+              {% include "partials/nd/icons/mail.html" %}
+              <span>{{ site_settings.email }}</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </address>
+  </div>
+
+  <div class="nd-footer__bottom">
+    {% if site_settings %}
+      {% if site_settings.copyright_lead or site_settings.copyright_tail %}
+        <p class="nd-footer__copy">
+          <span class="site-footer__lead nd-footer__lead">{{ site_settings.copyright_lead }}</span><span class="site-footer__tail">{{ site_settings.copyright_tail }}</span>
         </p>
-      </div>
-    </div>
+      {% endif %}
+    {% endif %}
+    <p class="site-footer__credit nd-footer__credit">
+      {% cms_field site_settings "credit" %}
+      {% if request.resolver_match.url_name == "home" %}
+        <a
+          class="site-footer__credit-link"
+          href="https://www.prometeylabs.com/internet-shop-v2/"
+          target="_blank"
+          rel="nofollow noopener noreferrer"
+        >PrometeyLabs</a>
+      {% else %}
+        <span class="site-footer__credit-name">PrometeyLabs</span>
+      {% endif %}
+    </p>
   </div>
 </footer>

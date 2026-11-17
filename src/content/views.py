@@ -1,17 +1,39 @@
 from types import SimpleNamespace
 
+from django.db.utils import OperationalError, ProgrammingError
 from django.http import Http404
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from src.commerce.forms import ContactForm, style_form
 from src.commerce.models import Inquiry
 from src.commerce.services import create_inquiry
-from src.core.ratelimit import honeypot_filled, reject_if_limited
-from src.content.home_slots import about_popular, home_categories, home_popular
+from src.commerce.wishlist import sku_set
+from src.content.home_slots import home_categories, home_popular
 from src.content.legal_pages import legal_document
-from src.content.models import AboutPage, Advantage, HomeBlock, Review
+from src.content.models import AboutPage, Advantage, HomeBlock, HomeCollection, Review
+from src.content.models_faq import FaqPage
+from src.content.models_menu import MenuGroupItem
+from src.core.ratelimit import honeypot_filled, reject_if_limited
+
+
+def _home_collections():
+    try:
+        rows = list(
+            HomeCollection.objects.filter(is_active=True, block__key=HomeBlock.Key.COLLECTIONS)
+            .select_related("category")
+            .order_by("sort", "id")
+        )
+        if rows:
+            return rows
+        return list(
+            HomeCollection.objects.filter(is_active=True, block__isnull=True)
+            .select_related("category")
+            .order_by("sort", "id")
+        )
+    except (OperationalError, ProgrammingError):
+        return []
 
 
 @require_http_methods(["GET", "HEAD", "POST"])
@@ -40,8 +62,10 @@ def home(request):
         {
             "categories": home_categories(),
             "popular": home_popular(),
+            "collections": _home_collections(),
             "advantages": advantages,
             "reviews": Review.objects.filter(placement=Review.Placement.HOME),
+            "wishlist_skus": sku_set(request),
             "home_form": form,
         },
         status=status,
@@ -57,21 +81,64 @@ def _figma_block(key, title, cta=""):
 
 def about(request):
     page = AboutPage.load()
-    popular_title = page.popular_title or "Популярні товари"
-    popular_cta = page.popular_cta or "Перейти до каталогу"
-    reviews_title = page.reviews_title or "Відгуки"
-    reviews = Review.objects.filter(placement=Review.Placement.ABOUT)
-    if not reviews.exists():
-        reviews = Review.objects.filter(placement=Review.Placement.HOME)
+    return render(request, "content/about.html", {"page": page})
+
+
+def faq(request):
+    page = FaqPage.load()
+    items = page.items.filter(is_active=True)
     return render(
         request,
-        "content/about.html",
+        "content/faq.html",
         {
             "page": page,
-            "popular": about_popular(),
-            "reviews": reviews,
-            "popular_block": SimpleNamespace(title=popular_title, cta=popular_cta),
-            "reviews_block": SimpleNamespace(title=reviews_title),
+            "items": items,
+        },
+    )
+
+
+def collection_detail(request, slug):
+    collection = get_object_or_404(
+        HomeCollection.objects.select_related("product", "category").prefetch_related(
+            "gallery_images",
+            "addons",
+        ),
+        slug=slug,
+        is_active=True,
+    )
+    blocks = {
+        block.key: block
+        for block in HomeBlock.objects.filter(key__in=["pdp_ship", "pdp_pay"])
+    }
+    others = (
+        HomeCollection.objects.filter(is_active=True)
+        .exclude(pk=collection.pk)
+        .exclude(slug="")
+        .exclude(slug__isnull=True)
+        .select_related("category")
+        .order_by("sort", "id")
+    )
+    menu_item = (
+        MenuGroupItem.objects.filter(
+            collection_id=collection.pk,
+            is_active=True,
+            group__is_active=True,
+        )
+        .select_related("group")
+        .order_by("group__sort", "sort", "id")
+        .first()
+    )
+    return render(
+        request,
+        "content/collection.html",
+        {
+            "collection": collection,
+            "gallery": collection.gallery_photos(),
+            "addons": list(collection.addons.filter(is_active=True)),
+            "others": others,
+            "ship_block": blocks.get("pdp_ship"),
+            "pay_block": blocks.get("pdp_pay"),
+            "menu_group": menu_item.group if menu_item else None,
         },
     )
 

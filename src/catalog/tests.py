@@ -68,25 +68,101 @@ class FacetTests(TestCase):
         skus = list(filter_catalog(Product.objects.all(), parsed).values_list("sku", flat=True))
         self.assertEqual(skus[:3], ["B", "C", "A"])
         page = self.client.get("/katalog/?sort=price_asc&in_stock=1")
-        self.assertContains(page, 'data-sort-value="price_asc"')
-        self.assertContains(page, "Спочатку дешевші")
+        self.assertContains(page, 'data-nd-sort-value="price_asc"')
+        self.assertContains(page, "Ціна: за зростанням")
 
-    def test_catalog_mosaic_uses_cell_price_until_filter(self):
+    def test_sort_without_filters_bypasses_curated(self):
+        self.a.price_uah = Decimal("300")
+        self.a.name_uk = "Зевс"
+        self.a.save(update_fields=["price_uah", "name_uk"])
+        self.b.price_uah = Decimal("100")
+        self.b.name_uk = "Арес"
+        self.b.save(update_fields=["price_uah", "name_uk"])
+        self.c.price_uah = Decimal("200")
+        self.c.name_uk = "Геракл"
+        self.c.save(update_fields=["price_uah", "name_uk"])
         CatalogCell.objects.create(
             product=self.a,
-            band=2,
+            band=0,
             layout=CatalogCell.Layout.ROW,
             role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
             sort=1,
-            price_uah=Decimal("8990"),
+            price_uah=Decimal("1"),
+            crop=CatalogCell.Crop.UKR,
+            name_width=127,
+        )
+        CatalogCell.objects.create(
+            product=self.b,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=2,
+            price_uah=Decimal("1"),
+            crop=CatalogCell.Crop.UKR,
+            name_width=127,
+        )
+        CatalogCell.objects.create(
+            product=self.c,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=3,
+            price_uah=Decimal("1"),
+            crop=CatalogCell.Crop.UKR,
+            name_width=127,
+        )
+        curated = self.client.get("/katalog/")
+        self.assertEqual(curated.status_code, 200)
+        curated_body = curated.content.decode()
+        self.assertLess(curated_body.index("Зевс"), curated_body.index("Арес"))
+
+        asc = self.client.get("/katalog/?sort=price_asc")
+        self.assertEqual(asc.status_code, 200)
+        asc_body = asc.content.decode()
+        self.assertLess(asc_body.index("Арес"), asc_body.index("Геракл"))
+        self.assertLess(asc_body.index("Геракл"), asc_body.index("Зевс"))
+        self.assertContains(asc, "Ціна: за зростанням")
+
+        desc = self.client.get("/katalog/?sort=price_desc")
+        desc_body = desc.content.decode()
+        self.assertLess(desc_body.index("Зевс"), desc_body.index("Геракл"))
+        self.assertLess(desc_body.index("Геракл"), desc_body.index("Арес"))
+
+        by_name = self.client.get("/katalog/?sort=name")
+        name_body = by_name.content.decode()
+        self.assertLess(name_body.index("Арес"), name_body.index("Геракл"))
+        self.assertLess(name_body.index("Геракл"), name_body.index("Зевс"))
+
+        filtered = self.client.get("/katalog/?style=scandi&sort=price_asc")
+        filtered_body = filtered.content.decode()
+        self.assertLess(filtered_body.index("Арес"), filtered_body.index("Зевс"))
+        self.assertNotContains(filtered, "Геракл")
+
+    def test_catalog_curated_uses_filter_cells_as_grid(self):
+        self.a.price_uah = Decimal("8990")
+        self.a.save(update_fields=["price_uah"])
+        CatalogCell.objects.create(
+            product=self.a,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=1,
+            price_uah=Decimal("1"),
             crop=CatalogCell.Crop.UKR,
             name_width=127,
         )
         page = self.client.get("/katalog/")
+        self.assertContains(page, 'data-qa="product-grid"')
         self.assertContains(page, "8 990 UAH")
+        self.assertContains(page, "wish-toggle--nd")
+        self.assertNotContains(page, "catalog-row")
         filtered = self.client.get("/katalog/?in_stock=1")
-        self.assertNotContains(filtered, "8 990 UAH")
-        self.assertContains(filtered, "data-qa=\"product-grid\"")
+        self.assertContains(filtered, 'data-qa="product-grid"')
+        self.assertContains(filtered, "/tovar/a/")
 
     def test_category_page_shows_grid_not_mosaic(self):
         CatalogCell.objects.create(
@@ -107,6 +183,8 @@ class FacetTests(TestCase):
         self.assertNotContains(page, "catalog-row")
         self.assertContains(page, "/tovar/a/")
         self.assertNotContains(page, "/tovar/b/")
+        self.assertContains(page, 'aria-current="page"')
+        self.assertContains(page, "Каталог")
 
     def test_category_narrows_with_style(self):
         other = Category.objects.create(slug="other", name_uk="Інше")
@@ -123,9 +201,15 @@ class FacetTests(TestCase):
         page = self.client.get("/katalog/")
         self.assertContains(page, "Застосувати")
         self.assertContains(page, "Скандинавський")
-        self.assertContains(page, 'data-catalog-open')
-        self.assertContains(page, 'data-catalog-sheet')
-        self.assertContains(page, 'data-sheet-open')
+        self.assertContains(page, "css/nd/catalog.css")
+        self.assertContains(page, "js/nd/catalog.js")
+        self.assertContains(page, 'data-nd-filters-toggle')
+        self.assertContains(page, 'data-nd-filters-panel')
+        self.assertContains(page, 'id="catalog-results"')
+        self.assertContains(page, 'hx-target="#catalog-results"')
+        self.assertContains(page, "Каталог товарів Gestia Home")
+        self.assertContains(page, 'data-screen-label="Товари"')
+        self.assertContains(page, 'aria-label="Товари"')
 
     def test_product_page_shows_figma_purchase(self):
         page = self.client.get("/tovar/a/")
@@ -135,6 +219,39 @@ class FacetTests(TestCase):
         self.assertContains(page, 'max="99"')
         self.assertContains(page, "data-qty-label")
         self.assertContains(page, "Арт. A")
+        self.assertContains(page, 'id="product-title"')
+        self.assertContains(page, "<h1")
+        self.assertContains(page, "Стиль: Скандинавський")
+        self.assertContains(page, "Колір: Білий")
+        self.assertContains(page, "10 UAH")
+        self.assertContains(page, 'action="/koshik/dodaty/"')
+        self.assertContains(page, 'id="buy-dialog"')
+        self.assertContains(page, "wish-toggle--nd")
+        self.assertContains(page, "css/nd/product.css")
+        self.assertContains(page, "js/nd/product.js")
+        self.assertNotContains(page, "css/pages/product.css")
+        self.assertNotContains(page, "js/pages/product.js")
+        self.assertNotContains(page, 'id="callback-dialog"')
+        self.assertNotContains(page, "pdp-reviews")
+        self.assertNotContains(page, "nd-pdp-rail--set")
+
+        bundle = ProductSet.objects.create(slug="set-a", name_uk="Сет A")
+        self.a.product_set = bundle
+        self.a.save(update_fields=["product_set"])
+        self.b.product_set = bundle
+        self.b.save(update_fields=["product_set"])
+        self.a.related_manual.add(self.b)
+        with_rails = self.client.get("/tovar/a/")
+        self.assertContains(with_rails, "nd-pdp-rail--set")
+        self.assertContains(with_rails, "nd-pdp-rail--related")
+        self.assertContains(with_rails, 'aria-labelledby="same-set"')
+        self.assertContains(with_rails, 'aria-labelledby="similar"')
+        self.assertContains(with_rails, 'id="same-set"')
+        self.assertContains(with_rails, 'id="similar"')
+        self.assertContains(with_rails, "/tovar/b/")
+        self.assertContains(with_rails, 'data-qa="product-card"')
+        self.assertContains(with_rails, "nd-card__name")
+        self.assertContains(with_rails, "nd-card__price")
 
     def test_search_keeps_name(self):
         query = QueryDict(mutable=True)
@@ -142,6 +259,60 @@ class FacetTests(TestCase):
         parsed = parse_catalog_filters(query)
         skus = list(filter_catalog(Product.objects.all(), parsed).values_list("sku", flat=True))
         self.assertEqual(skus, ["A"])
+
+    def test_htmx_returns_results_partial(self):
+        page = self.client.get("/katalog/?style=scandi", HTTP_HX_REQUEST="true")
+        self.assertContains(page, 'data-qa="product-grid"')
+        self.assertNotContains(page, 'data-nd-cat')
+        self.assertNotContains(page, "<!DOCTYPE html>", html=False)
+
+    def test_load_all_returns_every_card(self):
+        from src.content.models import HomeBlock
+
+        HomeBlock.objects.update_or_create(
+            key=HomeBlock.Key.CATALOG,
+            defaults={"cta_uk": "Завантажити все", "cta_en": "Load all"},
+        )
+        for index in range(15):
+            product = self._product(f"P{index}", f"p-{index}", "scandi", "white")
+            product.price_uah = Decimal(100 + index)
+            product.save(update_fields=["price_uah"])
+        limited = self.client.get("/katalog/?style=scandi")
+        self.assertContains(limited, "Завантажити все")
+        self.assertContains(limited, "all=1")
+        self.assertEqual(limited.content.decode().count('data-qa="product-card"'), 12)
+        full = self.client.get("/katalog/?style=scandi&all=1")
+        self.assertNotContains(full, "Завантажити все")
+        self.assertGreaterEqual(full.content.decode().count('data-qa="product-card"'), 15)
+
+    def test_inactive_filter_cell_is_skipped(self):
+        self.a.is_active = False
+        self.a.save(update_fields=["is_active"])
+        CatalogCell.objects.create(
+            product=self.a,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=1,
+            price_uah=Decimal("10"),
+            crop=CatalogCell.Crop.COVER,
+            name_width=127,
+        )
+        CatalogCell.objects.create(
+            product=self.b,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=2,
+            price_uah=Decimal("10"),
+            crop=CatalogCell.Crop.COVER,
+            name_width=127,
+        )
+        page = self.client.get("/katalog/")
+        self.assertContains(page, "/tovar/b/")
+        self.assertNotContains(page, "/tovar/a/")
 
 
 class EnglishCatalogCopyTests(TestCase):
@@ -208,7 +379,9 @@ class EnglishCatalogCopyTests(TestCase):
         page = self.client.get("/en/tovar/vesilnyi/")
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, 'lang="en"')
-        self.assertContains(page, "<h1>Wedding box</h1>")
+        self.assertContains(page, 'id="product-title"')
+        self.assertContains(page, "Wedding box")
+        self.assertContains(page, "<h1")
         self.assertNotContains(page, "Бокс «Весільний»")
         nest = self.client.get("/en/tovar/velykodnii-hnizdo/")
         self.assertContains(nest, "Easter box “The Nest”")

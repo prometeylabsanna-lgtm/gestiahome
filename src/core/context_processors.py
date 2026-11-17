@@ -9,6 +9,16 @@ from src.core.middleware import language_enabled
 from src.core.seo import build_head
 
 
+def _next_path(request) -> str:
+    """Full path for language/currency next, without sensitive ?number=."""
+    params = request.GET.copy()
+    params.pop("number", None)
+    query = params.urlencode()
+    if query:
+        return f"{request.path}?{query}"
+    return request.path
+
+
 def shop(request):
     currency = request.session.get("currency", "uah")
     if currency not in {"uah", "eur"}:
@@ -17,6 +27,7 @@ def shop(request):
     home_blocks = {}
     nav_categories = []
     menu_categories = []
+    menu_groups = []
     menu_cards = []
     footer_columns = {"category": [], "info": [], "legal": []}
     cart_count = 0
@@ -30,6 +41,9 @@ def shop(request):
         from src.commerce.wishlist import item_count as wish_count
         from src.content.footer_nav import build_footer_columns
         from src.content.models import ContactForms, HomeBlock, SiteSettings
+        from django.db.models import Prefetch
+
+        from src.content.models_menu import MenuGroup, MenuGroupItem
 
         site = SiteSettings.load()
         form_copy = ContactForms.load()
@@ -37,6 +51,19 @@ def shop(request):
         nav_categories = list(load_nav())
         menu_categories = list(
             Category.objects.filter(parent__isnull=True, is_active=True).order_by("sort", "name_uk")
+        )
+        menu_groups = list(
+            MenuGroup.objects.filter(is_active=True)
+            .prefetch_related(
+                Prefetch(
+                    "items",
+                    queryset=MenuGroupItem.objects.filter(is_active=True)
+                    .select_related("collection", "collection__category", "category")
+                    .order_by("sort", "id"),
+                    to_attr="active_items",
+                )
+            )
+            .order_by("sort", "id")
         )
         featured = Product.objects.filter(slug="boks-rizdvyanyi-shyshky", is_active=True).prefetch_related("images").first()
         if featured is not None:
@@ -52,9 +79,9 @@ def shop(request):
         discount_modal = DiscountModal.load()
     except (OperationalError, ProgrammingError):
         discount_modal = None
-    full = request.get_full_path()
+    next_path = _next_path(request)
     switch = {
-        code: localize_path(full, code)
+        code: localize_path(next_path, code)
         for code, _label in settings.LANGUAGES
     }
     return {
@@ -62,11 +89,13 @@ def shop(request):
         "home_blocks": home_blocks,
         "nav_categories": nav_categories,
         "menu_categories": menu_categories,
+        "menu_groups": menu_groups,
         "menu_cards": menu_cards,
         "footer_columns": footer_columns,
         "currency": currency,
         "cart_count": cart_count,
         "wishlist_count": wishlist_count,
+        "next_path": next_path,
         "lang_switch_urls": switch,
         "lang_enabled": {
             code: language_enabled(code) for code, _label in settings.LANGUAGES

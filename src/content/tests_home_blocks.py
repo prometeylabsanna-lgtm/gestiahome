@@ -32,10 +32,10 @@ class HomeBlockRenderTests(TestCase):
         self.assertContains(page, "Перейти до каталогу")
 
     def test_english_block_uses_the_english_field(self):
-        _block("reviews", title_uk="Відгуки", title_en="Guest notes", sort=6)
+        _block("popular", title_uk="Популярні товари", title_en="Guest picks", sort=4)
         page = self.client.get("/en/")
-        self.assertContains(page, "Guest notes")
-        self.assertNotContains(page, ">Відгуки<")
+        self.assertContains(page, "Guest picks")
+        self.assertNotContains(page, ">Популярні товари<")
 
 
 class ContactFormCopyTests(TestCase):
@@ -169,7 +169,7 @@ class HomeSlotsTests(TestCase):
         self.assertContains(page, "Слот")
         self.assertContains(page, "Слот товар")
 
-    def test_advantages_scroll_class_when_more_than_four(self):
+    def test_legacy_home_sections_are_not_rendered(self):
         block = _block("advantages", title_uk="Чому", sort=5)
         for index in range(5):
             Advantage.objects.create(
@@ -178,9 +178,15 @@ class HomeSlotsTests(TestCase):
                 text_uk="Текст",
                 sort=index,
             )
+        _block("categories", title_uk="Категорії секція", sort=2)
+        _block("reviews", title_uk="Відгуки секція", sort=7)
+        _block("callback", title_uk="Зворотний секція", sort=8)
         page = self.client.get("/")
-        self.assertContains(page, "benefit-list--scroll")
-        self.assertContains(page, "Пункт 4")
+        self.assertNotContains(page, "benefit-list")
+        self.assertNotContains(page, "Пункт 4")
+        self.assertNotContains(page, "Категорії секція")
+        self.assertNotContains(page, "Відгуки секція")
+        self.assertNotContains(page, "Зворотний секція")
 
 
 class HomeCategorySlotFormTests(TestCase):

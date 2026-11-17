@@ -92,8 +92,9 @@
       >
         <span class="nd-header__opt{% if currency == 'uah' %} is-current{% endif %}">₴</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if currency == 'eur' %} is-current{% endif %}">€</span>
       </button>
-      <a class="nd-header__icon" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}">
+      <a class="nd-header__icon head-bag" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}" data-qa="header-wishlist">
         {% include "partials/nd/icons/heart.html" %}
+        {% include "partials/wishlist_count.html" %}
       </a>
       <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
         {% include "partials/nd/icons/bag.html" %}
@@ -113,6 +114,10 @@
       >
         {% include "partials/nd/icons/search.html" %}
       </button>
+      <a class="nd-header__icon head-bag" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}" data-qa="header-wishlist-mobile">
+        {% include "partials/nd/icons/heart.html" %}
+        {% include "partials/wishlist_count_mobile.html" %}
+      </a>
       <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
         {% include "partials/nd/icons/bag.html" %}
         {% include "partials/cart_count_mobile.html" %}

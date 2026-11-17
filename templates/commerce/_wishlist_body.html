@@ -80,3 +80,7 @@
     <a class="nd-wish__empty-link" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
   </div>
 {% endif %}
+{% if request.META.HTTP_HX_REQUEST %}
+  <span id="wishlist-count" class="head-bag__count{% if not wishlist_count %} is-empty{% endif %}" data-qa="wishlist-count" hx-swap-oob="outerHTML" aria-hidden="{% if wishlist_count %}false{% else %}true{% endif %}">{% if wishlist_count %}({{ wishlist_count }}){% endif %}</span>
+  <span id="wishlist-count-mobile" class="head-bag__count{% if not wishlist_count %} is-empty{% endif %}" data-qa="wishlist-count-mobile" hx-swap-oob="outerHTML" aria-hidden="{% if wishlist_count %}false{% else %}true{% endif %}">{% if wishlist_count %}({{ wishlist_count }}){% endif %}</span>
+{% endif %}

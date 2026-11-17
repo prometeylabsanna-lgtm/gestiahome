@@ -59,7 +59,7 @@ def _catalog_context(request, category=None):
     facet_base = qs
     filtered = filter_catalog(qs, parsed)
     active = _filters_active(parsed)
-    use_curated = not category and not active
+    use_curated = not category and not active and not parsed["sort"]
     if use_curated:
         all_products = curated_catalog_products()
     else:

@@ -98,10 +98,51 @@ class WishlistNdTests(TestCase):
         self.assertContains(response, "Обране (3)")
         self.assertNotContains(response, "Бокс Великодній «Український»")
         self.assertContains(response, "Бокс «Різдвяний Шишки»")
+        self.assertContains(response, 'id="wishlist-count"')
+        self.assertContains(response, 'hx-swap-oob="outerHTML"')
+        self.assertContains(response, "(3)")
         self.assertEqual(
             self.client.session.get("wishlist"),
             ["GH-02", "GH-06", "GH-04"],
         )
+
+    def test_header_shows_wishlist_count(self):
+        self._fill()
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-qa="header-wishlist"')
+        self.assertContains(response, 'data-qa="header-wishlist-mobile"')
+        self.assertContains(response, 'data-qa="wishlist-count"')
+        self.assertContains(response, 'data-qa="wishlist-count-mobile"')
+        self.assertContains(response, "(4)")
+
+    def test_wishlist_toggle_htmx_updates_header_count(self):
+        response = self.client.post(
+            reverse("wishlist_toggle"),
+            {"sku": "GH-01", "variant": "nd"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('class="wish-toggle wish-toggle--nd"', body)
+        self.assertIn("is-on", body)
+        self.assertIn('id="wishlist-count"', body)
+        self.assertIn('id="wishlist-count-mobile"', body)
+        self.assertIn('hx-swap-oob="outerHTML"', body)
+        self.assertIn("(1)", body)
+        self.assertEqual(self.client.session.get("wishlist"), ["GH-01"])
+
+        removed = self.client.post(
+            reverse("wishlist_toggle"),
+            {"sku": "GH-01", "variant": "nd"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(removed.status_code, 200)
+        out = removed.content.decode()
+        self.assertIn('id="wishlist-count"', out)
+        self.assertIn("is-empty", out)
+        self.assertNotIn("(1)", out)
+        self.assertEqual(self.client.session.get("wishlist"), [])
 
     def test_wishlist_cart_add_form(self):
         self._fill()

@@ -71,6 +71,76 @@ class FacetTests(TestCase):
         self.assertContains(page, 'data-nd-sort-value="price_asc"')
         self.assertContains(page, "Ціна: за зростанням")
 
+    def test_sort_without_filters_bypasses_curated(self):
+        self.a.price_uah = Decimal("300")
+        self.a.name_uk = "Зевс"
+        self.a.save(update_fields=["price_uah", "name_uk"])
+        self.b.price_uah = Decimal("100")
+        self.b.name_uk = "Арес"
+        self.b.save(update_fields=["price_uah", "name_uk"])
+        self.c.price_uah = Decimal("200")
+        self.c.name_uk = "Геракл"
+        self.c.save(update_fields=["price_uah", "name_uk"])
+        CatalogCell.objects.create(
+            product=self.a,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=1,
+            price_uah=Decimal("1"),
+            crop=CatalogCell.Crop.UKR,
+            name_width=127,
+        )
+        CatalogCell.objects.create(
+            product=self.b,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=2,
+            price_uah=Decimal("1"),
+            crop=CatalogCell.Crop.UKR,
+            name_width=127,
+        )
+        CatalogCell.objects.create(
+            product=self.c,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            surface=CatalogCell.Surface.FILTERS,
+            sort=3,
+            price_uah=Decimal("1"),
+            crop=CatalogCell.Crop.UKR,
+            name_width=127,
+        )
+        curated = self.client.get("/katalog/")
+        self.assertEqual(curated.status_code, 200)
+        curated_body = curated.content.decode()
+        self.assertLess(curated_body.index("Зевс"), curated_body.index("Арес"))
+
+        asc = self.client.get("/katalog/?sort=price_asc")
+        self.assertEqual(asc.status_code, 200)
+        asc_body = asc.content.decode()
+        self.assertLess(asc_body.index("Арес"), asc_body.index("Геракл"))
+        self.assertLess(asc_body.index("Геракл"), asc_body.index("Зевс"))
+        self.assertContains(asc, "Ціна: за зростанням")
+
+        desc = self.client.get("/katalog/?sort=price_desc")
+        desc_body = desc.content.decode()
+        self.assertLess(desc_body.index("Зевс"), desc_body.index("Геракл"))
+        self.assertLess(desc_body.index("Геракл"), desc_body.index("Арес"))
+
+        by_name = self.client.get("/katalog/?sort=name")
+        name_body = by_name.content.decode()
+        self.assertLess(name_body.index("Арес"), name_body.index("Геракл"))
+        self.assertLess(name_body.index("Геракл"), name_body.index("Зевс"))
+
+        filtered = self.client.get("/katalog/?style=scandi&sort=price_asc")
+        filtered_body = filtered.content.decode()
+        self.assertLess(filtered_body.index("Арес"), filtered_body.index("Зевс"))
+        self.assertNotContains(filtered, "Геракл")
+
     def test_catalog_curated_uses_filter_cells_as_grid(self):
         self.a.price_uah = Decimal("8990")
         self.a.save(update_fields=["price_uah"])

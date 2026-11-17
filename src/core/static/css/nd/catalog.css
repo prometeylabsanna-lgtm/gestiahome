@@ -510,12 +510,11 @@
   }
 
   .nd-cat-sort__native-wrap {
-    display: none;
+    align-self: flex-start;
   }
 
-  .nd-cat:not(.is-ready) .nd-cat-sort__native-wrap {
-    display: block;
-    align-self: flex-start;
+  .nd-cat.is-ready .nd-cat-sort__native-wrap {
+    margin: 0;
   }
 
   .nd-cat:not(.is-ready) .nd-cat__sort-row .nd-cat-sort__btn {

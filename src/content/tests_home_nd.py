@@ -133,6 +133,9 @@ class HomeNdRenderTests(TestCase):
         self.assertIn('viewBox="0 0 24 24"', body)
         self.assertIn("is-on", body)
         self.assertIn('fill="currentColor"', body)
+        self.assertIn('id="wishlist-count"', body)
+        self.assertIn('hx-swap-oob="outerHTML"', body)
+        self.assertIn("(1)", body)
         removed = self.client.post(
             reverse("wishlist_toggle"),
             {"sku": "NDPOP1", "variant": "nd"},
@@ -144,3 +147,5 @@ class HomeNdRenderTests(TestCase):
         self.assertIn("<svg", out)
         self.assertIn('fill="none"', out)
         self.assertNotIn("is-on", out)
+        self.assertIn('id="wishlist-count"', out)
+        self.assertIn("is-empty", out)

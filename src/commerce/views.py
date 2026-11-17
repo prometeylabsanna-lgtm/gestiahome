@@ -380,8 +380,13 @@ def wishlist_toggle(request):
     if _hx(request):
         return render(
             request,
-            "partials/wishlist_btn.html",
-            {"product": product, "in_wishlist": active, "variant": variant},
+            "partials/wishlist_toggle_response.html",
+            {
+                "product": product,
+                "in_wishlist": active,
+                "variant": variant,
+                "wishlist_count": wish.item_count(request),
+            },
         )
     next_url = safe_next(request.POST.get("next") or product.get_absolute_url())
     return HttpResponseRedirect(next_url)

@@ -1,5 +1,16 @@
 {% load i18n shop_tags static content_tags %}
 {% with locale=home_blocks.locale %}
+{# #region agent log #}
+<script>
+(function(){
+  function probe(){
+    var el=document.getElementById('wishlist-count');
+    fetch('http://127.0.0.1:7295/ingest/fd1f6d6c-b340-4395-8b6a-a5855ccd6173',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3759d8'},body:JSON.stringify({sessionId:'3759d8',runId:'dom',hypothesisId:'B',location:'header.html:wishlist-probe',message:'DOM wishlist-count probe',data:{exists:!!el,text:el?el.textContent:'',className:el?el.className:'',wishlistCountTpl:{{ wishlist_count|default:0 }}},timestamp:Date.now()})}).catch(function(){});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',probe);}else{probe();}
+})();
+</script>
+{# #endregion #}
 <div class="nd-header-spacer" aria-hidden="true"></div>
 <header class="site-header nd-header" data-header data-nd-header>
   <div class="site-header__bar nd-header__bar">

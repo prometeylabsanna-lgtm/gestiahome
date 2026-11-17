@@ -71,6 +71,14 @@ def shop(request):
         footer_columns = build_footer_columns()
         cart_count = item_count(request)
         wishlist_count = wish_count(request)
+        # #region agent log
+        try:
+            import json, time
+            with open("/Users/olegbonislavskyi/Sites/Gestia/Gestia/.cursor/debug-3759d8.log", "a") as _dbg:
+                _dbg.write(json.dumps({"sessionId": "3759d8", "runId": "local", "hypothesisId": "C", "location": "context_processors.py:wish_count", "message": "context wishlist_count", "data": {"wishlist_count": wishlist_count, "cart_count": cart_count, "path": getattr(request, "path", "")}, "timestamp": int(time.time() * 1000)}) + "\n")
+        except Exception:
+            pass
+        # #endregion
     except (OperationalError, ProgrammingError):
         pass
     try:

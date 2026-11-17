@@ -7,7 +7,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 40;
+  z-index: 2100;
   color: var(--nd-ink);
   font-family: var(--nd-sans);
   line-height: normal;
@@ -202,7 +202,7 @@
   right: 0;
   top: calc(var(--nd-header-h-compact) + env(safe-area-inset-top, 0px));
   bottom: 0;
-  z-index: 39;
+  z-index: 2100;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;

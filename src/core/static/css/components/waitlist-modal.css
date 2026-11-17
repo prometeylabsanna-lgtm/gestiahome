@@ -10,6 +10,7 @@ body.waitlist-modal-open {
 .waitlist-modal {
   position: fixed;
   inset: 0;
+  top: calc(var(--nd-header-h-compact) + env(safe-area-inset-top, 0px));
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -73,8 +74,16 @@ body.waitlist-modal-open {
 .waitlist-modal__scrim {
   position: fixed;
   inset: 0;
+  top: calc(var(--nd-header-h-compact) + env(safe-area-inset-top, 0px));
   background: rgba(37, 16, 8, 0.5);
   touch-action: none;
+}
+
+@media (min-width: 768px) {
+  .waitlist-modal,
+  .waitlist-modal__scrim {
+    top: calc(var(--nd-header-h) + env(safe-area-inset-top, 0px));
+  }
 }
 
 .waitlist-modal__panel {

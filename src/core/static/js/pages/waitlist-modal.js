@@ -75,7 +75,7 @@
     }
   }
 
-  function closeModal() {
+  function closeModal(restoreFocus) {
     if (!root.classList.contains("is-open") && root.hidden) {
       return;
     }
@@ -85,7 +85,7 @@
     window.setTimeout(() => {
       root.hidden = true;
     }, 280);
-    if (lastFocused && typeof lastFocused.focus === "function") {
+    if (restoreFocus !== false && lastFocused && typeof lastFocused.focus === "function") {
       lastFocused.focus();
     }
   }
@@ -99,6 +99,12 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && root.classList.contains("is-open")) {
       closeModal();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("[data-catalog], [data-burger], [data-search-open], [data-mobile-search-btn]")) {
+      closeModal(false);
     }
   });
 

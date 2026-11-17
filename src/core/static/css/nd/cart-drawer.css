@@ -6,7 +6,7 @@
 .nd-cart-drawer {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 2200;
 }
 
 .nd-cart-drawer__scrim {

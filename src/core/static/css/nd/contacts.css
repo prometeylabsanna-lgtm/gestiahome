@@ -1,6 +1,6 @@
 .page-contacts {
   background: var(--nd-surface);
-  color: var(--nd-ink);
+  color: #000;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -69,7 +69,7 @@
   font-size: clamp(44px, 5.56vw, 80px);
   line-height: 0.95;
   letter-spacing: var(--nd-ls-04);
-  color: var(--nd-ink);
+  color: #000;
 }
 
 .nd-contacts__nap {
@@ -89,13 +89,13 @@
   font-size: clamp(16px, 1.25vw, 18px);
   line-height: 1.45;
   letter-spacing: var(--nd-ls-02);
-  color: var(--nd-ink);
+  color: #000;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
 .nd-contacts__address {
-  color: var(--nd-muted);
+  color: #000;
   text-decoration: none;
   max-width: 22rem;
 }
@@ -107,7 +107,7 @@
 }
 
 .nd-contacts__more a {
-  color: var(--nd-muted);
+  color: #000;
 }
 
 .nd-contacts__main {
@@ -126,29 +126,31 @@
   font-size: clamp(24px, 2.2vw, 32px);
   line-height: 1.05;
   letter-spacing: var(--nd-ls-03);
-  color: var(--nd-ink);
+  color: #000;
 }
 
 .nd-contacts .field {
   gap: 6px;
-  margin-bottom: clamp(16px, 1.8vw, 22px);
+  margin-bottom: 12px;
 }
 
 .nd-contacts .field__label {
-  color: var(--nd-muted);
+  color: #000;
   font-size: 16px;
   letter-spacing: var(--nd-ls-02);
 }
 
 .nd-contacts .field__input,
 .nd-contacts select.field__input {
-  min-height: 44px;
-  padding: 10px 0;
-  border: 0;
-  border-bottom: 1px solid var(--nd-ink);
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #000;
   border-radius: 0;
   background: transparent;
-  color: var(--nd-ink);
+  color: #000;
   font-size: 16px;
   transition: none;
   animation: none;
@@ -158,31 +160,83 @@
 .nd-contacts .field__input:focus-visible {
   outline: none;
   box-shadow: none;
-  border-bottom-color: var(--nd-ink);
+  border-color: #000;
 }
 
 .nd-contacts .field__input--area {
+  height: auto;
   min-height: 7.5rem;
-  padding-top: 12px;
+  padding: 12px 14px;
   resize: vertical;
 }
 
 .nd-contacts .check {
-  margin: 4px 0 12px;
-  color: var(--nd-muted);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin: 8px 0 12px;
+  color: #000;
   font-size: 16px;
   line-height: 1.45;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.nd-contacts .check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nd-contacts .check > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nd-contacts .check > span::before {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #000;
+  background: var(--nd-surface);
+  box-shadow: inset 0 0 0 2px var(--nd-surface);
+}
+
+.nd-contacts .check input:checked + span::before {
+  background: #000;
+}
+
+.nd-contacts .check input:focus-visible + span::before {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.nd-contacts .check.is-invalid > span::before {
+  border-color: var(--nd-danger);
 }
 
 .nd-contacts .check a {
   color: inherit;
+  text-underline-offset: 3px;
 }
 
 .nd-contacts .btn {
   min-height: 44px;
   margin-top: 8px;
   padding: 0 28px;
-  background: var(--nd-ink);
+  background: #000;
   color: var(--nd-cream);
   transition: none;
   animation: none;

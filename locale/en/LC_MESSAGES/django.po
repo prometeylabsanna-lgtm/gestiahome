@@ -707,6 +707,201 @@ msgstr "Social networks"
 msgid "Зв'язатись з нами"
 msgstr "Contact us"
 
+msgid "Ціна: за зростанням"
+msgstr "Price: low to high"
+
+msgid "Ціна: за спаданням"
+msgstr "Price: high to low"
+
+msgid "Назва: А–Я"
+msgstr "Name: A–Z"
+
+msgid "Сортування"
+msgstr "Sort"
+
+msgid "Товари"
+msgstr "Products"
+
+msgid "Пошук і фільтри"
+msgstr "Search and filters"
+
+msgid "Пошук у каталозі"
+msgstr "Search the catalogue"
+
+msgid "Скинути фільтри"
+msgstr "Reset filters"
+
+msgid "Доповнити сет"
+msgstr "Complete the set"
+
+msgid "Додати"
+msgstr "Add"
+
+msgid "Ваш кошик порожній"
+msgstr "Your basket is empty"
+
+msgid "Підсумок замовлення"
+msgstr "Order summary"
+
+msgid "Загальна ціна"
+msgstr "Total"
+
+msgid "Вартість доставки розраховується за тарифами перевізника"
+msgstr "Delivery is charged at the carrier's rate"
+
+msgid "Видалити з обраного"
+msgstr "Remove from wishlist"
+
+msgid "В кошик"
+msgstr "Add to basket"
+
+msgid "У вас поки немає обраних товарів"
+msgstr "You have no saved items yet"
+
+msgid "Хлібні крихти"
+msgstr "Breadcrumbs"
+
+msgid "Оформлення"
+msgstr "Checkout"
+
+msgid "Вулиця"
+msgstr "Street"
+
+msgid "Підказки недоступні — вкажіть місто і відділення вручну."
+msgstr "Suggestions are unavailable — enter the city and branch manually."
+
+msgid "Не вдалося завантажити міста. Спробуйте ще раз або введіть вручну."
+msgstr "Could not load cities. Try again or enter the city manually."
+
+msgid "Для цього міста відділень не знайдено — введіть вручну."
+msgstr "No branches were found for this city — enter one manually."
+
+msgid "Не вдалося завантажити відділення — введіть вручну."
+msgstr "Could not load branches — enter one manually."
+
+msgid "Підказки вулиць недоступні — введіть вручну."
+msgstr "Street suggestions are unavailable — enter the street manually."
+
+msgid "Вулиць не знайдено. Уточніть назву або введіть вручну."
+msgstr "No streets found. Refine the name or enter it manually."
+
+msgid "Не вдалося завантажити вулиці — введіть вручну."
+msgstr "Could not load streets — enter one manually."
+
+msgid "Оберіть місто зі списку або введіть назву."
+msgstr "Choose a city from the list or type its name."
+
+msgid "Вулиця окремо; будинок і квартиру — у полях праворуч."
+msgstr "Enter the street here; house and apartment go in the fields on the right."
+
+msgid "Будинок"
+msgstr "House"
+
+msgid "буд."
+msgstr "bldg."
+
+msgid "Оформити замовлення"
+msgstr "Place order"
+
+msgid "Оплатити замовлення"
+msgstr "Pay for the order"
+
+msgid "Підтвердження замовлення та деталі оплати надсилаються після оформлення"
+msgstr "Order confirmation and payment details are sent after checkout"
+
+msgid "Оплата замовлення"
+msgstr "Order payment"
+
+msgid "Перейти до оплати"
+msgstr "Continue to payment"
+
+msgid "Замовлення № %(number)s — переходимо до безпечної оплати LiqPay."
+msgstr "Order No. %(number)s — continuing to secure LiqPay payment."
+
+msgid "Оплату отримано"
+msgstr "Payment received"
+
+msgid "Оплата не пройшла"
+msgstr "Payment failed"
+
+msgid "Спробувати оплатити знову"
+msgstr "Try paying again"
+
+msgid "Очікуємо підтвердження оплати"
+msgstr "Waiting for payment confirmation"
+
+msgid "Гестія"
+msgstr "Hestia"
+
+msgid "Разом з Gestia home"
+msgstr "Together with Gestia Home"
+
+msgid "Бути разом"
+msgstr "Being together"
+
+msgid "Що в боксі"
+msgstr "What's in the box"
+
+msgid "У боксі"
+msgstr "In the box"
+
+msgid "ти знайдеш"
+msgstr "you will find"
+
+msgid "Інші колекції"
+msgstr "Other collections"
+
+msgid "Gestia Home — на головну"
+msgstr "Gestia Home — home"
+
+msgid "Знижка"
+msgstr "Discount"
+
+msgid "Інформація"
+msgstr "Information"
+
+msgid "Документи"
+msgstr "Documents"
+
+msgid "Основна навігація"
+msgstr "Main navigation"
+
+msgid "Змінити мову"
+msgstr "Change language"
+
+msgid "Змінити місце доставки та валюту"
+msgstr "Change delivery location and currency"
+
+msgid "Закрити пошук"
+msgstr "Close search"
+
+msgid "Мобільна навігація"
+msgstr "Mobile navigation"
+
+msgid "Закрити меню"
+msgstr "Close menu"
+
+msgid "Закрити кошик"
+msgstr "Close basket"
+
+msgid "Додано"
+msgstr "Added"
+
+msgid "Підсумок"
+msgstr "Summary"
+
+msgid "Переглянути кошик"
+msgstr "View basket"
+
+msgid "Детальніше про колекцію %(name)s"
+msgstr "More about the %(name)s collection"
+
+msgid "Додано: %(name)s"
+msgstr "Added: %(name)s"
+
+msgid "Додати %(name)s"
+msgstr "Add %(name)s"
+
 #~ msgid "Знайти"
 #~ msgstr "Find"
 
@@ -736,9 +931,6 @@ msgstr "Contact us"
 
 #~ msgid "Політика конфіденційності"
 #~ msgstr "Privacy policy"
-
-#~ msgid "Оформити замовлення"
-#~ msgstr "Checkout"
 
 #~ msgid "Оновити"
 #~ msgstr "Update"

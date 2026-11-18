@@ -78,47 +78,11 @@ def shop(request):
             for product in Product.objects.filter(slug__in=card_slugs, is_active=True).prefetch_related("images")
         }
         menu_cards = [featured[slug] for slug in card_slugs if slug in featured]
-        # #region agent log
-        try:
-            import json
-            import time
-            with open("/Users/olegbonislavskyi/Sites/Gestia/Gestia/.cursor/debug-3759d8.log", "a", encoding="utf-8") as _log:
-                _log.write(json.dumps({
-                    "sessionId": "3759d8",
-                    "hypothesisId": "A",
-                    "location": "context_processors.py:shop",
-                    "message": "mega menu context",
-                    "data": {
-                        "groups": len(menu_groups),
-                        "group_titles": [g.title_uk for g in menu_groups],
-                        "cards": len(menu_cards),
-                        "card_slugs": [p.slug for p in menu_cards],
-                    },
-                    "timestamp": int(time.time() * 1000),
-                }, ensure_ascii=False) + "\n")
-        except OSError:
-            pass
-        # #endregion
         footer_columns = build_footer_columns()
         cart_count = item_count(request)
         wishlist_count = wish_count(request)
-    except (OperationalError, ProgrammingError) as exc:
-        # #region agent log
-        try:
-            import json
-            import time
-            with open("/Users/olegbonislavskyi/Sites/Gestia/Gestia/.cursor/debug-3759d8.log", "a", encoding="utf-8") as _log:
-                _log.write(json.dumps({
-                    "sessionId": "3759d8",
-                    "hypothesisId": "B",
-                    "location": "context_processors.py:shop:except",
-                    "message": "shop context aborted",
-                    "data": {"error": type(exc).__name__, "detail": str(exc)[:300]},
-                    "timestamp": int(time.time() * 1000),
-                }, ensure_ascii=False) + "\n")
-        except OSError:
-            pass
-        # #endregion
+    except (OperationalError, ProgrammingError):
+        pass
     try:
         from src.content.models_discount import DiscountModal
 

@@ -194,25 +194,23 @@ def _tel_href(phone: str) -> str:
 
 def _contacts_nap():
     from src.content.models import SiteSettings
-    from src.core.seo import public_contacts, public_profile_url
     from src.core.utils import localized
 
     site = SiteSettings.load()
-    contacts = public_contacts()
     socials = []
     for label, attr in (
         ("Instagram", "instagram_url"),
         ("Pinterest", "pinterest_url"),
         ("Telegram", "telegram_url"),
     ):
-        href = public_profile_url(getattr(site, attr, ""))
+        href = " ".join(str(getattr(site, attr, "") or "").split())
         if href:
             socials.append({"label": label, "href": href})
-    phone = contacts["phone"]
+    phone = " ".join(str(site.phone or "").split()) or "+380 00 000 00 00"
     return {
         "phone": phone,
-        "phone_href": _tel_href(phone) if phone else "",
-        "email": contacts["email"],
+        "phone_href": _tel_href(phone),
+        "email": " ".join(str(site.email or "").split()),
         "address": " ".join(str(localized(site, "address") or "").split()),
         "socials": socials,
     }

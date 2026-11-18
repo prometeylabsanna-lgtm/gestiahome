@@ -420,7 +420,7 @@
   gap: clamp(16px, 2.1vw, 30px);
   overflow-x: auto;
   overflow-y: hidden;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
 }
 
 .nd-pdp-rail__list > .nd-card--rail {

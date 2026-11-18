@@ -313,6 +313,7 @@
   window.addEventListener(
     "scroll",
     function () {
+      if (document.body.classList.contains("nav-lock")) return;
       if (mega && !mega.hidden) setMega(false);
     },
     { passive: true }

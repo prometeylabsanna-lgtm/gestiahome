@@ -2,6 +2,9 @@
   var KEY_REGION = "gestia.region";
   var KEY_NEXT = "gestia.region.next";
   var header = document.querySelector("[data-nd-header]");
+  // #region agent log
+  fetch('http://127.0.0.1:7295/ingest/fd1f6d6c-b340-4395-8b6a-a5855ccd6173',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3759d8'},body:JSON.stringify({sessionId:'3759d8',runId:'pre',hypothesisId:'D',location:'header.js:init',message:'header init',data:{hasHeader:!!header,vw:window.innerWidth},timestamp:Date.now()})}).catch(function(){});
+  // #endregion
   if (!header) return;
 
   var burgerBtn = header.querySelector("[data-burger]");
@@ -105,6 +108,11 @@
     flag(mega, open);
     document.body.classList.toggle("is-mega", open);
     if (catalogBtn) catalogBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    // #region agent log
+    var panel = mega ? mega.querySelector(".nd-mega__panel") : null;
+    var panelBox = panel ? panel.getBoundingClientRect() : null;
+    fetch('http://127.0.0.1:7295/ingest/fd1f6d6c-b340-4395-8b6a-a5855ccd6173',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3759d8'},body:JSON.stringify({sessionId:'3759d8',runId:'pre',hypothesisId:'B',location:'header.js:setMega',message:'setMega',data:{open:!!open,hidden:mega?mega.hidden:null,display:mega?getComputedStyle(mega).display:null,panelH:panelBox?Math.round(panelBox.height):0,scrollY:window.scrollY},timestamp:Date.now()})}).catch(function(){});
+    // #endregion
     if (open) {
       setBurger(false);
       setDeskSearch(false);
@@ -172,7 +180,12 @@
   }
 
   if (catalogBtn) {
-    catalogBtn.addEventListener("click", function () {
+    catalogBtn.addEventListener("click", function (event) {
+      var rect = catalogBtn.getBoundingClientRect();
+      var hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      // #region agent log
+      fetch('http://127.0.0.1:7295/ingest/fd1f6d6c-b340-4395-8b6a-a5855ccd6173',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3759d8'},body:JSON.stringify({sessionId:'3759d8',runId:'pre',hypothesisId:'A',location:'header.js:catalog-click',message:'catalog click',data:{target:(event.target&&event.target.className)||'',hit:(hit&&hit.className)||'',megaHiddenBefore:mega?mega.hidden:null,vw:window.innerWidth,scrollY:window.scrollY},timestamp:Date.now()})}).catch(function(){});
+      // #endregion
       setMega(!(mega && !mega.hidden));
     });
   }
@@ -313,7 +326,12 @@
   window.addEventListener(
     "scroll",
     function () {
-      if (mega && !mega.hidden) setMega(false);
+      if (mega && !mega.hidden) {
+        // #region agent log
+        fetch('http://127.0.0.1:7295/ingest/fd1f6d6c-b340-4395-8b6a-a5855ccd6173',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3759d8'},body:JSON.stringify({sessionId:'3759d8',runId:'pre',hypothesisId:'B',location:'header.js:scroll-close',message:'scroll closes mega',data:{scrollY:window.scrollY,navLock:document.body.classList.contains('nav-lock')},timestamp:Date.now()})}).catch(function(){});
+        // #endregion
+        setMega(false);
+      }
     },
     { passive: true }
   );

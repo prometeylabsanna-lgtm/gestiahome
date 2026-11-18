@@ -97,6 +97,21 @@ def faq(request):
     )
 
 
+def _collection_addons(collection):
+    """Порядок додатків такий, як у макеті, а не алфавіт товарів."""
+    through = collection.addons.through
+    ordered_ids = list(
+        through.objects.filter(homecollection_id=collection.pk)
+        .order_by("id")
+        .values_list("product_id", flat=True)
+    )
+    products = {
+        product.pk: product
+        for product in collection.addons.filter(is_active=True, pk__in=ordered_ids)
+    }
+    return [products[pk] for pk in ordered_ids if pk in products]
+
+
 def collection_detail(request, slug):
     collection = get_object_or_404(
         HomeCollection.objects.select_related("product", "category").prefetch_related(
@@ -134,7 +149,7 @@ def collection_detail(request, slug):
         {
             "collection": collection,
             "gallery": collection.gallery_photos(),
-            "addons": list(collection.addons.filter(is_active=True)),
+            "addons": _collection_addons(collection),
             "others": others,
             "ship_block": blocks.get("pdp_ship"),
             "pay_block": blocks.get("pdp_pay"),

@@ -1,7 +1,8 @@
 {% load content_tags %}
 {% cms_field form_copy "sheet_consent" as sheet_consent %}
 {% cms_field form_copy "contact_button" as contact_button %}
-<form data-qa="lead-form" method="post" action="{% url 'contact' %}" hx-post="{% url 'contact' %}" hx-target="this" hx-swap="outerHTML" {% include "commerce/_validate_attrs.html" %}>
+{% url 'contact' as contact_url %}
+<form data-qa="lead-form" method="post" action="{% if form_action %}{{ form_action }}{% else %}{{ contact_url }}{% endif %}" hx-post="{% if form_action %}{{ form_action }}{% else %}{{ contact_url }}{% endif %}" hx-target="this" hx-swap="outerHTML" {% include "commerce/_validate_attrs.html" %}>
   {% csrf_token %}
   {% include "commerce/_honeypot.html" %}
   {% if contact_form.non_field_errors %}<p class="field__error">{{ contact_form.non_field_errors }}</p>{% endif %}
@@ -13,5 +14,5 @@
     <span><a href="{% url 'privacy' %}">{{ sheet_consent }}</a></span>
   </label>
   <p class="field__error" data-error-for="consent"{% if not contact_form.consent.errors %} hidden{% endif %}>{% if contact_form.consent.errors %}{{ contact_form.consent.errors|striptags }}{% endif %}</p>
-  <button class="btn" type="submit">{{ contact_button }}</button>
+  <button class="btn" type="submit">{% if submit_label %}{{ submit_label }}{% else %}{{ contact_button }}{% endif %}</button>
 </form>

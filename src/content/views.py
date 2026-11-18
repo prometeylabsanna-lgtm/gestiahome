@@ -182,3 +182,91 @@ def cookies(request):
 
 def shipping(request):
     return legal_page(request, "shipping")
+
+
+def _tel_href(phone: str) -> str:
+    kept = []
+    for char in phone:
+        if char.isdigit() or (char == "+" and not kept):
+            kept.append(char)
+    return "tel:" + "".join(kept)
+
+
+def _contacts_nap():
+    from src.content.models import SiteSettings
+    from src.core.seo import public_contacts, public_profile_url
+    from src.core.utils import localized
+
+    site = SiteSettings.load()
+    contacts = public_contacts()
+    socials = []
+    for label, attr in (
+        ("Instagram", "instagram_url"),
+        ("Pinterest", "pinterest_url"),
+        ("Telegram", "telegram_url"),
+    ):
+        href = public_profile_url(getattr(site, attr, ""))
+        if href:
+            socials.append({"label": label, "href": href})
+    phone = contacts["phone"]
+    return {
+        "phone": phone,
+        "phone_href": _tel_href(phone) if phone else "",
+        "email": contacts["email"],
+        "address": " ".join(str(localized(site, "address") or "").split()),
+        "socials": socials,
+    }
+
+
+def _contacts_form_context(request, form):
+    from django.utils.translation import gettext
+
+    return {
+        "contact_form": form,
+        "submit_label": gettext("Зв'язатись з нами"),
+        "form_action": request.path,
+    }
+
+
+def _contacts_thanks(request):
+    if request.headers.get("HX-Request"):
+        return render(request, "commerce/_thanks_lead.html", {"long": False})
+    return redirect(f"{reverse('thanks')}?kind=contact")
+
+
+@require_http_methods(["GET", "HEAD", "POST"])
+def contacts(request):
+    from src.content.form_labels import label_form
+
+    bound = request.method == "POST"
+    form = label_form(style_form(ContactForm(request.POST if bound else None)))
+    status = 200
+    if bound:
+        if honeypot_filled(request):
+            return _contacts_thanks(request)
+        if reject_if_limited(request, form, "contact"):
+            status = 429
+        elif form.is_valid():
+            create_inquiry(
+                kind=Inquiry.Kind.CONTACT,
+                name=form.cleaned_data["name"],
+                phone=form.cleaned_data["phone"],
+                message=form.cleaned_data["message"],
+                consent=True,
+            )
+            return _contacts_thanks(request)
+        elif request.headers.get("HX-Request"):
+            status = 422
+        if request.headers.get("HX-Request"):
+            return render(
+                request,
+                "commerce/_contact_form.html",
+                _contacts_form_context(request, form),
+                status=status,
+            )
+    return render(
+        request,
+        "content/contacts.html",
+        {"contact_form": form, "nap": _contacts_nap(), **_contacts_form_context(request, form)},
+        status=status,
+    )

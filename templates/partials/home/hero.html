@@ -16,7 +16,15 @@
       <source src="{{ block.video.url }}" type="{% if '.webm' in block.video.name %}video/webm{% else %}video/mp4{% endif %}">
     </video>
   {% elif block.image %}
-    <img class="nd-hero__media" src="{{ block.image.url }}" alt="" width="1440" height="812">
+    <img
+      class="nd-hero__media"
+      src="{{ block.image.url }}"
+      alt="{% if hero_text %}{{ hero_text|striptags }}{% else %}Gestia Home{% endif %}"
+      width="1440"
+      height="812"
+      fetchpriority="high"
+      decoding="async"
+    >
   {% endif %}
   <div class="nd-hero__copy">
     <h1 class="nd-hero__brand">

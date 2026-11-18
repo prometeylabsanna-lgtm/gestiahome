@@ -11,10 +11,16 @@
     <span class="nd-card__media">
       {% with media=product.card_media %}
         {% if media %}
-          {% if modifier == "rail" %}
-            {% include "partials/smart_media.html" with media=media width=368 height=415 %}
+          {% if eager %}
+            {% if modifier == "rail" %}
+              {% include "partials/smart_media.html" with media=media width=368 height=415 fetchpriority="high" %}
+            {% else %}
+              {% include "partials/smart_media.html" with media=media width=303 height=342 fetchpriority="high" %}
+            {% endif %}
+          {% elif modifier == "rail" %}
+            {% include "partials/smart_media.html" with media=media width=368 height=415 loading="lazy" %}
           {% else %}
-            {% include "partials/smart_media.html" with media=media width=303 height=342 %}
+            {% include "partials/smart_media.html" with media=media width=303 height=342 loading="lazy" %}
           {% endif %}
         {% endif %}
       {% endwith %}

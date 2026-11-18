@@ -27,6 +27,9 @@ def llms_text(request) -> str:
     ]
     categories = _category_lines(request)
     lines.extend(categories or ["- Немає активних категорій."])
+    collections = _collection_lines(request)
+    if collections:
+        lines.extend(["", "## Колекції", "", *collections])
     lines.extend(
         [
             "",
@@ -34,6 +37,8 @@ def llms_text(request) -> str:
             "",
             _pair(request, "Доставка та оплата", "shipping"),
             _pair(request, "Про нас", "about"),
+            _pair(request, "Контакти", "contacts"),
+            _pair(request, "Актуальні питання", "faq"),
             _pair(request, "Оферта", "offer"),
             _pair(request, "Конфіденційність", "privacy"),
             _pair(request, "Cookies", "cookies"),
@@ -113,6 +118,25 @@ def _shop_blurb() -> str:
 
         text = " ".join(LITERALS["hero_text"][0].split())
     return clip_text(text, 500)
+
+
+def _collection_lines(request) -> list[str]:
+    from src.content.models import HomeCollection
+
+    lines = []
+    rows = (
+        HomeCollection.objects.filter(is_active=True)
+        .exclude(slug="")
+        .exclude(slug__isnull=True)
+        .order_by("sort", "id")
+    )
+    for collection in rows:
+        for code, _label in settings.LANGUAGES:
+            with override(code):
+                label = _md_label(collection.title)
+                href = public_base(request) + collection.get_absolute_url()
+            lines.append(f"- [{label}]({href})")
+    return lines
 
 
 def _category_lines(request) -> list[str]:

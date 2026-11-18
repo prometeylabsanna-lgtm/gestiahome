@@ -51,7 +51,7 @@
               {% if forloop.first %}
                 {% include "partials/smart_media.html" with media=image width=636 height=770 alt=product.name fetchpriority="high" %}
               {% else %}
-                {% include "partials/smart_media.html" with media=image width=636 height=770 alt="" %}
+                {% include "partials/smart_media.html" with media=image width=636 height=770 alt="" loading="lazy" %}
               {% endif %}
             {% endif %}
           </div>

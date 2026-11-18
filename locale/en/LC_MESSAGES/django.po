@@ -674,6 +674,39 @@ msgstr "Currency"
 msgid "Додати в обране"
 msgstr "Add to wishlist"
 
+msgid "сторінка %(n)s"
+msgstr "page %(n)s"
+
+msgid "Святковий стіл Gestia Home"
+msgstr "A festive table by Gestia Home"
+
+msgid "Актуальні питання"
+msgstr "FAQ"
+
+msgid "Контакти"
+msgstr "Contacts"
+
+msgid "Контакти Gestia Home — телефон, пошта та майстерня"
+msgstr "Contact Gestia Home — phone, studio address, email"
+
+msgid "Контакти Gestia Home: телефон, електронна пошта й адреса майстерні. Напишіть у формі про святкові бокси, сервірування столу або доставку — ми відповімо."
+msgstr "Contact Gestia Home by phone, email or the form on this page. Ask about festive table boxes, table setting and delivery — the studio will reply to you."
+
+msgid "Контакти Gestia Home — телефон, пошта та форма для питань про святкові бокси, сервірування столу й доставку."
+msgstr "Gestia Home contacts: phone, email and a form for festive table boxes, table setting and delivery."
+
+msgid "Телефон і пошта"
+msgstr "Phone and email"
+
+msgid "Адреса"
+msgstr "Address"
+
+msgid "Соцмережі"
+msgstr "Social networks"
+
+msgid "Зв'язатись з нами"
+msgstr "Contact us"
+
 #~ msgid "Знайти"
 #~ msgstr "Find"
 

@@ -7,7 +7,7 @@ from django.test import TestCase, override_settings
 from django.utils import translation
 
 from src.catalog.models import Category, Product
-from src.content.models import SiteSettings
+from src.content.models import HomeCollection, SiteSettings
 from src.core.seo import DESCRIPTION_MAX, TITLE_MAX, clip_text
 
 
@@ -115,6 +115,13 @@ class SeoHeadTests(SeoFixture):
         self.assertContains(home, 'property="og:type" content="website"')
         self.assertContains(home, 'name="twitter:card" content="summary_large_image"')
         self.assertContains(home, 'property="og:image" content="http://testserver/')
+        self.assertContains(home, "og-default.jpg")
+        self.assertContains(home, 'property="og:image:width" content="1200"')
+        self.assertContains(home, 'property="og:image:height" content="630"')
+        self.assertContains(home, 'property="og:image:type" content="image/jpeg"')
+        self.assertContains(home, "/chrome.css?v=")
+        self.assertNotContains(home, "css/reset.css")
+        self.assertNotContains(home, "css/variables.css")
         self.assertEqual(_h1_count(home), 1)
         self.assertNotContains(home, "FAQPage")
         self.assertNotContains(home, "itemprop")
@@ -132,12 +139,27 @@ class SeoHeadTests(SeoFixture):
         self.assertContains(queried, 'name="robots" content="noindex,follow"')
         self.assertContains(queried, 'href="http://testserver/katalog/"')
 
-        second = self.client.get("/katalog/?page=2")
-        self.assertContains(second, 'rel="canonical" href="http://testserver/katalog/?page=2"')
-        self.assertContains(second, 'hreflang="uk" href="http://testserver/katalog/?page=2"')
-        self.assertContains(second, 'hreflang="en" href="http://testserver/en/katalog/?page=2"')
-        self.assertContains(second, 'hreflang="x-default" href="http://testserver/katalog/?page=2"')
+        for index in range(12):
+            Product.objects.create(
+                category=self.category,
+                sku=f"SEO-P{index}",
+                slug=f"seo-p-{index}",
+                name_uk=f"Бокс {index}",
+                name_en=f"Box {index}",
+                price_uah=Decimal("10.00"),
+                price_eur=Decimal("1.00"),
+                is_active=True,
+                stock_qty=1,
+            )
+        second = self.client.get("/katalog/seo-cat/?page=2")
+        self.assertContains(second, 'rel="canonical" href="http://testserver/katalog/seo-cat/?page=2"')
+        self.assertContains(second, 'hreflang="uk" href="http://testserver/katalog/seo-cat/?page=2"')
+        self.assertContains(second, 'hreflang="en" href="http://testserver/en/katalog/seo-cat/?page=2"')
+        self.assertContains(second, 'hreflang="x-default" href="http://testserver/katalog/seo-cat/?page=2"')
+        self.assertContains(second, "сторінка 2")
         self.assertNotContains(second, "noindex")
+        self.assertNotContains(self.client.get("/katalog/seo-cat/"), "сторінка 2")
+        self.assertEqual(self.client.get("/katalog/?page=2").status_code, 404)
 
         first = self.client.get("/katalog/?page=1&utm_source=ig")
         self.assertContains(first, 'rel="canonical" href="http://testserver/katalog/"')
@@ -186,7 +208,8 @@ class SeoHeadTests(SeoFixture):
             stock_qty=2,
         )
         uk = _meta_description(self.client.get(bare.get_absolute_url()))
-        self.assertEqual(uk, "Порожній бокс. Святкові бокси. 1 500 ₴. Gestia")
+        self.assertEqual(uk, "Порожній бокс. Святкові бокси. Gestia")
+        self.assertNotIn("₴", uk)
         self.assertNotIn("<", uk)
 
         bare.description_uk = "<p>Короткий <strong>опис</strong>&nbsp;боксу</p>"
@@ -222,7 +245,7 @@ class SeoHeadTests(SeoFixture):
         bare.save(update_fields=["seo_description_uk", "description_uk"])
         self.assertEqual(
             _meta_description(self.client.get("/en/tovar/seo-bare/")),
-            "Empty box. Festive boxes. 1 500 ₴. Gestia",
+            "Empty box. Festive boxes. Gestia",
         )
         self.assertEqual(
             _meta_description(self.client.get("/en/katalog/seo-child/")),
@@ -280,6 +303,11 @@ class SeoCrawlTests(SeoFixture):
         for key in ("q", "in_stock", "category", "style", "color"):
             self.assertIn(f"Disallow: /*?*{key}=\n", body)
         self.assertIn("Disallow: /*?*utm_\n", body)
+        self.assertIn("Disallow: /katalog/pidkazky/\n", body)
+        self.assertIn("Disallow: /en/katalog/pidkazky/\n", body)
+        suggest = self.client.get("/katalog/pidkazky/?q=ab")
+        self.assertEqual(suggest.status_code, 200)
+        self.assertEqual(suggest["X-Robots-Tag"], "noindex")
         self.assertIn("Sitemap: http://testserver/sitemap.xml\n", body)
         self.assertNotIn("theme.css", body)
         self.assertNotIn("/admin", body)
@@ -321,6 +349,31 @@ class SeoCrawlTests(SeoFixture):
         self.assertNotIn("Прихована категорія", body)
         self.assertIn("http://testserver/dostavka-ta-oplata/", body)
         self.assertIn("http://testserver/en/pro-nas/", body)
+        self.assertIn("http://testserver/aktualni-pytannia/", body)
+        self.assertIn("http://testserver/en/aktualni-pytannia/", body)
+        HomeCollection.objects.create(
+            slug="llms-col",
+            title_uk="Квітка",
+            title_en="Flower",
+            is_active=True,
+        )
+        HomeCollection.objects.create(slug="llms-hidden-col", title_uk="Прихована колекція", is_active=False)
+        listed = self.client.get("/llms.txt").content.decode()
+        self.assertIn("http://testserver/kolektsiia/llms-col/", listed)
+        self.assertIn("http://testserver/en/kolektsiia/llms-col/", listed)
+        self.assertIn("Квітка", listed)
+        self.assertIn("Flower", listed)
+        self.assertNotIn("llms-hidden-col", listed)
+        sitemap = self.client.get("/sitemap.xml").content.decode()
+        self.assertIn("http://testserver/kolektsiia/llms-col/", sitemap)
+        self.assertRegex(
+            sitemap,
+            r"<loc>http://testserver/katalog/</loc>\s*<lastmod>\d{4}-\d{2}-\d{2}</lastmod>",
+        )
+        self.assertRegex(
+            sitemap,
+            r"<loc>http://testserver/kolektsiia/llms-col/</loc>\s*<lastmod>\d{4}-\d{2}-\d{2}</lastmod>",
+        )
         legacy = self.client.get("/llm.txt")
         self.assertEqual(legacy.status_code, 301)
         self.assertEqual(legacy["Location"], "/llms.txt")

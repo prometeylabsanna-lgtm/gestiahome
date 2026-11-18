@@ -35,6 +35,7 @@ class FaqPage(SingletonModel):
     seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
     seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
     seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
+    updated_at = models.DateTimeField("Оновлено", auto_now=True)
 
     class Meta:
         verbose_name = "Сторінка FAQ"

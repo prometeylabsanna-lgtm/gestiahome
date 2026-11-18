@@ -178,6 +178,7 @@ class HomeBlock(MediaChoice):
     lines_uk = models.TextField("Рядки підписів", blank=True)
     lines_en = models.TextField("Рядки підписів (EN)", blank=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
+    updated_at = models.DateTimeField("Оновлено", auto_now=True)
 
     class Meta:
         ordering = ["sort", "id"]
@@ -307,6 +308,7 @@ class HomeCollection(models.Model):
     seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
     is_active = models.BooleanField("Показувати на сайті", default=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
+    updated_at = models.DateTimeField("Оновлено", auto_now=True)
 
     class Meta:
         ordering = ["sort", "id"]
@@ -355,7 +357,9 @@ class HomeCollection(models.Model):
 
     @property
     def seo_description(self):
-        return localized(self, "seo_description")
+        from src.core.seo import collection_meta_description
+
+        return collection_meta_description(self)
 
     def gallery_photos(self):
         photos = []
@@ -568,6 +572,7 @@ class AboutPage(MediaChoice, SingletonModel):
     popular_title_en = models.CharField("Заголовок популярних (EN)", max_length=64, blank=True)
     popular_cta_uk = models.CharField("Кнопка популярних", max_length=40, blank=True)
     popular_cta_en = models.CharField("Кнопка популярних (EN)", max_length=40, blank=True)
+    updated_at = models.DateTimeField("Оновлено", auto_now=True)
 
     class Meta:
         verbose_name = "Сторінка «Про нас»"

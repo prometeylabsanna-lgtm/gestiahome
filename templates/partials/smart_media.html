@@ -25,6 +25,7 @@ class, width, height, alt, style, fetchpriority — опційно
     {% if width %}width="{{ width }}"{% endif %}
     {% if height %}height="{{ height }}"{% endif %}
     {% if fetchpriority %}fetchpriority="{{ fetchpriority }}"{% endif %}
+    {% if loading %}loading="{{ loading }}" decoding="async"{% endif %}
     {% if style %}style="{{ style }}"{% endif %}
   >
 {% endif %}

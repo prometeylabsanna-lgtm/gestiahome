@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/nd/contacts.css' %}">
+{% endblock %}
+
+{% block title %}{% trans "Контакти Gestia Home — телефон, пошта та майстерня" %}{% endblock %}
+{% block description %}{% trans "Контакти Gestia Home: телефон, електронна пошта й адреса майстерні. Напишіть у формі про святкові бокси, сервірування столу або доставку — ми відповімо." %}{% endblock %}
+
+{% block content %}
+  <div class="nd-contacts">
+    <nav class="nd-contacts__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+      <ol class="nd-contacts__crumbs-list">
+        <li>
+          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <span aria-hidden="true">/</span>
+        </li>
+        <li aria-current="page">{% trans "Контакти" %}</li>
+      </ol>
+    </nav>
+
+    <div class="nd-contacts__layout">
+      <div class="nd-contacts__aside">
+        <h1 class="nd-contacts__title">{% trans "Контакти" %}</h1>
+        <p class="nd-contacts__lead">
+          {% trans "Контакти Gestia Home — телефон, пошта та форма для питань про святкові бокси, сервірування столу й доставку." %}
+        </p>
+      </div>
+
+      <div class="nd-contacts__main">
+        {% if nap.phone or nap.email %}
+          <section class="nd-contacts__block" aria-labelledby="contacts-reach">
+            <h2 id="contacts-reach">{% trans "Телефон і пошта" %}</h2>
+            <ul>
+              {% if nap.phone %}
+                <li><a class="nd-contacts__link" href="{{ nap.phone_href }}">{{ nap.phone }}</a></li>
+              {% endif %}
+              {% if nap.email %}
+                <li><a class="nd-contacts__link" href="mailto:{{ nap.email }}">{{ nap.email }}</a></li>
+              {% endif %}
+            </ul>
+          </section>
+        {% endif %}
+
+        {% if nap.address %}
+          <section class="nd-contacts__block" aria-labelledby="contacts-address">
+            <h2 id="contacts-address">{% trans "Адреса" %}</h2>
+            <p>{{ nap.address }}</p>
+          </section>
+        {% endif %}
+
+        {% if nap.socials %}
+          <section class="nd-contacts__block" aria-labelledby="contacts-social">
+            <h2 id="contacts-social">{% trans "Соцмережі" %}</h2>
+            <ul>
+              {% for item in nap.socials %}
+                <li>
+                  <a class="nd-contacts__link" href="{{ item.href }}" target="_blank" rel="noopener noreferrer">{{ item.label }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+
+        <section class="nd-contacts__form" aria-labelledby="contacts-form">
+          <h2 id="contacts-form">{% trans "Зв'язатись з нами" %}</h2>
+          {% include "commerce/_contact_form.html" %}
+        </section>
+
+        <p class="nd-contacts__more">
+          <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
+          <a href="{% url 'shipping' %}">{% trans "Доставка та оплата" %}</a>
+          <a href="{% url 'faq' %}">{% trans "Актуальні питання" %}</a>
+        </p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -23,6 +23,7 @@ from src.commerce.forms import BuyNowForm, CallbackForm, style_form
 from src.commerce.wishlist import sku_set
 from src.content.form_labels import apply_labels
 from src.content.models import ContactForms, HomeBlock, HomeCollection, Review
+from src.core.seo import _page_number
 
 
 def _filters_active(parsed):
@@ -74,8 +75,17 @@ def _catalog_context(request, category=None):
         all_products = list(filtered)
     show_all = request.GET.get("all") == "1"
     total_count = len(all_products)
-    has_more = not show_all and total_count > CATALOG_PAGE_SIZE
-    products = all_products if show_all else all_products[:CATALOG_PAGE_SIZE]
+    page_number = _page_number(request.GET.get("page")) or 1
+    if show_all:
+        products = all_products
+        page_number = 1
+        start = 0
+    else:
+        start = (page_number - 1) * CATALOG_PAGE_SIZE
+        if page_number > 1 and start >= total_count:
+            raise Http404
+        products = all_products[start : start + CATALOG_PAGE_SIZE]
+    has_more = not show_all and start + CATALOG_PAGE_SIZE < total_count
     block = HomeBlock.objects.filter(key=HomeBlock.Key.CATALOG).first()
     subcategories = []
     if category:
@@ -103,6 +113,7 @@ def _catalog_context(request, category=None):
         "crumbs": category.chain() if category else [],
         "has_more": has_more,
         "show_all": show_all,
+        "catalog_page": page_number,
         "load_all_url": _load_all_url(request),
         "catalog_cta": block.cta if block else "",
         "wishlist_skus": sku_set(request),
@@ -206,4 +217,6 @@ def catalog_suggest(request):
                 "image": _suggest_image(product),
             }
         )
-    return JsonResponse({"items": items})
+    response = JsonResponse({"items": items})
+    response["X-Robots-Tag"] = "noindex"
+    return response

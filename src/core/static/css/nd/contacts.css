@@ -1,0 +1,149 @@
+.page-contacts {
+  background: var(--nd-surface);
+  color: var(--nd-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.nd-contacts {
+  padding: 0 var(--nd-gutter) env(safe-area-inset-bottom);
+  overflow-x: clip;
+}
+
+.nd-contacts p {
+  margin: 0;
+}
+
+.nd-contacts__crumbs {
+  padding-top: 12px;
+}
+
+.nd-contacts__crumbs-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.nd-contacts__crumbs-list a {
+  color: inherit;
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nd-contacts__crumbs-list a:hover,
+.nd-contacts__crumbs-list a:focus-visible {
+  text-decoration: underline;
+}
+
+.nd-contacts__crumbs-list [aria-current="page"] {
+  color: var(--nd-muted);
+}
+
+.nd-contacts__layout {
+  margin-top: clamp(40px, 5.6vw, 80px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.nd-contacts__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nd-contacts__title {
+  margin: 0;
+  font-family: var(--nd-serif);
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: clamp(44px, 5.56vw, 80px);
+  line-height: 0.95;
+  letter-spacing: var(--nd-ls-04);
+}
+
+.nd-contacts__lead,
+.nd-contacts__block p,
+.nd-contacts__more {
+  max-width: 38rem;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--nd-muted);
+}
+
+.nd-contacts__main {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 48px);
+  padding-bottom: clamp(80px, 8.3vw, 120px);
+}
+
+.nd-contacts__block h2,
+.nd-contacts__form h2 {
+  margin: 0 0 12px;
+  font-family: var(--nd-serif);
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: clamp(24px, 2.2vw, 32px);
+  line-height: 1.05;
+  letter-spacing: var(--nd-ls-03);
+}
+
+.nd-contacts__block ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-contacts__link,
+.nd-contacts__more a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 16px;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.nd-contacts__more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.nd-contacts input,
+.nd-contacts textarea,
+.nd-contacts select {
+  font-size: 16px;
+}
+
+.nd-contacts__form .btn {
+  width: 100%;
+  max-width: 20rem;
+}
+
+@media (min-width: 900px) {
+  .nd-contacts__layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(24px, 4.2vw, 60px);
+  }
+
+  .nd-contacts__aside {
+    position: sticky;
+    top: 112px;
+  }
+
+  .nd-contacts__form .btn {
+    width: auto;
+    min-width: 16rem;
+  }
+}

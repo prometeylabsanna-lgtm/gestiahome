@@ -19,7 +19,9 @@ from src.core.seo import (
     public_contacts,
 )
 
-CONTENT_URL_NAMES = frozenset({"about", "faq", "offer", "privacy", "cookies", "shipping"})
+CONTENT_URL_NAMES = frozenset(
+    {"about", "faq", "contacts", "offer", "privacy", "cookies", "shipping"}
+)
 
 
 def json_ld_script(data: dict) -> str:
@@ -49,6 +51,9 @@ def build_graph(context) -> dict:
     faq = _faq_node(context, request)
     if faq is not None:
         graph.append(faq)
+    contact = _contact_node(context, request)
+    if contact is not None:
+        graph.append(contact)
     return {"@context": "https://schema.org", "@graph": graph}
 
 
@@ -143,6 +148,8 @@ def _content_title(context, url_name: str) -> str:
         if page is None:
             return ""
         return " ".join(str(getattr(page, "title", "") or "").split()) or gettext("Про нас")
+    if url_name == "contacts":
+        return gettext("Контакти")
     if url_name == "faq":
         page = context.get("page")
         if page is None:
@@ -158,6 +165,21 @@ def _content_title(context, url_name: str) -> str:
         return " ".join(cleaned.split()) or gettext("Актуальні питання")
     doc = context.get("doc") or {}
     return " ".join(str(doc.get("title") or "").split())
+
+
+def _contact_node(context, request):
+    if _url_name(request) != "contacts":
+        return None
+    base = public_base(request)
+    canonical = (context.get("seo") or {}).get("canonical") or f"{base}{request.path}"
+    return {
+        "@type": "ContactPage",
+        "@id": f"{canonical}#contactpage",
+        "url": canonical,
+        "name": gettext("Контакти"),
+        "isPartOf": {"@id": f"{base}/#website"},
+        "mainEntity": {"@id": f"{base}/#organization"},
+    }
 
 
 def _faq_node(context, request):

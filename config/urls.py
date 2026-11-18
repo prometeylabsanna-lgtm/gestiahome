@@ -7,6 +7,7 @@ from django.urls import include, path
 
 from src.core.sitemaps import SITEMAPS
 from src.core.views import (
+    chrome_css,
     healthz,
     llm_txt,
     llms_txt,
@@ -22,6 +23,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("healthz/", healthz, name="healthz"),
     path("theme.css", theme_css, name="theme_css"),
+    path("chrome.css", chrome_css, name="chrome_css"),
     path("robots.txt", robots_txt, name="robots"),
     path("llms.txt", llms_txt, name="llms"),
     path("llm.txt", llm_txt, name="llm_legacy"),

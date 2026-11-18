@@ -40,6 +40,16 @@ def theme_css(request):
     return HttpResponse(build_theme_css(), content_type="text/css")
 
 
+def chrome_css(request):
+    from src.core.chrome_css import chrome_payload
+
+    body, token = chrome_payload()
+    response = HttpResponse(body, content_type="text/css; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=31536000, immutable"
+    response["ETag"] = token
+    return response
+
+
 def _extract_next(request) -> str:
     raw = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
     if not url_has_allowed_host_and_scheme(

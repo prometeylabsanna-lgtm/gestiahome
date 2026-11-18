@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% load content_tags static %}
 
+{% block extra_head %}
+  {% if home_blocks.hero.shows_video and home_blocks.hero.poster_src %}
+    <link rel="preload" as="image" href="{{ home_blocks.hero.poster_src }}" fetchpriority="high">
+  {% elif home_blocks.hero.image %}
+    <link rel="preload" as="image" href="{{ home_blocks.hero.image.url }}" fetchpriority="high">
+  {% endif %}
+{% endblock %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/home.css' %}">
 {% endblock %}

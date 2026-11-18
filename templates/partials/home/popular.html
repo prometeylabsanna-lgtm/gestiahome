@@ -9,7 +9,7 @@
       <a class="pop-card" href="{{ product.get_absolute_url }}">
         <span class="pop-card__media">
           {% with media=product.card_media %}
-            {% if media %}{% include "partials/smart_media.html" with media=media width=368 height=416 %}{% endif %}
+            {% if media %}{% include "partials/smart_media.html" with media=media width=368 height=416 loading="lazy" %}{% endif %}
           {% endwith %}
         </span>
         <span class="pop-card__meta">
@@ -24,7 +24,7 @@
       <a class="about-pick about-pick--{% if forloop.counter0|divisibleby:2 %}shift{% else %}cover{% endif %}" href="{{ product.get_absolute_url }}">
         <span class="about-pick__media">
           {% with media=product.card_media %}
-            {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}
+            {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 loading="lazy" %}{% endif %}
           {% endwith %}
         </span>
         <span class="about-pick__meta">

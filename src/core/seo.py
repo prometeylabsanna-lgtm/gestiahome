@@ -10,7 +10,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.utils.translation import get_language
 
-from src.core.utils import format_money, localized
+from src.core.utils import localized
 
 TITLE_MAX = 60
 DESCRIPTION_MAX = 160
@@ -45,6 +45,15 @@ PRIVATE_PREFIXES = (
     "/tinymce/",
     "/healthz/",
 )
+SUGGEST_PREFIXES = ("/katalog/pidkazky/",)
+_OG_WIDTH = 1200
+_OG_HEIGHT = 630
+_RASTER = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+}
 BRAND = "Gestia Home"
 _RESERVED_EMAIL_DOMAINS = ("example.com", "example.org", "example.net")
 _FAKE_EMAIL_SUFFIXES = (".local", ".example", ".test")
@@ -95,9 +104,6 @@ def product_meta_description(product) -> str:
     parts = [plain_text(getattr(product, "name", ""))]
     if getattr(product, "category_id", None):
         parts.append(plain_text(product.category.name))
-    price = getattr(product, "price_uah", None)
-    if price is not None:
-        parts.append(format_money(price, "uah"))
     parts.append(META_BRAND)
     return ". ".join(part for part in parts if part)
 
@@ -114,6 +120,22 @@ def category_meta_description(category) -> str:
     if not parts or parts[-1] != META_BRAND:
         parts.append(META_BRAND)
     return ". ".join(parts)
+
+
+def collection_meta_description(collection) -> str:
+    custom = plain_text(localized(collection, "seo_description"))
+    if custom:
+        return custom
+    for field in ("text", "story"):
+        text = plain_text(localized(collection, field))
+        if text:
+            return text
+    title = plain_text(localized(collection, "title"))
+    if not title:
+        return BRAND
+    if _language() == "en":
+        return f"Collection “{title}”. {BRAND}"
+    return f"Колекція «{title}». {BRAND}"
 
 
 def configured_origin() -> tuple[str, str] | None:
@@ -255,40 +277,126 @@ def _default_image(request, site) -> str:
     return absolute_media(request, static("figma/desktop/5493c.png"))
 
 
-def og_image_url(context) -> str:
+def _image_type(url: str) -> str:
+    path = urlsplit(url).path.lower()
+    for ext, mime in _RASTER.items():
+        if path.endswith(ext):
+            return mime
+    return ""
+
+
+def _stored_size(field):
+    if not field:
+        return None
+    try:
+        width = int(field.width)
+        height = int(field.height)
+    except (OSError, ValueError, TypeError):
+        return None
+    if width < 1 or height < 1:
+        return None
+    return width, height
+
+
+def _bundle(url: str, alt: str, field=None, fallback_size=None) -> dict:
+    size = _stored_size(field) if field is not None else fallback_size
+    payload = {
+        "url": url,
+        "alt": plain_text(alt),
+        "type": _image_type(url),
+        "width": "",
+        "height": "",
+    }
+    if size:
+        payload["width"], payload["height"] = size
+    return payload
+
+
+def _default_og(request) -> dict:
+    from django.utils.translation import gettext
+
+    url = absolute_media(request, static("images/og-default.jpg"))
+    return _bundle(
+        url,
+        gettext("Святковий стіл Gestia Home"),
+        fallback_size=(_OG_WIDTH, _OG_HEIGHT),
+    )
+
+
+def _product_picture(product):
+    if getattr(product, "card_image", None):
+        return product.card_image
+    cover = getattr(product, "cover", None)
+    if cover is not None and getattr(cover, "image", None):
+        return cover.image
+    return None
+
+
+def og_image_bundle(context) -> dict:
     request = context.get("request")
+    empty = {"url": "", "alt": "", "type": "", "width": "", "height": ""}
     if request is None:
-        return ""
+        return empty
     product = context.get("product")
     if product is not None:
         media_url = getattr(product, "card_photo_url", "") or ""
-        if not media_url:
-            cover = getattr(product, "cover", None)
-            if cover is not None:
-                image = getattr(cover, "image", None)
-                if image:
-                    media_url = image.url
-                else:
-                    media_url = getattr(cover, "poster_src", "") or ""
         if media_url:
             try:
-                return absolute_media(request, media_url)
+                return _bundle(
+                    absolute_media(request, media_url),
+                    getattr(product, "name", "") or BRAND,
+                    field=_product_picture(product),
+                )
             except ValueError:
                 pass
-    seo = context.get("seo") or {}
-    return seo.get("image") or ""
+    collection = context.get("collection")
+    image = getattr(collection, "image_large", None) if collection is not None else None
+    if image:
+        try:
+            return _bundle(
+                absolute_media(request, image.url),
+                getattr(collection, "title", "") or BRAND,
+                field=image,
+            )
+        except ValueError:
+            pass
+    blocks = context.get("home_blocks") or {}
+    hero = blocks.get("hero") if hasattr(blocks, "get") else None
+    hero_image = getattr(hero, "image", None) if hero is not None else None
+    if hero_image and not getattr(hero, "shows_video", False):
+        try:
+            alt = plain_text(getattr(hero, "text", "") or "") or BRAND
+            return _bundle(absolute_media(request, hero_image.url), alt, field=hero_image)
+        except ValueError:
+            pass
+    return _default_og(request)
+
+
+def og_image_url(context) -> str:
+    return og_image_bundle(context).get("url") or ""
 
 
 def robots_text(request) -> str:
     from src.catalog.selectors import catalog_filter_query_names
 
-    lines = ["User-agent: *", "Allow: /"]
+    lines = ["User-agent: *", "Allow: /", "Allow: /kontakty/"]
+    for code, _label in settings.LANGUAGES:
+        if code == settings.LANGUAGE_CODE:
+            continue
+        lines.append(f"Allow: /{code}/kontakty/")
     for prefix in PRIVATE_PREFIXES:
         lines.append(f"Disallow: {prefix}")
     for code, _label in settings.LANGUAGES:
         if code == settings.LANGUAGE_CODE:
             continue
         for prefix in PRIVATE_PREFIXES:
+            lines.append(f"Disallow: /{code}{prefix}")
+    for prefix in SUGGEST_PREFIXES:
+        lines.append(f"Disallow: {prefix}")
+    for code, _label in settings.LANGUAGES:
+        if code == settings.LANGUAGE_CODE:
+            continue
+        for prefix in SUGGEST_PREFIXES:
             lines.append(f"Disallow: /{code}{prefix}")
     for key in catalog_filter_query_names():
         lines.append(f"Disallow: /*?*{key}=")
@@ -319,6 +427,28 @@ def is_placeholder_contact(value: str, kind: str) -> bool:
     return not raw
 
 
+_BARE_PROFILE_HOSTS = {
+    "instagram.com",
+    "www.instagram.com",
+    "pinterest.com",
+    "www.pinterest.com",
+    "t.me",
+    "telegram.me",
+    "www.telegram.me",
+}
+
+
+def public_profile_url(url: str) -> str:
+    raw = " ".join(str(url or "").split())
+    if not raw:
+        return ""
+    parts = urlsplit(raw if "://" in raw else "https://" + raw)
+    host = parts.netloc.lower()
+    if host in _BARE_PROFILE_HOSTS and not parts.path.strip("/"):
+        return ""
+    return raw
+
+
 def public_contacts() -> dict:
     try:
         from django.db.utils import OperationalError, ProgrammingError
@@ -341,8 +471,8 @@ def public_contacts() -> dict:
         if text and text not in addresses:
             addresses.append(text)
     same = []
-    for attr in ("instagram_url", "pinterest_url"):
-        value = str(getattr(site, attr, "") or "").strip()
+    for attr in ("instagram_url", "pinterest_url", "telegram_url"):
+        value = public_profile_url(getattr(site, attr, ""))
         if value:
             same.append(value)
     return {

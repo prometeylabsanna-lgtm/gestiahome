@@ -7,7 +7,7 @@
 {% block extra_js %}
   <script src="{% static 'js/nd/catalog.js' %}" defer></script>
 {% endblock %}
-{% block title %}{% if category %}{{ category.seo_title }}{% else %}{% trans "Каталог" %} — Gestia{% endif %}{% endblock %}
+{% block title %}{% if category %}{{ category.seo_title }}{% else %}{% trans "Каталог" %} — Gestia{% endif %}{% if catalog_page > 1 %} — {% blocktrans with n=catalog_page %}сторінка {{ n }}{% endblocktrans %}{% endif %}{% endblock %}
 {% block description %}{% if category %}{{ category.seo_description }}{% else %}{% trans "Каталог святкових боксів і сервірування Gestia Home" %}{% endif %}{% endblock %}
 
 {% block content %}

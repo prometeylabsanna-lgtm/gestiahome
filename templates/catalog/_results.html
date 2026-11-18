@@ -2,7 +2,7 @@
 {% if products %}
   <ul class="nd-cat__grid product-grid" data-qa="product-grid">
     {% for product in products %}
-      {% include "partials/nd/product_card.html" %}
+      {% include "partials/nd/product_card.html" with eager=forloop.first %}
     {% endfor %}
   </ul>
   {% if has_more and catalog_cta %}

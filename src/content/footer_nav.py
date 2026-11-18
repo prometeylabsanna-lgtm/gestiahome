@@ -69,9 +69,13 @@ def build_footer_columns():
 
     legal_links = _footer_link_items("legal")
     legal = legal_links if legal_links else _legal_from_pages()
+    info = _footer_link_items("info")
+    contacts_href = reverse("contacts")
+    if not any(item.href == contacts_href for item in info):
+        info.append(SimpleNamespace(label=_("Контакти"), href=contacts_href, underlined=False))
 
     return {
         "category": categories,
-        "info": _footer_link_items("info"),
+        "info": info,
         "legal": legal,
     }

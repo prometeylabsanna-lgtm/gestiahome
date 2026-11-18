@@ -90,6 +90,7 @@ class CollectionPageTests(TestCase):
         self.assertEqual(page.status_code, 200)
         html = page.content.decode()
         self.assertIn("Історія квітки", html)
+        self.assertIn('name="description" content="Історія квітки Другий абзац"', html)
         self.assertIn("Другий абзац", html)
         self.assertIn("Вази-креманки — 2 штуки", html)
         self.assertIn("Жива хвоя", html)

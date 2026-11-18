@@ -71,7 +71,19 @@ def build_footer_columns():
     legal = legal_links if legal_links else _legal_from_pages()
     info = _footer_link_items("info")
     contacts_href = reverse("contacts")
-    if not any(item.href == contacts_href for item in info):
+    seen_contacts = False
+    unique = []
+    for item in info:
+        label = " ".join(str(item.label or "").split()).casefold()
+        is_contacts = label in {"контакти", "contacts"} or item.href.rstrip("/") == contacts_href.rstrip("/")
+        if is_contacts:
+            if seen_contacts:
+                continue
+            item.href = contacts_href
+            seen_contacts = True
+        unique.append(item)
+    info = unique
+    if not seen_contacts:
         info.append(SimpleNamespace(label=_("Контакти"), href=contacts_href, underlined=False))
 
     return {

@@ -65,6 +65,20 @@ class FooterNavTests(TestCase):
         )
         self.assertNotIn(reverse("shipping"), hrefs)
 
+    def test_contacts_link_is_not_duplicated(self):
+        FooterLink.objects.create(
+            column="info",
+            label_uk="Контакти",
+            label_en="Contacts",
+            url_name="anchor",
+            url_arg="callback",
+            sort=2,
+        )
+        columns = build_footer_columns()
+        contacts = [item for item in columns["info"] if item.label.casefold() in {"контакти", "contacts"}]
+        self.assertEqual(len(contacts), 1)
+        self.assertEqual(contacts[0].href, reverse("contacts"))
+
     def test_legal_column_falls_back_to_legal_pages(self):
         FooterLink.objects.filter(column="legal").delete()
         self.assertTrue(LegalPage.objects.exists())

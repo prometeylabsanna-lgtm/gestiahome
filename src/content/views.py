@@ -14,6 +14,7 @@ from src.content.home_slots import home_categories, home_popular
 from src.content.legal_pages import legal_document
 from src.content.models import AboutPage, Advantage, HomeBlock, HomeCollection, Review
 from src.content.models_faq import FaqPage
+from src.catalog.menu_filters import catalog_href, group_key
 from src.content.models_menu import MenuGroupItem
 from src.core.ratelimit import honeypot_filled, reject_if_limited
 
@@ -154,6 +155,8 @@ def collection_detail(request, slug):
             "ship_block": blocks.get("pdp_ship"),
             "pay_block": blocks.get("pdp_pay"),
             "menu_group": menu_item.group if menu_item else None,
+            "crumb_group_url": catalog_href(group_key(menu_item.group)) if menu_item else "",
+            "crumb_current": menu_item.label if menu_item else collection.title,
         },
     )
 

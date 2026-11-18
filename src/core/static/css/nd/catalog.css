@@ -204,6 +204,15 @@
   gap: 4px;
 }
 
+.nd-cat-facet__sub {
+  margin: 2px 0 8px;
+  padding: 0 0 0 22px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .nd-cat-check {
   display: flex;
   align-items: center;
@@ -211,6 +220,15 @@
   min-height: 24px;
   font-size: var(--nd-fs-16);
   cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .nd-cat-facet__list .nd-cat-check,
+  .nd-cat-facet__sub .nd-cat-check {
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 .nd-cat-check__dot {

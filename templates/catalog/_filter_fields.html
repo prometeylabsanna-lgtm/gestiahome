@@ -2,19 +2,38 @@
 <fieldset class="nd-cat-facet">
   <legend class="nd-cat-facet__title">{% trans "Категорії" %}</legend>
   <ul class="nd-cat-facet__list">
-    {% for category in filter_categories %}
+    {% for group in menu_facets %}
       <li>
         <label class="nd-cat-check">
           <input
             class="visually-hidden"
             type="checkbox"
-            name="category"
-            value="{{ category.slug }}"
-            {% if category.slug in parsed.categories %}checked{% endif %}
+            name="menu"
+            value="{{ group.key }}"
+            {% if group.key in parsed.menu %}checked{% endif %}
           >
           <span class="nd-cat-check__dot" aria-hidden="true"></span>
-          <span class="nd-cat-check__label">{{ category.filter_label }}</span>
+          <span class="nd-cat-check__label">{{ group.label }}</span>
         </label>
+        {% if group.children %}
+          <ul class="nd-cat-facet__sub">
+            {% for child in group.children %}
+              <li>
+                <label class="nd-cat-check">
+                  <input
+                    class="visually-hidden"
+                    type="checkbox"
+                    name="menu"
+                    value="{{ child.key }}"
+                    {% if child.key in parsed.menu %}checked{% endif %}
+                  >
+                  <span class="nd-cat-check__dot" aria-hidden="true"></span>
+                  <span class="nd-cat-check__label">{{ child.label }}</span>
+                </label>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>

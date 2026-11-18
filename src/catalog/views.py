@@ -1,8 +1,9 @@
 from urllib.parse import urlencode
 
 from django.http import Http404, QueryDict
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
+from src.catalog.menu_filters import accessory_crumb, menu_facets
 from src.catalog.models import Category
 from src.catalog.selectors import (
     CATALOG_PAGE_SIZE,
@@ -10,7 +11,6 @@ from src.catalog.selectors import (
     category_scope,
     curated_catalog_products,
     filter_catalog,
-    filter_categories,
     filter_groups_for_catalog,
     filters_reset_url,
     parse_catalog_filters,
@@ -20,19 +20,25 @@ from src.catalog.selectors import (
 from src.commerce.forms import BuyNowForm, CallbackForm, style_form
 from src.commerce.wishlist import sku_set
 from src.content.form_labels import apply_labels
-from src.content.models import ContactForms, HomeBlock, Review
+from src.content.models import ContactForms, HomeBlock, HomeCollection, Review
 
 
 def _filters_active(parsed):
-    return bool(parsed["q"] or parsed["in_stock"] or parsed["attrs"] or parsed["categories"])
+    return bool(
+        parsed["q"]
+        or parsed["in_stock"]
+        or parsed["attrs"]
+        or parsed["categories"]
+        or parsed.get("menu")
+    )
 
 
 def _panel_open(parsed):
-    return bool(parsed["attrs"] or parsed["categories"])
+    return bool(parsed["attrs"] or parsed["categories"] or parsed.get("menu"))
 
 
 def _active_filter_count(parsed):
-    count = len(parsed["categories"])
+    count = len(parsed["categories"]) + len(parsed.get("menu") or [])
     for values in parsed["attrs"].values():
         count += len(values)
     if parsed["in_stock"]:
@@ -83,12 +89,14 @@ def _catalog_context(request, category=None):
         "products": products,
         "parsed": parsed,
         "filter_groups": filter_groups_for_catalog(facet_base),
-        "filter_categories": filter_categories(),
+        "menu_facets": menu_facets(),
         "panel_open": _panel_open(parsed),
         "filters_open": _panel_open(parsed),
         "subcategories": subcategories,
         "filters_reset_url": filters_reset_url(request),
-        "filters_active": bool(parsed["in_stock"] or parsed["attrs"] or parsed["categories"]),
+        "filters_active": bool(
+            parsed["in_stock"] or parsed["attrs"] or parsed["categories"] or parsed.get("menu")
+        ),
         "active_filter_count": _active_filter_count(parsed),
         "crumbs": category.chain() if category else [],
         "has_more": has_more,
@@ -113,6 +121,14 @@ def product_detail(request, slug):
     product = get_object_or_404(base_products(), slug=slug)
     if not product.is_active:
         raise Http404
+    collection = (
+        HomeCollection.objects.filter(product=product, is_active=True)
+        .exclude(slug="")
+        .order_by("sort", "id")
+        .first()
+    )
+    if collection is not None:
+        return redirect(collection.get_absolute_url())
     order = {"style": 0, "color": 1}
     attrs = sorted(
         (attr for attr in product.filter_attrs.all() if attr.show_on_pdp),
@@ -145,5 +161,6 @@ def product_detail(request, slug):
                 ContactForms.load(),
             ),
             "wishlist_skus": sku_set(request),
+            "menu_crumb": accessory_crumb(product),
         },
     )

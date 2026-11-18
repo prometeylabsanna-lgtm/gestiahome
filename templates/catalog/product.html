@@ -22,7 +22,15 @@
           <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
           <span aria-hidden="true">/</span>
         </li>
-        <li aria-current="page">{{ product.name }}</li>
+        {% if menu_crumb %}
+          <li>
+            <a href="{{ menu_crumb.url }}">{{ menu_crumb.title }}</a>
+            <span aria-hidden="true">/</span>
+          </li>
+          <li aria-current="page">{{ menu_crumb.label }}</li>
+        {% else %}
+          <li aria-current="page">{{ product.name }}</li>
+        {% endif %}
       </ol>
     </nav>
 

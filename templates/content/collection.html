@@ -19,20 +19,16 @@
           <span aria-hidden="true">/</span>
         </li>
         <li>
-          {% if menu_group %}
-            {% if collection.category_id %}
-              <a href="{{ collection.category.get_absolute_url }}">{{ menu_group.title }}</a>
-            {% else %}
-              <a href="{% url 'catalog' %}">{{ menu_group.title }}</a>
-            {% endif %}
-          {% elif collection.category_id %}
-            <a href="{{ collection.category.get_absolute_url }}">{{ collection.category.name }}</a>
-          {% else %}
-            <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
-          {% endif %}
+          <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
           <span aria-hidden="true">/</span>
         </li>
-        <li aria-current="page">{{ collection.title }}</li>
+        {% if menu_group %}
+          <li>
+            <a href="{{ crumb_group_url }}">{{ menu_group.title }}</a>
+            <span aria-hidden="true">/</span>
+          </li>
+        {% endif %}
+        <li aria-current="page">{{ crumb_current }}</li>
       </ol>
     </nav>
 

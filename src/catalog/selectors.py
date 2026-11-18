@@ -12,7 +12,7 @@ ATTRIBUTE_FILTER_KEYS = (
 
 def catalog_filter_query_names():
     """GET-параметри, які каталог справді читає для фільтрів."""
-    return ("q", "in_stock", "category", *ATTRIBUTE_FILTER_KEYS)
+    return ("q", "in_stock", "menu", "category", *ATTRIBUTE_FILTER_KEYS)
 
 
 def _ordered_images():
@@ -52,6 +52,10 @@ def parse_catalog_filters(get):
         if values:
             attrs[key] = values
     selected = [f"{key}:{value}" for key, values in attrs.items() for value in values]
+    from src.catalog.menu_filters import known_menu_keys
+
+    allowed_menu = known_menu_keys()
+    menu = [value for value in get.getlist("menu") if value in allowed_menu][:12]
     categories = [value for value in get.getlist("category") if value][:12]
     sort = (get.get("sort") or "").strip()
     if sort not in SORT_KEYS:
@@ -59,6 +63,7 @@ def parse_catalog_filters(get):
     return {
         "attrs": attrs,
         "selected": selected,
+        "menu": menu,
         "categories": categories,
         "q": (get.get("q") or "").strip()[:80],
         "in_stock": get.get("in_stock") == "1",
@@ -74,6 +79,10 @@ def filter_catalog(qs, parsed):
             | Q(name_en__icontains=query)
             | Q(sku__iexact=query)
         )
+    if parsed.get("menu"):
+        from src.catalog.menu_filters import product_ids_for_menu
+
+        qs = qs.filter(pk__in=product_ids_for_menu(parsed["menu"]))
     if parsed["categories"]:
         qs = qs.filter(category__slug__in=parsed["categories"])
     for key, values in parsed["attrs"].items():

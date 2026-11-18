@@ -104,6 +104,8 @@ class CollectionPageTests(TestCase):
         self.assertIn("Оплата", html)
         self.assertIn("nd/collection.css", html)
         self.assertIn("Святкові бокси", html)
+        self.assertIn('href="/katalog/?menu=svyatkovi-boksy"', html)
+        self.assertIn("«Квітка-душа»", html)
         self.assertIn('aria-labelledby="others-title"', html)
         self.assertIn('data-screen-label="Collection hero"', html)
         self.assertIn('data-screen-label="In the box"', html)
@@ -123,6 +125,13 @@ class CollectionPageTests(TestCase):
         self.assertNotIn('name="sku" value="COLBOX1"', html)
         self.assertNotIn("Доповнити сет", html)
         self.assertIn("Що в боксі", html)
+
+    def test_box_product_url_opens_collection(self):
+        page = self.client.get(reverse("product", kwargs={"slug": "col-box-1"}))
+        self.assertRedirects(
+            page,
+            reverse("collection", kwargs={"slug": "page-kvitka-dusha"}),
+        )
 
     def test_absolute_url_and_menu_point_to_collection(self):
         url = reverse("collection", kwargs={"slug": "page-kvitka-dusha"})

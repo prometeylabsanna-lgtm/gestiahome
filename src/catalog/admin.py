@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -15,7 +18,7 @@ from src.catalog.models import (
     ProductAttributeGroup,
     ProductImage,
 )
-from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
+from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline
 from src.core.admin_lang import language_tabs
 from src.core.admin_slug import SlugAdminMixin
 
@@ -86,30 +89,37 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         return super().get_queryset(request).exclude(slug__in=HIDDEN_CATEGORY_SLUGS)
 
 
-class ProductAttributeInline(GestiaTabularInline):
-    model = ProductAttribute
-    extra = 1
-    fields = ("name_uk", "name_en", "slug", "sort", "is_filterable", "show_on_pdp")
-    ordering = ("sort", "id")
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        if formfield is not None and db_field.name == "slug":
-            formfield.required = False
-        return formfield
-
-
 @admin.register(ProductAttributeGroup)
 class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
     auto_slug = False
     list_display = ("slug", "name_uk")
     search_fields = ("name_uk", "slug")
     fieldsets = language_tabs(
-        uk_fields=("slug", "name_uk"),
+        uk_fields=("slug", "name_uk", "value_links"),
         en_fields=("name_en",),
         uk_description="Нова група (наприклад «Розмір») з’явиться окремим полем у вкладці «Фільтри» товару.",
     )
-    inlines = (ProductAttributeInline,)
+    readonly_fields = ("value_links",)
+
+    @admin.display(description="Значення")
+    def value_links(self, obj):
+        if obj is None or not obj.pk:
+            return "Спочатку збережіть групу, потім додайте значення."
+        rows = obj.values.order_by("sort", "id")
+        links = format_html_join(
+            "",
+            '<a class="gestia-value-link" href="{}">{}</a>',
+            (
+                (reverse("admin:catalog_productattribute_change", args=[row.pk]), row.name_uk)
+                for row in rows
+            ),
+        )
+        add_url = f"{reverse('admin:catalog_productattribute_add')}?group={obj.pk}"
+        return format_html(
+            '<div class="gestia-value-list">{}<a class="gestia-value-add" href="{}">Додати</a></div>',
+            links,
+            add_url,
+        )
 
 
 @admin.register(ProductAttribute)
@@ -122,6 +132,46 @@ class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
         en_fields=("name_en",),
         uk_description="Значення фільтра (наприклад «Білий» у групі «Колір»).",
     )
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        group = request.GET.get("group")
+        if group:
+            initial["group"] = group
+        return initial
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if formfield is not None and db_field.name == "sort":
+            formfield.widget.attrs["maxlength"] = "3"
+            formfield.widget.attrs["inputmode"] = "numeric"
+            formfield.widget.attrs["min"] = "0"
+            formfield.widget.attrs["max"] = "999"
+            classes = formfield.widget.attrs.get("class", "")
+            formfield.widget.attrs["class"] = f"{classes} gestia-sort".strip()
+        return formfield
+
+    def response_add(self, request, obj, post_url_continue=None):
+        redirect = self._group_redirect(request, obj)
+        if redirect is not None:
+            return redirect
+        return super().response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        redirect = self._group_redirect(request, obj)
+        if redirect is not None:
+            return redirect
+        return super().response_change(request, obj)
+
+    def _group_redirect(self, request, obj):
+        if "_continue" in request.POST or not obj.group_id:
+            return None
+        if "_addanother" in request.POST:
+            url = f"{reverse('admin:catalog_productattribute_add')}?group={obj.group_id}"
+            return HttpResponseRedirect(url)
+        return HttpResponseRedirect(
+            reverse("admin:catalog_productattributegroup_change", args=[obj.group_id])
+        )
 
 
 @admin.register(Product)

@@ -78,7 +78,7 @@
     var type = (field.getAttribute("type") || "").toLowerCase();
     if (SKIP[type]) return;
     var max = maxOf(field);
-    if (!max) return;
+    if (!max || max <= 160) return;
     field.dataset.gestiaCount = "1";
     field.setAttribute("maxlength", String(max));
     var visible = field.getAttribute("data-gestia-visible-count") === "1";
@@ -125,7 +125,7 @@
     var field = editor.targetElm;
     if (field.dataset.gestiaTinyCount === "1") return;
     var max = maxOf(field);
-    if (!max) return;
+    if (!max || max <= 160) return;
     field.dataset.gestiaTinyCount = "1";
     field.dataset.gestiaCount = "1";
     var visible = true;

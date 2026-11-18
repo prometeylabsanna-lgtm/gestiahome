@@ -24,6 +24,7 @@ class CharCounterTests(TestCase):
     def test_username_field_is_skipped(self):
         source = Path(find("js/admin/char_counter.js")).read_text()
         self.assertIn('=== "username"', source)
+        self.assertIn("max <= 160", source)
 
 
 class InterfaceFallbackTests(TestCase):

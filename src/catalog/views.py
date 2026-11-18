@@ -76,6 +76,7 @@ def _catalog_context(request, category=None):
     show_all = request.GET.get("all") == "1"
     total_count = len(all_products)
     page_number = _page_number(request.GET.get("page")) or 1
+    page_past_end = False
     if show_all:
         products = all_products
         page_number = 1
@@ -83,7 +84,9 @@ def _catalog_context(request, category=None):
     else:
         start = (page_number - 1) * CATALOG_PAGE_SIZE
         if page_number > 1 and start >= total_count:
-            raise Http404
+            page_number = 1
+            start = 0
+            page_past_end = True
         products = all_products[start : start + CATALOG_PAGE_SIZE]
     has_more = not show_all and start + CATALOG_PAGE_SIZE < total_count
     block = HomeBlock.objects.filter(key=HomeBlock.Key.CATALOG).first()
@@ -118,7 +121,17 @@ def _catalog_context(request, category=None):
         "catalog_cta": block.cta if block else "",
         "wishlist_skus": sku_set(request),
         "use_curated": use_curated,
+        "page_past_end": page_past_end,
     }
+
+
+def _catalog_url_without_page(request):
+    query = request.GET.copy()
+    query.pop("page", None)
+    encoded = query.urlencode()
+    if encoded:
+        return f"{request.path}?{encoded}"
+    return request.path
 
 
 def catalog(request, slug=None):
@@ -126,6 +139,14 @@ def catalog(request, slug=None):
     if slug:
         category = get_object_or_404(Category, slug=slug, is_active=True)
     context = _catalog_context(request, category)
+    past_end = context.pop("page_past_end", False)
+    if past_end:
+        target = _catalog_url_without_page(request)
+        if request.headers.get("HX-Request"):
+            response = render(request, "catalog/_results.html", context)
+            response["HX-Push-Url"] = target
+            return response
+        return redirect(target)
     template = "catalog/_results.html" if request.headers.get("HX-Request") else "catalog/list.html"
     return render(request, template, context)
 

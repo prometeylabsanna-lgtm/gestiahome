@@ -188,6 +188,8 @@ def create_inquiry(*, kind, name, phone, consent, message="", email="", sku=""):
         if product:
             product_name = product.name_uk
             sku = product.sku
+        else:
+            sku = ""
     inquiry = Inquiry.objects.create(
         kind=kind,
         name=name,

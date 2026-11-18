@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import os
+import re
 import subprocess
 import sys
 import unittest
@@ -134,6 +135,8 @@ class LiqPayCheckoutFlowTests(TestCase):
 
     def test_card_checkout_redirects_to_pay_page_with_form(self):
         self._cart()
+        html = self.client.get(reverse("checkout")).content.decode()
+        cart_sig = re.search(r'name="cart_sig" value="([^"]*)"', html).group(1)
         response = self.client.post(
             reverse("checkout"),
             {
@@ -147,6 +150,7 @@ class LiqPayCheckoutFlowTests(TestCase):
                 "consent": "on",
                 "amount": "1.00",
                 "total": "1.00",
+                "cart_sig": cart_sig,
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -589,6 +593,7 @@ class LiqPayDisabledAndCurrencyTests(TestCase):
         self.assertIn('name="payment_method" value="on_delivery"', html)
         form = CheckoutForm(card_enabled=False)
         self.assertEqual(form.fields["payment_method"].initial, Order.Payment.ON_DELIVERY)
+        cart_sig = re.search(r'name="cart_sig" value="([^"]*)"', html).group(1)
 
         response = self.client.post(
             reverse("checkout"),
@@ -601,6 +606,7 @@ class LiqPayDisabledAndCurrencyTests(TestCase):
                 "branch": "1",
                 "payment_method": Order.Payment.CARD,
                 "consent": "on",
+                "cart_sig": cart_sig,
             },
         )
         self.assertEqual(response.status_code, 200)

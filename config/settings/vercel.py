@@ -200,7 +200,8 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = config(
 )
 SECURE_HSTS_PRELOAD = False
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = False
+# HTMX copies the token from <meta name="csrf-token">, not from the CSRF cookie.
+CSRF_COOKIE_HTTPONLY = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 X_FRAME_OPTIONS = "DENY"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"

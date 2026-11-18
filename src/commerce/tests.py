@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -10,6 +11,14 @@ from src.commerce.forms import CallbackForm
 from src.commerce.models import Inquiry, Order
 from src.commerce.services import OrderValidationError, create_order, row_from_product
 from src.commerce.validators import MSG_NAME, MSG_PHONE
+
+
+def checkout_signature(client):
+    html = client.get("/zamovlennia/").content.decode()
+    match = re.search(r'name="cart_sig" value="([^"]*)"', html)
+    if match is None:
+        raise AssertionError("cart_sig missing")
+    return match.group(1)
 
 
 class PhoneTests(TestCase):
@@ -122,6 +131,7 @@ class CheckoutTests(TestCase):
                 "address": "Відділення 12",
                 "payment_method": Order.Payment.ON_DELIVERY,
                 "consent": "on",
+                "cart_sig": checkout_signature(self.client),
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -201,6 +211,7 @@ class CheckoutTests(TestCase):
                 "branch": "Поштамат 5",
                 "payment_method": Order.Payment.CARD,
                 "consent": "on",
+                "cart_sig": checkout_signature(self.client),
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -289,6 +300,7 @@ class CheckoutTests(TestCase):
                 "apartment": "42",
                 "payment_method": Order.Payment.ON_DELIVERY,
                 "consent": "on",
+                "cart_sig": checkout_signature(self.client),
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -403,6 +415,7 @@ class CheckoutTests(TestCase):
                 "address": "Київ",
                 "payment_method": Order.Payment.ON_DELIVERY,
                 "consent": "on",
+                "cart_sig": checkout_signature(self.client),
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -491,10 +504,12 @@ class CheckoutGuardTests(TestCase):
         self.product.save()
         self._cart()
         response = self.client.post("/zamovlennia/", self._payload())
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Товар «Сніг» зараз відсутній. Приберіть його з кошика.")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/koshik/")
+        cart = self.client.get("/koshik/")
+        self.assertContains(cart, "Товар «Сніг» зараз відсутній. Приберіть його з кошика.")
         self.assertEqual(Order.objects.count(), 0)
-        self.assertEqual(self.client.session["cart"]["SNIH"], 1)
+        self.assertNotIn("SNIH", self.client.session.get("cart", {}))
 
     def test_inactive_product_removed_with_notice(self):
         Product.objects.create(
@@ -533,9 +548,20 @@ class CheckoutGuardTests(TestCase):
         )
         self.assertEqual(Order.objects.count(), 0)
 
+    def test_checkout_without_cart_sig_creates_no_order(self):
+        self._cart()
+        response = self.client.post("/zamovlennia/", self._payload())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Кошик або ціни змінилися. Перевірте суму та підтвердіть замовлення ще раз.",
+        )
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(self.client.session["cart"]["SNIH"], 1)
+
     def test_same_idem_posts_redirect_to_one_order(self):
         self._cart()
-        payload = self._payload(idem="same-token")
+        payload = self._payload(idem="same-token", cart_sig=checkout_signature(self.client))
         first = self.client.post("/zamovlennia/", payload)
         second = self.client.post("/zamovlennia/", payload)
         self.assertEqual(first.status_code, 302)

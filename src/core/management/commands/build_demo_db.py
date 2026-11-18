@@ -21,15 +21,29 @@ PURGE_SQL = (
     "DELETE FROM auth_group_permissions;",
     "DELETE FROM auth_group;",
     "DELETE FROM auth_user;",
+    "DELETE FROM axes_accessattemptexpiration;",
+    "DELETE FROM axes_accessattempt;",
+    "DELETE FROM axes_accesslog;",
+    "DELETE FROM axes_accessfailurelog;",
+    "DELETE FROM gestia_cache;",
 )
 
 MEDIA_FIELD_NAMES = frozenset(
     {
         "image",
         "image_mobile",
+        "image_large",
+        "image_small",
         "video",
         "logo",
         "card_image",
+        "mark_light",
+        "mark_dark",
+        "intro_photo_left",
+        "intro_photo_main",
+        "gestia_plate",
+        "gestia_photo",
+        "together_photo",
     }
 )
 
@@ -78,9 +92,7 @@ class Command(BaseCommand):
         if options["skip_media"]:
             return
 
-        if demo_media.exists():
-            shutil.rmtree(demo_media)
-        demo_media.mkdir(parents=True)
+        demo_media.mkdir(parents=True, exist_ok=True)
 
         names = self._media_names_from(target_db)
         copied = 0
@@ -88,14 +100,16 @@ class Command(BaseCommand):
         oversized: list[str] = []
         for relative in sorted(names):
             src = media_root / relative
+            dest = demo_media / relative
             if not src.is_file():
+                if dest.is_file():
+                    continue
                 missing += 1
                 self.stderr.write(f"missing: {relative}")
                 continue
             size_mb = src.stat().st_size / (1024 * 1024)
             if size_mb > 50:
                 oversized.append(f"{relative} ({size_mb:.1f} MB)")
-            dest = demo_media / relative
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dest)
             copied += 1

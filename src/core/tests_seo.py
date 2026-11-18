@@ -159,7 +159,11 @@ class SeoHeadTests(SeoFixture):
         self.assertContains(second, "сторінка 2")
         self.assertNotContains(second, "noindex")
         self.assertNotContains(self.client.get("/katalog/seo-cat/"), "сторінка 2")
-        self.assertEqual(self.client.get("/katalog/?page=2").status_code, 404)
+        stale = self.client.get("/katalog/?page=2")
+        self.assertRedirects(stale, "/katalog/", fetch_redirect_response=False)
+        stale_filters = self.client.get("/katalog/?page=99&sort=name", HTTP_HX_REQUEST="true")
+        self.assertEqual(stale_filters.status_code, 200)
+        self.assertEqual(stale_filters["HX-Push-Url"], "/katalog/?sort=name")
 
         first = self.client.get("/katalog/?page=1&utm_source=ig")
         self.assertContains(first, 'rel="canonical" href="http://testserver/katalog/"')

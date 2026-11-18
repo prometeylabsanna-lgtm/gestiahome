@@ -35,12 +35,27 @@ from src.commerce.services import (
 )
 from src.content.form_labels import label_form
 from src.core.i18n import safe_next
-from src.core.ratelimit import honeypot_filled, reject_if_limited
+from src.core.ratelimit import honeypot_filled, is_rate_limited, reject_if_limited
 from src.core.utils import format_money
+
+
+_NP_QUERY_MAX = 80
+_NP_REF_MAX = 64
+_CART_FLASH = "cart_flash"
 
 
 def _currency(request):
     return currency_of(request)
+
+
+def _np_blocked(request):
+    if is_rate_limited(request, "np"):
+        return JsonResponse({"items": []}, status=429)
+    query = (request.GET.get("q") or "").strip()
+    city_ref = (request.GET.get("city_ref") or "").strip()
+    if len(query) > _NP_QUERY_MAX or len(city_ref) > _NP_REF_MAX:
+        return JsonResponse({"items": []}, status=400)
+    return None
 
 
 def _hx(request):
@@ -162,7 +177,7 @@ def _checkout_post_ok(form, request, rows):
         elif row.get("over_stock"):
             ok = False
     submitted = (request.POST.get("cart_sig") or "").strip()
-    if submitted and submitted != signature(rows):
+    if submitted != signature(rows):
         form.add_error(
             None,
             _("Кошик або ціни змінилися. Перевірте суму та підтвердіть замовлення ще раз."),
@@ -171,13 +186,45 @@ def _checkout_post_ok(form, request, rows):
     return ok
 
 
-def _checkout_render(request, form, rows, total, currency):
+def _fit_cart_to_stock(request, rows):
+    notices = []
+    changed = False
+    for row in rows:
+        product = row["product"]
+        if row.get("out_of_stock") or product.stock_qty <= 0:
+            set_qty(request, row["sku"], 0, stock_qty=0)
+            notices.append(unavailable_message(product.name))
+            changed = True
+        elif row.get("over_stock"):
+            set_qty(request, row["sku"], product.stock_qty, stock_qty=product.stock_qty)
+            notices.append(insufficient_stock_message(product.name, product.stock_qty))
+            changed = True
+    return changed, " ".join(notices)
+
+
+def _stash_cart_flash(request, notice):
+    if notice:
+        request.session[_CART_FLASH] = notice
+
+
+def _take_cart_flash(request):
+    notice = request.session.pop(_CART_FLASH, "")
+    if notice:
+        request.session.modified = True
+    return notice if isinstance(notice, str) else ""
+
+
+def _joined_notice(*parts):
+    return " ".join(part for part in parts if part)
+
+
+def _checkout_render(request, form, rows, total, currency, notice=""):
     return {
         "form": form,
         "rows": rows,
         "total": total,
         "total_label": format_money(total, currency),
-        "cart_notice": _cart_notice(request, rows),
+        "cart_notice": _joined_notice(notice, _cart_notice(request, rows)),
         "cart_sig": signature(rows),
         "idem": secrets.token_urlsafe(16),
     }
@@ -187,7 +234,8 @@ def _checkout_render(request, form, rows, total, currency):
 def cart_page(request):
     currency = _currency(request)
     rows, total = lines(request, currency)
-    ctx = cart_body_context(request, rows, total, notice=_cart_notice(request, rows))
+    notice = _joined_notice(_take_cart_flash(request), _cart_notice(request, rows))
+    ctx = cart_body_context(request, rows, total, notice=notice)
     if _hx(request):
         return render(request, "commerce/_cart_body.html", ctx)
     return render(request, "commerce/cart.html", ctx)
@@ -203,15 +251,25 @@ def checkout(request):
         if existing is not None:
             return _finish_checkout(request, existing)
     rows, total = lines(request, currency)
+    changed, fit_notice = _fit_cart_to_stock(request, rows)
+    if changed:
+        rows, total = lines(request, currency)
     if not rows:
+        _stash_cart_flash(request, fit_notice)
         return HttpResponseRedirect(reverse("cart"))
     form = style_form(CheckoutForm(request.POST or None, card_enabled=card_ok))
     if request.method == "POST" and reject_if_limited(request, form, "checkout"):
         return render(
             request,
             "commerce/checkout.html",
-            _checkout_render(request, form, rows, total, currency),
+            _checkout_render(request, form, rows, total, currency, notice=fit_notice),
             status=429,
+        )
+    if request.method == "POST" and changed:
+        return render(
+            request,
+            "commerce/checkout.html",
+            _checkout_render(request, form, rows, total, currency, notice=fit_notice),
         )
     if request.method == "POST" and _checkout_post_ok(form, request, rows):
         try:
@@ -227,11 +285,18 @@ def checkout(request):
             form.add_error(None, exc.message)
         else:
             return _finish_checkout(request, order)
-    return render(request, "commerce/checkout.html", _checkout_render(request, form, rows, total, currency))
+    return render(
+        request,
+        "commerce/checkout.html",
+        _checkout_render(request, form, rows, total, currency, notice=fit_notice),
+    )
 
 
 @require_GET
 def np_cities(request):
+    blocked = _np_blocked(request)
+    if blocked is not None:
+        return blocked
     query = (request.GET.get("q") or "").strip()
     if len(query) < 2:
         return JsonResponse({"items": []})
@@ -242,6 +307,9 @@ def np_cities(request):
 
 @require_GET
 def np_warehouses(request):
+    blocked = _np_blocked(request)
+    if blocked is not None:
+        return blocked
     query = (request.GET.get("q") or "").strip()
     city_ref = (request.GET.get("city_ref") or "").strip()
     kind = "locker" if request.GET.get("kind") == "locker" else "branch"
@@ -261,6 +329,9 @@ def np_warehouses(request):
 
 @require_GET
 def np_streets(request):
+    blocked = _np_blocked(request)
+    if blocked is not None:
+        return blocked
     city_ref = (request.GET.get("city_ref") or "").strip()
     query = (request.GET.get("q") or "").strip()
     if len(query) < 2 or not city_ref:
@@ -372,6 +443,8 @@ def wishlist_page(request):
 @never_cache
 @require_POST
 def wishlist_toggle(request):
+    if is_rate_limited(request, "wishlist"):
+        return HttpResponse(status=429)
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
     active = wish.toggle(request, product.sku)
     variant = request.POST.get("variant") or ""
@@ -395,6 +468,8 @@ def wishlist_toggle(request):
 @never_cache
 @require_POST
 def wishlist_remove(request):
+    if is_rate_limited(request, "wishlist"):
+        return HttpResponse(status=429)
     sku = request.POST.get("sku", "")
     wish.remove(request, sku)
     if _hx(request):
@@ -421,6 +496,8 @@ def wishlist_remove(request):
 @never_cache
 @require_POST
 def cart_add(request):
+    if is_rate_limited(request, "cart"):
+        return HttpResponse(status=429)
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
     if _no_stock(product):
         return HttpResponse(status=422)
@@ -460,6 +537,8 @@ def cart_panel(request):
 @never_cache
 @require_POST
 def cart_update(request):
+    if is_rate_limited(request, "cart"):
+        return HttpResponse(status=429)
     sku = request.POST.get("sku", "")
     try:
         qty = int(request.POST.get("qty", "1"))

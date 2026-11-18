@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import Csv, config
@@ -18,6 +19,7 @@ INSTALLED_APPS = [
     "unfold.contrib.filters",
     "django.contrib.admin",
     "django.contrib.auth",
+    "axes",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -41,6 +43,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -117,15 +120,28 @@ STOCK_PLACEHOLDER_QTY = 10
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "gestia",
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "gestia_cache",
     }
 }
 
 # Per-form overrides use the same shape. Missing keys fall back to "default".
+# Кошик і Нова пошта мають вищі стелі: 5/600 зупинило б набір міста і кількість у кошику.
 RATE_LIMITS = {
     "default": {"limit": 5, "window": 600},
+    "np": {"limit": 30, "window": 600},
+    "cart": {"limit": 60, "window": 600},
+    "wishlist": {"limit": 60, "window": 600},
 }
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=5)
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_PARAMETERS = [["ip_address"], ["username"]]
 TRUST_X_FORWARDED_FOR = config("TRUST_X_FORWARDED_FOR", default=False, cast=bool)
 
 

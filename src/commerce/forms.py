@@ -40,13 +40,18 @@ class NamePhoneMixin:
 class ContactForm(NamePhoneMixin, ConsentForm):
     name = forms.CharField(label=_("Ім'я"), max_length=120, error_messages=NAME_ERRORS.copy())
     phone = forms.CharField(label=_("Телефон"), max_length=32, error_messages=PHONE_ERRORS.copy())
-    message = forms.CharField(label=_("Повідомлення"), required=False, widget=forms.Textarea(attrs={"rows": 4}))
+    message = forms.CharField(
+        label=_("Повідомлення"),
+        required=False,
+        max_length=2000,
+        widget=forms.Textarea(attrs={"rows": 4}),
+    )
 
 
 class CallbackForm(NamePhoneMixin, ConsentForm):
     name = forms.CharField(label=_("Ім'я"), max_length=120, error_messages=NAME_ERRORS.copy())
     phone = forms.CharField(label=_("Телефон"), max_length=32, error_messages=PHONE_ERRORS.copy())
-    sku = forms.CharField(widget=forms.HiddenInput)
+    sku = forms.CharField(max_length=64, widget=forms.HiddenInput)
 
 
 class BuyNowForm(NamePhoneMixin, ConsentForm):
@@ -206,6 +211,8 @@ def style_form(form):
             )
         if name == "email":
             field.widget.attrs["autocomplete"] = "email"
+        if name == "message":
+            field.widget.attrs["maxlength"] = "2000"
         if name in {"address"}:
             field.widget.attrs["autocomplete"] = "street-address"
     return form

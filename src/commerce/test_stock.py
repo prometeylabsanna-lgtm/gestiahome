@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 
 from django.contrib import admin
@@ -26,10 +27,19 @@ def _customer():
     }
 
 
-def _checkout_payload():
+def _checkout_payload(**extra):
     data = _customer()
     data["consent"] = "on"
+    data.update(extra)
     return data
+
+
+def _checkout_sig(client):
+    html = client.get("/zamovlennia/").content.decode()
+    match = re.search(r'name="cart_sig" value="([^"]*)"', html)
+    if match is None:
+        raise AssertionError("cart_sig missing")
+    return match.group(1)
 
 
 class StockTests(TestCase):
@@ -182,14 +192,16 @@ class StockTests(TestCase):
         self.assertContains(cart, 'class="co-error"')
         self.assertContains(cart, "data-over-stock")
         self.assertContains(cart, 'max="2"')
+        self.assertEqual(self.client.session["cart"]["SNIH"], 5)
         checkout = self.client.get("/zamovlennia/")
         self.assertContains(checkout, message)
-        self.assertContains(checkout, "data-over-stock")
-        posted = self.client.post("/zamovlennia/", _checkout_payload())
+        self.assertContains(checkout, "× 2")
+        self.assertNotContains(checkout, "data-over-stock")
+        self.assertEqual(self.client.session["cart"]["SNIH"], 2)
+        posted = self.client.post("/zamovlennia/", _checkout_payload(cart_sig="0" * 64))
         self.assertEqual(posted.status_code, 200)
-        self.assertContains(posted, message)
-        self.assertEqual(posted.content.decode().count(message), 1)
         self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(self.client.session["cart"]["SNIH"], 2)
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock_qty, 2)
 
@@ -221,18 +233,23 @@ class StockTests(TestCase):
     def test_second_session_cannot_buy_the_last_unit(self):
         self.product.stock_qty = 1
         self.product.save()
-        payload = _checkout_payload()
         first = Client()
         second = Client()
+        signatures = {}
         for client in (first, second):
             session = client.session
             session["cart"] = {"SNIH": 1}
             session["currency"] = "uah"
             session.save()
-        self.assertEqual(first.post("/zamovlennia/", payload).status_code, 302)
-        rejected = second.post("/zamovlennia/", payload)
-        self.assertEqual(rejected.status_code, 200)
-        self.assertContains(rejected, "Товар «Сніг» зараз відсутній. Приберіть його з кошика.")
+            signatures[id(client)] = _checkout_sig(client)
+        placed = first.post("/zamovlennia/", _checkout_payload(cart_sig=signatures[id(first)]))
+        self.assertEqual(placed.status_code, 302)
+        rejected = second.post("/zamovlennia/", _checkout_payload(cart_sig=signatures[id(second)]))
+        self.assertEqual(rejected.status_code, 302)
+        self.assertEqual(rejected["Location"], "/koshik/")
+        cart = second.get("/koshik/")
+        self.assertContains(cart, "Товар «Сніг» зараз відсутній. Приберіть його з кошика.")
+        self.assertNotIn("SNIH", second.session.get("cart", {}))
         self.assertEqual(Order.objects.count(), 1)
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock_qty, 0)

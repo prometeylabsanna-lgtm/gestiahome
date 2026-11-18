@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 
 from django.core.cache import cache
@@ -12,6 +13,14 @@ from src.core.ratelimit import HONEYPOT_FIELD
 HONEYPOT_MARK = f'name="{HONEYPOT_FIELD}"'
 LIMIT_ONE = {"default": {"limit": 1, "window": 600}}
 TOO_MANY = "Забагато спроб. Спробуйте трохи пізніше."
+
+
+def _checkout_sig(client):
+    html = client.get("/zamovlennia/").content.decode()
+    match = re.search(r'name="cart_sig" value="([^"]*)"', html)
+    if match is None:
+        raise AssertionError("cart_sig missing")
+    return match.group(1)
 
 
 def _person(**extra):
@@ -187,6 +196,7 @@ class PublicFormGuardTests(TestCase):
             delivery_method=Order.Delivery.BRANCH,
             address="Відділення 12",
             payment_method=Order.Payment.ON_DELIVERY,
+            cart_sig=_checkout_sig(self.client),
         )
         placed = self.client.post("/zamovlennia/", checkout)
         self.assertEqual(placed.status_code, 302)
@@ -195,8 +205,8 @@ class PublicFormGuardTests(TestCase):
         self.assertContains(limited, TOO_MANY, status_code=429)
         self.assertEqual(Order.objects.count(), 2)
 
-    @override_settings(RATE_LIMITS=LIMIT_ONE)
-    def test_cart_add_is_not_rate_limited(self):
+    @override_settings(RATE_LIMITS={**LIMIT_ONE, "cart": {"limit": 60, "window": 600}})
+    def test_cart_add_keeps_its_own_quota(self):
         first = self.client.post("/koshik/dodaty/", {"sku": "GUARD", "qty": "1"})
         second = self.client.post("/koshik/dodaty/", {"sku": "GUARD", "qty": "1"})
         self.assertEqual(first.status_code, 302)

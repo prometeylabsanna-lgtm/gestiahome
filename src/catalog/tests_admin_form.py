@@ -49,7 +49,6 @@ class CatalogLanguageTabTests(TestCase):
         pages = (
             reverse("admin:catalog_product_change", args=[self.product.pk]),
             reverse("admin:catalog_category_change", args=[self.category.pk]),
-            reverse("admin:catalog_productset_change", args=[self.product_set.pk]),
             reverse("admin:catalog_productattribute_change", args=[self.attribute.pk]),
             reverse("admin:catalog_productattributegroup_change", args=[self.group.pk]),
         )
@@ -77,3 +76,20 @@ class CatalogLanguageTabTests(TestCase):
         self.assertContains(page, "gestia-admin-thumb")
         self.assertContains(page, GALLERY_HINT)
         self.assertContains(page, "product_gallery.css")
+
+    def test_collection_bucket_is_hidden_from_the_category_list(self):
+        hidden = Category.objects.get(slug="kolektsiini-dodatky")
+        page = self.client.get(reverse("admin:catalog_category_changelist"))
+        self.assertContains(page, "Каталог")
+        self.assertNotContains(page, "Доповнення колекцій")
+        change = self.client.get(reverse("admin:catalog_category_change", args=[hidden.pk]))
+        self.assertEqual(change.status_code, 302)
+        self.assertEqual(change.url, "/admin/")
+
+    def test_filter_group_shows_existing_values_and_a_blank_row(self):
+        group = ProductAttributeGroup.objects.create(slug="color-admin", name_uk="Колір")
+        ProductAttribute.objects.create(group=group, slug="white", name_uk="Білий", sort=1)
+        page = self.client.get(reverse("admin:catalog_productattributegroup_change", args=[group.pk]))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Білий")
+        self.assertContains(page, 'name="values-1-name_uk"')

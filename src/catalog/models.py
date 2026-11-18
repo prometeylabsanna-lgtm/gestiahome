@@ -20,6 +20,7 @@ class Category(MediaChoice, TimeStampedModel):
         blank=True,
         related_name="children",
         on_delete=models.CASCADE,
+        limit_choices_to=~models.Q(slug="kolektsiini-dodatky"),
     )
     slug = models.SlugField("Слаг", max_length=80, unique=True)
     name_uk = models.CharField("Назва", max_length=160)

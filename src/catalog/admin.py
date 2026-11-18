@@ -14,12 +14,12 @@ from src.catalog.models import (
     ProductAttribute,
     ProductAttributeGroup,
     ProductImage,
-    ProductSet,
 )
-from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline
+from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
 from src.core.admin_lang import language_tabs
 from src.core.admin_slug import SlugAdminMixin
 
+HIDDEN_CATEGORY_SLUGS = ("kolektsiini-dodatky",)
 GALLERY_HINT = "1272×1540 px. JPG або PNG."
 GALLERY_VIDEO_HINT = "MP4 або WEBM."
 GALLERY_POSTER_HINT = "Кадр до старту відео. Якщо порожньо — основне фото."
@@ -82,6 +82,22 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         en_fields=("name_en", "seo_title_en", "seo_description_en"),
     )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(slug__in=HIDDEN_CATEGORY_SLUGS)
+
+
+class ProductAttributeInline(GestiaTabularInline):
+    model = ProductAttribute
+    extra = 1
+    fields = ("name_uk", "name_en", "slug", "sort", "is_filterable", "show_on_pdp")
+    ordering = ("sort", "id")
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if formfield is not None and db_field.name == "slug":
+            formfield.required = False
+        return formfield
+
 
 @admin.register(ProductAttributeGroup)
 class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
@@ -93,6 +109,7 @@ class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
         en_fields=("name_en",),
         uk_description="Нова група (наприклад «Розмір») з’явиться окремим полем у вкладці «Фільтри» товару.",
     )
+    inlines = (ProductAttributeInline,)
 
 
 @admin.register(ProductAttribute)
@@ -104,16 +121,6 @@ class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
         uk_fields=("group", "slug", "is_filterable", "show_on_pdp", "sort", "name_uk"),
         en_fields=("name_en",),
         uk_description="Значення фільтра (наприклад «Білий» у групі «Колір»).",
-    )
-
-
-@admin.register(ProductSet)
-class ProductSetAdmin(SlugAdminMixin, GestiaModelAdmin):
-    list_display = ("name_uk", "slug")
-    search_fields = ("name_uk", "name_en", "slug")
-    fieldsets = language_tabs(
-        uk_fields=("slug", "name_uk"),
-        en_fields=("name_en",),
     )
 
 
@@ -138,14 +145,12 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
     list_filter_sheet = False
     list_filter = (
         ("category", CatalogRelatedFilter),
-        ("product_set", CatalogRelatedFilter),
         ("stock_status", CatalogChoicesFilter),
         ("is_active", CatalogBooleanFilter),
         ("is_sale", CatalogBooleanFilter),
     )
     list_filter_options = {
         "category": {"horizontal": True, "label": "Категорія"},
-        "product_set": {"horizontal": True, "label": "Сет"},
         "stock_status": {"horizontal": True, "label": "Наявність"},
         "is_active": {"horizontal": True, "label": "Активний"},
         "is_sale": {"horizontal": True, "label": "Акція"},
@@ -157,13 +162,12 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         "unset_sale",
     )
     search_fields = ("name_uk", "name_en", "sku", "slug")
-    autocomplete_fields = ("category", "product_set", "related_manual")
+    autocomplete_fields = ("category", "related_manual")
     inlines = [ProductImageInline]
     ordering = ("sort", "name_uk")
     fieldsets = language_tabs(
         uk_fields=(
             "category",
-            "product_set",
             "sku",
             "slug",
             "price_uah",

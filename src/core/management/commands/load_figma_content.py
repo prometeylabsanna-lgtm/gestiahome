@@ -117,9 +117,7 @@ class Command(BaseCommand):
             ("rizdvyani-boksy", "Різдвяні бокси", "db3d5.png", 1, 1, True),
             ("interierni-kompozytsii", "Інтер'єрні композиції", "dd136.png", 2, 2, False),
             ("serviruvannia", "Сервірування", "fed6d.png", 3, 3, False),
-            ("novorichnyi-dekor", "Новорічний декор", "", 4, None, False),
             ("vazy-ta-kashpo", "Вази та кашпо", "6fbc8.png", 5, 4, False),
-            ("tekstyl", "Текстиль ", "", 6, None, False),
             ("svichky", "Свічки", "328df.png", 7, 6, False),
             ("podarunkovi-sety", "Подарункові сети", "14fec.png", 8, 5, False),
         )
@@ -138,10 +136,8 @@ class Command(BaseCommand):
             made[slug] = category
         # Labels match the Figma filter panel; products live in these category slugs.
         filters = {
-            "novorichnyi-dekor": (1, "Новорічний декор"),
             "interierni-kompozytsii": (2, "Інтер'єрні композиції"),
             "vazy-ta-kashpo": (3, ""),
-            "tekstyl": (4, "Текстиль"),
             "svichky": (5, ""),
             "podarunkovi-sety": (6, ""),
         }
@@ -179,10 +175,10 @@ class Command(BaseCommand):
         # (key, sku, slug, name, image, price, weight, sort, category, popular, crop, name_width, styles, colors)
         specs = (
             ("GH-01", "GH-01", "velykodnii-ukrainskyi", "Бокс Великодній «Український»", DESKTOP / "479da.png", "8990.00", 400, 1, "interierni-kompozytsii", True, "ukr", 127, ("scandi",), ("white",)),
-            ("GH-02", "GH-02", "boks-rizdvyanyi-shyshky", "Бокс «Різдвяний Шишки»", DESKTOP / "db3d5.png", "4980.00", 400, 2, "novorichnyi-dekor", True, "shysh", 127, ("rustic",), ("red",)),
+            ("GH-02", "GH-02", "boks-rizdvyanyi-shyshky", "Бокс «Різдвяний Шишки»", DESKTOP / "db3d5.png", "4980.00", 400, 2, "rizdvyani-boksy", True, "shysh", 127, ("rustic",), ("red",)),
             ("GH-03", "TL-0012", "velykodnii-hnizdo", "Бокс Великодній «Гніздо»", DESKTOP / "14fec.png", "2450.00", 400, 3, "interierni-kompozytsii", True, "hnizdo", 126, ("boho",), ("green",)),
             ("GH-04", "GH-04", "vesilnyi", "Бокс «Весільний»", DESKTOP / "72b4d.png", "14980.00", 500, 4, "svichky", True, "cover", 119, ("classic",), ("beige",)),
-            ("GH-05", "GH-05", "vesnianyi", "Бокс «Весняний»", CATALOG / "2dcde.png", "2450.00", 400, 5, "tekstyl", False, "cover", 143, ("scandi",), ("green",)),
+            ("GH-05", "GH-05", "vesnianyi", "Бокс «Весняний»", CATALOG / "2dcde.png", "2450.00", 400, 5, "interierni-kompozytsii", False, "cover", 143, ("scandi",), ("green",)),
             ("GH-06", "GH-06", "gazetnyi", "Бокс «Газетний»", CATALOG / "729be.png", "5130.00", 400, 6, "podarunkovi-sety", False, "cover", 127, ("modern",), ("red",)),
         )
         attr_map = {

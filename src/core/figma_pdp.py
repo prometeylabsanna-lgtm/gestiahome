@@ -5,7 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.files import File
 
-from src.catalog.models import CatalogCell, ProductImage, ProductSet
+from src.catalog.models import CatalogCell, ProductImage
 from src.content.models import HomeBlock
 
 PDP = Path(settings.BASE_DIR) / "docs" / "figma" / "v3" / "d_product_1-8837"
@@ -46,11 +46,6 @@ def seed_pdp(products):
     product = products["GH-03"]
     product.description_uk = DESC
     product.save(update_fields=["description_uk"])
-    bundle = ProductSet.objects.create(slug="velykodni", name_uk="Великодній")
-    for key in ("GH-01", "GH-02", "GH-03", "GH-04"):
-        item = products[key]
-        item.product_set = bundle
-        item.save(update_fields=["product_set"])
     product.related_manual.add(
         products["GH-01"],
         products["GH-02"],

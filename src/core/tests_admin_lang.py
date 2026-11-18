@@ -9,9 +9,8 @@ from src.catalog.admin import (
     ProductAdmin,
     ProductAttributeAdmin,
     ProductAttributeGroupAdmin,
-    ProductSetAdmin,
 )
-from src.catalog.models import Category, Product, ProductAttribute, ProductAttributeGroup, ProductSet
+from src.catalog.models import Category, Product, ProductAttribute, ProductAttributeGroup
 from src.content.admin import HomeBlockAdmin, HomeCollectionAdmin, SiteSettingsAdmin
 from src.content.admin_about import AboutIntroAdmin, FooterChromeAdmin
 from src.content.admin_blocks import HomeCollectionsAdmin, HomePopularAdmin
@@ -83,7 +82,6 @@ class AdminLanguageTabFieldsetTests(TestCase):
             ProductAdmin,
             ProductAttributeGroupAdmin,
             ProductAttributeAdmin,
-            ProductSetAdmin,
         ):
             assert_language_tab_fieldsets(admin_cls.fieldsets)
 

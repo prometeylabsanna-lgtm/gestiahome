@@ -148,12 +148,6 @@ NAV_TREE = [
                 "url_name": "admin:catalog_category_changelist",
             },
             {
-                "key": "catalog_sets",
-                "title": "Сети",
-                "icon": "layers",
-                "url_name": "admin:catalog_productset_changelist",
-            },
-            {
                 "key": "catalog_attributes",
                 "title": "Фільтри",
                 "icon": "tune",

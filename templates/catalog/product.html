@@ -47,6 +47,12 @@
               {% endif %}
             {% endif %}
           </div>
+        {% empty %}
+          {% if product.card_image %}
+            <div class="nd-pdp-gallery__item">
+              <img src="{{ product.card_image.url }}" alt="{{ product.name }}" width="636" height="770" fetchpriority="high">
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
 

@@ -99,6 +99,7 @@ class CollectionPageTests(TestCase):
         self.assertIn('action="/koshik/dodaty/"', html)
         self.assertIn('name="sku" value="COLBOX1"', html)
         self.assertIn('name="sku" value="COLADD1"', html)
+        self.assertIn(f'href="{self.addon.get_absolute_url()}"', html)
         self.assertIn("Доставка", html)
         self.assertIn("Оплата", html)
         self.assertIn("nd/collection.css", html)

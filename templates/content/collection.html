@@ -98,22 +98,24 @@
             <ul class="nd-colp-addons__list">
               {% for addon in addons %}
                 <li class="nd-colp-addons__item">
-                  {% if addon.card_photo_url %}
-                    <img
-                      class="nd-colp-addons__img"
-                      src="{{ addon.card_photo_url }}"
-                      alt=""
-                      width="100"
-                      height="100"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <span class="nd-colp-addons__img nd-colp-addons__img--empty" aria-hidden="true"></span>
-                  {% endif %}
-                  <div class="nd-colp-addons__meta">
-                    <span class="nd-colp-addons__name">{{ addon.name }}</span>
-                    <span class="nd-colp-addons__price">{% home_price addon %}</span>
-                  </div>
+                  <a class="nd-colp-addons__link" href="{{ addon.get_absolute_url }}">
+                    {% if addon.card_photo_url %}
+                      <img
+                        class="nd-colp-addons__img"
+                        src="{{ addon.card_photo_url }}"
+                        alt=""
+                        width="100"
+                        height="100"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <span class="nd-colp-addons__img nd-colp-addons__img--empty" aria-hidden="true"></span>
+                    {% endif %}
+                    <span class="nd-colp-addons__meta">
+                      <span class="nd-colp-addons__name">{{ addon.name }}</span>
+                      <span class="nd-colp-addons__price">{% home_price addon %}</span>
+                    </span>
+                  </a>
                   <form
                     class="nd-colp-addons__form"
                     method="post"

@@ -77,12 +77,39 @@
 }
 
 .nd-colp-gallery {
+  position: relative;
   display: flex;
   flex-direction: row;
   gap: var(--nd-colp-gallery-gap);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   min-width: 0;
+}
+
+.nd-colp-gallery__wish {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
+.nd-colp-gallery__wish .wish-toggle,
+.nd-colp-gallery__wish .wish-toggle__btn,
+.nd-colp__wish .wish-toggle,
+.nd-colp__wish .wish-toggle__btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  touch-action: manipulation;
+}
+
+.nd-colp__wish {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 44px;
+  height: 44px;
+  margin: 16px 0 0;
 }
 
 .nd-colp-gallery__item {

@@ -37,6 +37,15 @@
         <div class="nd-colp-gallery nd-scroll" data-colp-gallery>
           {% for photo in gallery %}
             <div class="nd-colp-gallery__item">
+              {% if forloop.first and collection.product_id %}
+                <div class="nd-colp-gallery__wish product-card__wish">
+                  {% if collection.product.sku in wishlist_skus %}
+                    {% include "partials/wishlist_btn.html" with product=collection.product in_wishlist=True variant="nd" %}
+                  {% else %}
+                    {% include "partials/wishlist_btn.html" with product=collection.product in_wishlist=False variant="nd" %}
+                  {% endif %}
+                </div>
+              {% endif %}
               <img
                 src="{{ photo.url }}"
                 alt="{{ photo.alt }}"
@@ -63,6 +72,15 @@
 
         {% if collection.product_id %}
           <p class="nd-colp__price">{% home_price collection.product %}</p>
+          {% if not gallery %}
+            <div class="nd-colp__wish product-card__wish">
+              {% if collection.product.sku in wishlist_skus %}
+                {% include "partials/wishlist_btn.html" with product=collection.product in_wishlist=True variant="nd" %}
+              {% else %}
+                {% include "partials/wishlist_btn.html" with product=collection.product in_wishlist=False variant="nd" %}
+              {% endif %}
+            </div>
+          {% endif %}
           <div class="nd-colp__actions">
             <form
               class="nd-colp__cart-form"

@@ -99,6 +99,8 @@ class CollectionPageTests(TestCase):
         self.assertIn("Лляні серветки", html)
         self.assertIn('action="/koshik/dodaty/"', html)
         self.assertIn('name="sku" value="COLBOX1"', html)
+        self.assertIn("wish-toggle", html)
+        self.assertIn("Додати в обране", html)
         self.assertIn('name="sku" value="COLADD1"', html)
         self.assertIn(f'href="{self.addon.get_absolute_url()}"', html)
         self.assertIn("Доставка", html)
@@ -124,6 +126,7 @@ class CollectionPageTests(TestCase):
         self.assertEqual(page.status_code, 200)
         html = page.content.decode()
         self.assertNotIn('name="sku" value="COLBOX1"', html)
+        self.assertNotIn("wish-toggle", html)
         self.assertNotIn("Доповнити сет", html)
         self.assertIn("Що в боксі", html)
 

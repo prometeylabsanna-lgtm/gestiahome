@@ -151,6 +151,7 @@ def collection_detail(request, slug):
             "menu_group": menu_item.group if menu_item else None,
             "crumb_group_url": catalog_href(group_key(menu_item.group)) if menu_item else "",
             "crumb_current": menu_item.label if menu_item else collection.title,
+            "wishlist_skus": sku_set(request),
         },
     )
 

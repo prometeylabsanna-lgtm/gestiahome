@@ -389,12 +389,6 @@ def _walk(entries):
 
 def _with_dynamic_children(entry):
     kind = entry.get("dynamic") or ""
-    if kind == "advantages":
-        children = list(entry.get("items") or [])
-        children.extend(_advantage_nav_items())
-        expanded = dict(entry)
-        expanded["items"] = children
-        return expanded
     if kind == "collections":
         children = list(entry.get("items") or [])
         children.extend(_collection_nav_items())
@@ -402,30 +396,6 @@ def _with_dynamic_children(entry):
         expanded["items"] = children
         return expanded
     return entry
-
-
-def _advantage_nav_items():
-    try:
-        from src.content.models import Advantage
-    except Exception:
-        return []
-    try:
-        rows = list(Advantage.objects.order_by("sort", "id").only("id", "title_uk"))
-    except Exception:
-        return []
-    items = []
-    for row in rows:
-        title = (row.title_uk or "").strip() or f"Перевага #{row.pk}"
-        items.append(
-            {
-                "key": f"home_advantage_{row.pk}",
-                "title": title[:48],
-                "icon": "workspace_premium",
-                "url_name": "admin:content_advantage_change",
-                "url_args": (row.pk,),
-            }
-        )
-    return items
 
 
 def _collection_nav_items():

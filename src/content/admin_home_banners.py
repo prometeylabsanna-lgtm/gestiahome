@@ -1,15 +1,10 @@
-"""Медіа-банери головної: верхній / середній / нижній + текст верхнього."""
+"""Медіа і текст банера головної."""
 
 from django.contrib import admin
 
 from src.content.admin_keyed import KeyedBlockAdmin
 from src.content.models import HomeBlock
-from src.content.proxies import (
-    HomeBannerMedia,
-    HomeBannerText,
-    HomeBottomBanner,
-    HomeMidBanner,
-)
+from src.content.proxies import HomeBannerMedia, HomeBannerText
 from src.core.admin_lang import language_tabs
 
 PHOTO_DESK = "1442×871 px. Одна картинка для десктопу і мобільного. JPG або PNG."
@@ -55,15 +50,3 @@ class HomeBannerTextAdmin(KeyedBlockAdmin):
         uk_fields=("title_uk", "text_uk", "cta_uk", "seo_title_uk", "seo_description_uk"),
         en_fields=("title_en", "text_en", "cta_en", "seo_title_en", "seo_description_en"),
     )
-
-
-@admin.register(HomeMidBanner)
-class HomeMidBannerAdmin(MediaOnlyBlockAdmin):
-    block_key = HomeBlock.Key.VIDEO
-    default_sort = 3
-
-
-@admin.register(HomeBottomBanner)
-class HomeBottomBannerAdmin(MediaOnlyBlockAdmin):
-    block_key = HomeBlock.Key.VIDEO_2
-    default_sort = 6

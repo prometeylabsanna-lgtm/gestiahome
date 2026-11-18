@@ -173,7 +173,6 @@ class WebPAndAdminMediaTests(TestCase):
         for name in (
             "admin:catalog_category_changelist",
             "admin:content_homeblock_changelist",
-            "admin:content_advantage_changelist",
             "admin:content_sitesettings_changelist",
         ):
             page = self.client.get(reverse(name))

@@ -22,7 +22,7 @@ from src.catalog.selectors import (
 from src.commerce.forms import BuyNowForm, CallbackForm, style_form
 from src.commerce.wishlist import sku_set
 from src.content.form_labels import apply_labels
-from src.content.models import ContactForms, HomeBlock, HomeCollection, Review
+from src.content.models import ContactForms, HomeBlock, HomeCollection
 from src.core.seo import _page_number
 
 
@@ -170,7 +170,7 @@ def product_detail(request, slug):
     )
     blocks = {
         block.key: block
-        for block in HomeBlock.objects.filter(key__in=["pdp_ship", "pdp_pay", "pdp_set", "pdp_related", "reviews"])
+        for block in HomeBlock.objects.filter(key__in=["pdp_ship", "pdp_pay", "pdp_set", "pdp_related"])
     }
     return render(
         request,
@@ -184,8 +184,6 @@ def product_detail(request, slug):
             "pay_block": blocks.get("pdp_pay"),
             "set_block": blocks.get("pdp_set"),
             "related_block": blocks.get("pdp_related"),
-            "reviews_block": blocks.get("reviews"),
-            "reviews": Review.objects.filter(placement=Review.Placement.HOME),
             "callback_form": apply_labels(
                 style_form(CallbackForm(initial={"sku": product.sku})),
                 ContactForms.load(),

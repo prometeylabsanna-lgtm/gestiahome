@@ -1,16 +1,12 @@
 from django.contrib import admin
 
-from src.content.admin_limits import tighten
 from src.content.models import (
-    Advantage,
     FooterLink,
     HomeBlock,
     HomeCollection,
     HomeCollectionImage,
-    Review,
     SiteSettings,
 )
-from src.content.proxies import AboutReview, HomeReview
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
@@ -195,94 +191,6 @@ class HomeCollectionAdmin(GestiaModelAdmin):
             )
             obj.block = block
         super().save_model(request, obj, form, change)
-
-
-@admin.register(Advantage)
-class AdvantageAdmin(GestiaModelAdmin):
-    list_display = ("title_uk", "sort")
-    search_fields = ("title_uk", "title_en")
-    ordering = ("sort",)
-    text_limits = {"title_uk": 24, "title_en": 24, "text_uk": 80, "text_en": 80}
-    tiny_fields = ("text_uk", "text_en")
-    fieldsets = language_tabs(
-        uk_fields=("sort", "title_uk", "text_uk", "media_kind", "image", "video", "poster"),
-        en_fields=("title_en", "text_en"),
-    )
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in self.tiny_fields:
-            kwargs["widget"] = tinymce_widget(short=True)
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        hint = ""
-        if db_field.name == "image":
-            hint = "303×197 px. Якщо порожньо — лишається фото блоку «Переваги». JPG або PNG."
-        elif db_field.name == "video":
-            hint = "MP4 або WEBM."
-        elif db_field.name == "poster":
-            hint = "Кадр до старту відео. Якщо порожньо — основне фото."
-        return tighten(formfield, self.text_limits.get(db_field.name), hint)
-
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change=change, **kwargs)
-        force_tinymce(form, self.tiny_fields, short=True)
-        for name, limit in self.text_limits.items():
-            if name in form.base_fields:
-                tighten(form.base_fields[name], limit)
-        return form
-
-    def save_model(self, request, obj, form, change):
-        if obj.block_id is None:
-            block, _ = HomeBlock.objects.get_or_create(
-                key=HomeBlock.Key.ADVANTAGES,
-                defaults={"sort": 5, "title_uk": "Чому обирають GESTIA HOME"},
-            )
-            obj.block = block
-        super().save_model(request, obj, form, change)
-
-
-class ReviewAdmin(GestiaModelAdmin):
-    placement = Review.Placement.HOME
-    list_display = ("author_uk", "rating_kind", "sort")
-    search_fields = ("author_uk", "text_uk")
-    ordering = ("sort",)
-    text_limits = {"author_uk": 24, "author_en": 24, "text_uk": 180, "text_en": 180}
-    tiny_fields = ("text_uk", "text_en")
-    fieldsets = language_tabs(
-        uk_fields=("sort", "rating_kind", "author_uk", "text_uk"),
-        en_fields=("author_en", "text_en"),
-    )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(placement=self.placement)
-
-    def save_model(self, request, obj, form, change):
-        obj.placement = self.placement
-        super().save_model(request, obj, form, change)
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in self.tiny_fields:
-            kwargs["widget"] = tinymce_widget(short=True)
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        return tighten(formfield, self.text_limits.get(db_field.name))
-
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change=change, **kwargs)
-        force_tinymce(form, self.tiny_fields, short=True)
-        for name, limit in self.text_limits.items():
-            if name in form.base_fields:
-                tighten(form.base_fields[name], limit)
-        return form
-
-
-@admin.register(HomeReview)
-class HomeReviewAdmin(ReviewAdmin):
-    placement = Review.Placement.HOME
-
-
-@admin.register(AboutReview)
-class AboutReviewAdmin(ReviewAdmin):
-    placement = Review.Placement.ABOUT
-
 
 
 # FooterLink сховано: футер збирається автоматично з категорій і юридичних сторінок.

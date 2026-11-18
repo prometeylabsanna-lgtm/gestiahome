@@ -10,9 +10,9 @@ from src.commerce.forms import ContactForm, style_form
 from src.commerce.models import Inquiry
 from src.commerce.services import create_inquiry
 from src.commerce.wishlist import sku_set
-from src.content.home_slots import home_categories, home_popular
+from src.content.home_slots import home_popular
 from src.content.legal_pages import legal_document
-from src.content.models import AboutPage, Advantage, HomeBlock, HomeCollection, Review
+from src.content.models import AboutPage, HomeBlock, HomeCollection
 from src.content.models_faq import FaqPage
 from src.catalog.menu_filters import catalog_href, group_key
 from src.content.models_menu import MenuGroupItem
@@ -54,18 +54,12 @@ def home(request):
             consent=True,
         )
         return redirect(f"{reverse('thanks')}?kind=contact")
-    advantages = Advantage.objects.filter(block__key=HomeBlock.Key.ADVANTAGES)
-    if not advantages.exists():
-        advantages = Advantage.objects.filter(block__isnull=True)
     return render(
         request,
         "content/home.html",
         {
-            "categories": home_categories(),
             "popular": home_popular(),
             "collections": _home_collections(),
-            "advantages": advantages,
-            "reviews": Review.objects.filter(placement=Review.Placement.HOME),
             "wishlist_skus": sku_set(request),
             "home_form": form,
         },

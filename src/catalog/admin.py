@@ -59,9 +59,7 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         "slug",
         "is_active",
         "sort",
-        "home_sort",
         "menu_featured",
-        "filter_sort",
     )
     list_filter = ("is_active", "parent")
     search_fields = ("name_uk", "name_en", "slug")
@@ -76,9 +74,7 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
             "poster",
             "is_active",
             "sort",
-            "home_sort",
             "menu_featured",
-            "filter_sort",
             "name_uk",
             "seo_title_uk",
             "seo_description_uk",

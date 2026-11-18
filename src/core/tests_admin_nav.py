@@ -124,7 +124,8 @@ class SidebarTreeTests(TestCase):
             reverse("admin:content_footerlink_changelist")
         self.assertContains(response, "Інтро")
         self.assertContains(response, reverse("admin:content_aboutintro_changelist"))
-        self.assertContains(response, reverse("admin:content_aboutreviewsblock_changelist"))
+        with self.assertRaises(NoReverseMatch):
+            reverse("admin:content_aboutreviewsblock_changelist")
         self.assertContains(response, "Замовлення і заявки")
         self.assertContains(response, "Хедер і футер")
         self.assertContains(response, "Меню каталогу")

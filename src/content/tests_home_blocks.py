@@ -5,8 +5,6 @@ from django.urls import reverse
 from django.utils import translation
 
 from src.catalog.models import Category, Product
-from src.content.admin_blocks import HomeCallbackForm, HomeCategorySlotForm
-from src.core.admin_base import AdminImagePreviewWidget
 from src.content.home_slots import home_categories, home_popular
 from src.content.literals import LITERALS
 from src.content.models import Advantage, HomeBlock
@@ -98,50 +96,6 @@ class HomeBlockAdminTests(TestCase):
         self.assertContains(page, "Виберіть файл для завантаження")
         self.assertNotContains(page, 'name="title_uk"')
 
-    def test_callback_placeholders_roundtrip(self):
-        block = HomeBlock.objects.get(key="callback")
-        page = self.client.get(reverse("admin:content_homecallbackblock_change", args=[block.pk]))
-        self.assertContains(page, "Номер телефону")
-        form = HomeCallbackForm(instance=block)
-        data = {name: form[name].value() if form[name].value() is not None else "" for name in form.fields}
-        bound = HomeCallbackForm(data, instance=block)
-        self.assertTrue(bound.is_valid(), bound.errors)
-        bound.save()
-        self.assertEqual(block.lines_uk, "Ім’я\nНомер телефону\nПовідомлення")
-        self.assertEqual(block.lines_en, "Name\nPhone number\nMessage")
-
-    def test_mid_banner_is_separate_from_categories(self):
-        categories = _block("categories", title_uk="Секція", sort=2)
-        video = _block(
-            "video",
-            media_kind="photo",
-            sort=3,
-            image="home/video-figma.webp",
-            image_mobile="home/video-m.webp",
-        )
-        cats_page = self.client.get(reverse("admin:content_homecategoriesblock_change", args=[categories.pk]))
-        self.assertNotContains(cats_page, "page_video_media_kind")
-        self.assertNotContains(cats_page, "Відео-блок після категорій")
-        mid = self.client.get(reverse("admin:content_homemidbanner_change", args=[video.pk]))
-        self.assertContains(mid, "home/video-figma.webp")
-        self.assertContains(mid, 'name="media_kind"')
-
-    def test_advantages_inline_and_bottom_banner_split(self):
-        advantages = _block("advantages", title_uk="Чому ми", sort=5, image="home/card.webp")
-        video = _block(
-            "video_2",
-            media_kind="photo",
-            sort=6,
-            image="home/video_2-figma.webp",
-        )
-        page = self.client.get(reverse("admin:content_homeadvantagesblock_change", args=[advantages.pk]))
-        self.assertContains(page, "home/card.webp")
-        self.assertNotContains(page, "page_video_media_kind")
-        self.assertNotContains(page, "Відео-блок після переваг")
-        bottom = self.client.get(reverse("admin:content_homebottombanner_change", args=[video.pk]))
-        self.assertContains(bottom, "home/video_2-figma.webp")
-
-
 class HomeSlotsTests(TestCase):
     def setUp(self):
         cache.clear()
@@ -187,12 +141,6 @@ class HomeSlotsTests(TestCase):
         self.assertNotContains(page, "Категорії секція")
         self.assertNotContains(page, "Відгуки секція")
         self.assertNotContains(page, "Зворотний секція")
-
-
-class HomeCategorySlotFormTests(TestCase):
-    def test_image_uses_preview_widget(self):
-        field = HomeCategorySlotForm.base_fields["image"]
-        self.assertIsInstance(field.widget, AdminImagePreviewWidget)
 
 
 def _block(key, **values):

@@ -12,40 +12,14 @@ from src.catalog.admin import (
     ProductSetAdmin,
 )
 from src.catalog.models import Category, Product, ProductAttribute, ProductAttributeGroup, ProductSet
-from src.content.admin import (
-    AdvantageAdmin,
-    HomeBlockAdmin,
-    HomeCollectionAdmin,
-    ReviewAdmin,
-    SiteSettingsAdmin,
-)
-from src.content.admin_about import (
-    AboutBannerAdmin,
-    AboutGalleryAdmin,
-    AboutIntroAdmin,
-    AboutPopularAdmin,
-    AboutReviewsAdmin,
-    AboutStoryAdmin,
-    FooterChromeAdmin,
-)
-from src.content.admin_blocks import (
-    HomeAdvantagesAdmin,
-    HomeCallbackAdmin,
-    HomeCategoriesAdmin,
-    HomeCollectionsAdmin,
-    HomePopularAdmin,
-    HomeReviewsAdmin,
-)
+from src.content.admin import HomeBlockAdmin, HomeCollectionAdmin, SiteSettingsAdmin
+from src.content.admin_about import AboutIntroAdmin, FooterChromeAdmin
+from src.content.admin_blocks import HomeCollectionsAdmin, HomePopularAdmin
 from src.content.admin_discount import DiscountModalAdmin
-from src.content.admin_home_banners import (
-    HomeBannerMediaAdmin,
-    HomeBannerTextAdmin,
-    HomeBottomBannerAdmin,
-    HomeMidBannerAdmin,
-)
+from src.content.admin_home_banners import HomeBannerMediaAdmin, HomeBannerTextAdmin
 from src.content.admin_legal import LegalPageAdmin
 from src.content.admin_menu import MenuGroupAdmin
-from src.content.models import Advantage, HomeBlock, Review, SiteSettings
+from src.content.models import HomeBlock, SiteSettings
 from src.content.models_discount import DiscountModal
 from src.core.admin_lang import assert_language_tab_fieldsets, language_tabs
 from src.core.html_sanitize import (
@@ -96,28 +70,15 @@ class AdminLanguageTabFieldsetTests(TestCase):
             DiscountModalAdmin,
             LegalPageAdmin,
             AboutIntroAdmin,
-            AboutGalleryAdmin,
-            AboutStoryAdmin,
-            AboutBannerAdmin,
-            AboutPopularAdmin,
-            AboutReviewsAdmin,
             FooterChromeAdmin,
             HomeBannerMediaAdmin,
             HomeBannerTextAdmin,
-            HomeMidBannerAdmin,
-            HomeBottomBannerAdmin,
-            HomeCategoriesAdmin,
             HomePopularAdmin,
-            HomeAdvantagesAdmin,
             HomeCollectionsAdmin,
-            HomeReviewsAdmin,
-            HomeCallbackAdmin,
             MenuGroupAdmin,
             SiteSettingsAdmin,
             HomeBlockAdmin,
             HomeCollectionAdmin,
-            AdvantageAdmin,
-            ReviewAdmin,
             CategoryAdmin,
             ProductAdmin,
             ProductAttributeGroupAdmin,
@@ -126,8 +87,8 @@ class AdminLanguageTabFieldsetTests(TestCase):
         ):
             assert_language_tab_fieldsets(admin_cls.fieldsets)
 
-    def test_mid_and_bottom_banners_are_media_only(self):
-        for admin_cls in (HomeMidBannerAdmin, HomeBottomBannerAdmin, HomeBannerMediaAdmin):
+    def test_hero_banner_is_media_only(self):
+        for admin_cls in (HomeBannerMediaAdmin,):
             uk_fields = admin_cls.fieldsets[0][1]["fields"]
             self.assertIn("media_kind", uk_fields)
             self.assertIn("video", uk_fields)
@@ -147,16 +108,16 @@ class AdminLanguageTabRenderTests(TestCase):
             price_uah=Decimal("10"),
             price_eur=Decimal("1"),
         )
-        self.callback, _ = HomeBlock.objects.get_or_create(
-            key=HomeBlock.Key.CALLBACK,
-            defaults={"sort": 8, "title_uk": "Заявка"},
+        self.hero, _ = HomeBlock.objects.get_or_create(
+            key=HomeBlock.Key.HERO,
+            defaults={"sort": 1, "title_uk": "Банер"},
         )
         self.discount = DiscountModal.load()
         SiteSettings.load()
 
     def test_change_forms_render_two_tabs_and_tinymce(self):
         urls = (
-            reverse("admin:content_homecallbackblock_change", args=[self.callback.pk]),
+            reverse("admin:content_homebannertext_change", args=[self.hero.pk]),
             reverse("admin:content_discountmodal_change", args=[self.discount.pk]),
             reverse("admin:catalog_category_change", args=[self.category.pk]),
             reverse("admin:catalog_product_change", args=[self.product.pk]),
@@ -175,17 +136,17 @@ class AdminLanguageTabRenderTests(TestCase):
             self.assertGreater(uk_pos, 0, url)
             self.assertGreater(en_pos, uk_pos, url)
 
-        callback_page = self.client.get(
-            reverse("admin:content_homecallbackblock_change", args=[self.callback.pk])
+        banner_page = self.client.get(
+            reverse("admin:content_homebannertext_change", args=[self.hero.pk])
         )
-        body = callback_page.content.decode()
-        self.assertContains(callback_page, "tinymce")
-        self.assertContains(callback_page, "data-mce-conf")
-        self.assertContains(callback_page, 'name="text_uk"')
-        self.assertContains(callback_page, 'name="text_en"')
-        self.assertNotContains(callback_page, 'name="text_mobile_uk"')
-        self.assertNotContains(callback_page, 'name="image_mobile"')
-        self.assertContains(callback_page, "data-gestia-visible-count")
+        body = banner_page.content.decode()
+        self.assertContains(banner_page, "tinymce")
+        self.assertContains(banner_page, "data-mce-conf")
+        self.assertContains(banner_page, 'name="text_uk"')
+        self.assertContains(banner_page, 'name="text_en"')
+        self.assertNotContains(banner_page, 'name="text_mobile_uk"')
+        self.assertNotContains(banner_page, 'name="image_mobile"')
+        self.assertContains(banner_page, "data-gestia-visible-count")
         self.assertIn('class="tinymce"', body)
         self.assertIn("django_tinymce/init_tinymce.js", body)
         self.assertIn("char_counter.js", body)

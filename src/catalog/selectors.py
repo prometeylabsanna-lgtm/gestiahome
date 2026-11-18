@@ -1,6 +1,8 @@
 from urllib.parse import urlencode
 
-from django.db.models import Prefetch, Q
+from django.db import connection
+from django.db.models import Func, Prefetch, Q, TextField
+from django.db.models.functions import Lower
 
 from src.catalog.models import CatalogCell, Category, Product, ProductAttributeGroup, ProductImage
 
@@ -71,14 +73,32 @@ def parse_catalog_filters(get):
     }
 
 
+class _PyFold(Func):
+    function = "py_fold"
+    output_field = TextField()
+
+
+def _folded_names(qs, query):
+    """Порівнює вже згорнуті назви, тож «тартан» знаходить «Тартан»."""
+    needle = query.casefold()
+    fold = _PyFold if connection.vendor == "sqlite" else Lower
+    return qs.annotate(_fold_uk=fold("name_uk"), _fold_en=fold("name_en")).filter(
+        Q(_fold_uk__contains=needle) | Q(_fold_en__contains=needle) | Q(sku__iexact=query)
+    )
+
+
+def suggest_products(query, limit=8):
+    """Короткий список для випадаючого пошуку. Менше двох літер нічого не показує."""
+    text = (query or "").strip()[:80]
+    if len(text.casefold()) < 2:
+        return []
+    return list(_folded_names(base_products(), text).order_by("name_uk", "id")[:limit])
+
+
 def filter_catalog(qs, parsed):
     query = parsed["q"]
     if query:
-        qs = qs.filter(
-            Q(name_uk__icontains=query)
-            | Q(name_en__icontains=query)
-            | Q(sku__iexact=query)
-        )
+        qs = _folded_names(qs, query)
     if parsed.get("menu"):
         from src.catalog.menu_filters import product_ids_for_menu
 

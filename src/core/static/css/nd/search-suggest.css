@@ -1,0 +1,67 @@
+.nd-header__search-inline,
+.nd-mobile-search__form,
+.nd-burger__search {
+  position: relative;
+}
+
+.nd-search-suggest {
+  position: absolute;
+  z-index: 6;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(360px, 60dvh);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  list-style: none;
+  background: var(--nd-surface);
+  border: 1px solid var(--nd-header-border);
+}
+
+.nd-search-suggest[hidden] {
+  display: none;
+}
+
+.nd-search-suggest__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 12px;
+  color: inherit;
+  text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nd-search-suggest__link.is-active,
+.nd-search-suggest__link:hover {
+  background: var(--nd-dialog-row);
+}
+
+.nd-search-suggest__img {
+  flex: none;
+  width: 40px;
+  height: 48px;
+  object-fit: cover;
+  background: var(--nd-dialog-row);
+}
+
+.nd-search-suggest__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nd-search-suggest__name,
+.nd-search-suggest__price {
+  overflow-wrap: anywhere;
+}
+
+.nd-search-suggest__price {
+  color: var(--nd-muted);
+  font-size: 14px;
+}

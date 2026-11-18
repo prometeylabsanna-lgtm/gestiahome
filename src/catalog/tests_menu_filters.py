@@ -5,6 +5,29 @@ from src.catalog.models import Product
 from src.catalog.selectors import filter_catalog, parse_catalog_filters
 
 
+class SearchSuggestTests(TestCase):
+    def test_two_letters_return_matching_products(self):
+        short = self.client.get("/katalog/pidkazky/?q=т")
+        self.assertEqual(short.json()["items"], [])
+        page = self.client.get("/katalog/pidkazky/?q=та")
+        names = [item["name"] for item in page.json()["items"]]
+        self.assertIn("Бокс «Тартан»", names)
+        self.assertNotIn("Бокс «Квітка-душа»", names)
+        tartan = next(item for item in page.json()["items"] if item["name"] == "Бокс «Тартан»")
+        self.assertEqual(tartan["url"], "/kolektsiia/tartan/")
+        self.assertIn("4 980", tartan["price"])
+
+
+class UkrainianSearchTests(TestCase):
+    def test_header_query_finds_tartan_ignoring_case(self):
+        page = self.client.get("/katalog/?q=тартан")
+        self.assertContains(page, "Бокс «Тартан»")
+        self.assertNotContains(page, "Бокс «Квітка-душа»")
+
+        upper = self.client.get("/katalog/?q=ТАРТАН")
+        self.assertContains(upper, "Бокс «Тартан»")
+
+
 class MenuCatalogFilterTests(TestCase):
     def test_facet_uses_header_menu(self):
         page = self.client.get("/katalog/")

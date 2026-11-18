@@ -1,6 +1,7 @@
+from decimal import Decimal
 from urllib.parse import urlencode
 
-from django.http import Http404, QueryDict
+from django.http import Http404, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 
 from src.catalog.menu_filters import accessory_crumb, menu_facets
@@ -11,6 +12,7 @@ from src.catalog.selectors import (
     category_scope,
     curated_catalog_products,
     filter_catalog,
+    suggest_products,
     filter_groups_for_catalog,
     filters_reset_url,
     parse_catalog_filters,
@@ -164,3 +166,44 @@ def product_detail(request, slug):
             "menu_crumb": accessory_crumb(product),
         },
     )
+
+
+def _suggest_price(product, currency):
+    amount = product.price_eur if currency == "eur" else product.price_uah
+    whole = int(Decimal(amount or 0).quantize(Decimal("1")))
+    text = f"{whole:,}".replace(",", " ")
+    return f"{text} €" if currency == "eur" else f"{text} UAH"
+
+
+def _suggest_image(product):
+    if product.card_image:
+        return product.card_image.url
+    cover = product.cover
+    if cover is not None and cover.image:
+        return cover.image.url
+    return ""
+
+
+def catalog_suggest(request):
+    products = suggest_products(request.GET.get("q") or "")
+    collections = {
+        row.product_id: row.get_absolute_url()
+        for row in HomeCollection.objects.filter(
+            product_id__in=[product.pk for product in products],
+            is_active=True,
+        ).exclude(slug="")
+    }
+    currency = request.session.get("currency", "uah")
+    if currency not in {"uah", "eur"}:
+        currency = "uah"
+    items = []
+    for product in products:
+        items.append(
+            {
+                "name": product.name,
+                "url": collections.get(product.pk) or product.get_absolute_url(),
+                "price": _suggest_price(product, currency),
+                "image": _suggest_image(product),
+            }
+        )
+    return JsonResponse({"items": items})

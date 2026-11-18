@@ -42,6 +42,7 @@
         action="{% url 'catalog' %}"
         method="get"
         data-search-form
+        data-suggest-url="{% url 'catalog_suggest' %}"
         hidden
       >
         <label class="nd-header__search-label">
@@ -55,8 +56,12 @@
             autocomplete="off"
             aria-label="{% trans 'Пошук товарів' %}"
             data-search-input
+            aria-autocomplete="list"
+            aria-controls="desk-search-suggest"
+            aria-expanded="false"
           >
         </label>
+        <ul class="nd-search-suggest" id="desk-search-suggest" role="listbox" hidden></ul>
       </form>
     </nav>
 
@@ -214,7 +219,7 @@
 
   <div class="nd-mobile-search" id="mobile-search-panel" data-mobile-search hidden>
     <button class="nd-mobile-search__scrim" type="button" data-mobile-search-close tabindex="-1" aria-label="{% trans 'Закрити пошук' %}"></button>
-    <form class="nd-mobile-search__form" role="search" action="{% url 'catalog' %}" method="get">
+    <form class="nd-mobile-search__form" role="search" action="{% url 'catalog' %}" method="get" data-search-form data-suggest-url="{% url 'catalog_suggest' %}">
       <label class="nd-mobile-search__label">
         {% include "partials/nd/icons/search.html" with size=18 stroke="1.4" %}
         <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
@@ -227,8 +232,12 @@
           placeholder="{% trans 'Пошук' %}"
           aria-label="{% trans 'Пошук товарів' %}"
           data-mobile-search-input
+          aria-autocomplete="list"
+          aria-controls="mobile-search-suggest"
+          aria-expanded="false"
         >
       </label>
+      <ul class="nd-search-suggest" id="mobile-search-suggest" role="listbox" hidden></ul>
     </form>
   </div>
 
@@ -314,12 +323,13 @@
 
 <nav class="burger nd-burger" id="burger-panel" data-burger-panel aria-label="{% trans 'Мобільна навігація' %}" hidden>
   <div class="burger__body nd-burger__body">
-    <form class="burger-search nd-burger__search" action="{% url 'catalog' %}" method="get" role="search">
+    <form class="burger-search nd-burger__search" action="{% url 'catalog' %}" method="get" role="search" data-search-form data-suggest-url="{% url 'catalog_suggest' %}">
       <label class="nd-burger__search-label">
         {% include "partials/nd/icons/search.html" with size=24 %}
         <span class="visually-hidden" id="burger-q-label">{% trans "Пошук товарів" %}</span>
-        <input id="burger-q" name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off" aria-labelledby="burger-q-label">
+        <input id="burger-q" name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off" aria-labelledby="burger-q-label" aria-autocomplete="list" aria-controls="burger-search-suggest" aria-expanded="false">
       </label>
+      <ul class="nd-search-suggest" id="burger-search-suggest" role="listbox" hidden></ul>
     </form>
 
     <div class="burger__catalog nd-burger__catalog" data-burger-catalog>

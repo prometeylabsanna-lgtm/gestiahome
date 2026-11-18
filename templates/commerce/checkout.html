@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static shop_tags %}
+{% load i18n static shop_tags ui_tags %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/checkout.css' %}">
@@ -8,21 +8,21 @@
   <script src="{% static 'js/pages/checkout.js' %}" defer></script>
   <script src="{% static 'js/nd/checkout-label.js' %}" defer></script>
 {% endblock %}
-{% block title %}{% trans "Оформлення замовлення" %}{% endblock %}
+{% block title %}{% ui "checkout_title" %}{% endblock %}
 
 {% block content %}
   <div class="nd-checkout" data-nd-checkout>
-    <nav class="nd-checkout__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+    <nav class="nd-checkout__crumbs" aria-label="{% ui "crumbs" %}">
       <ol class="nd-checkout__crumbs-list">
         <li>
-          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <a href="{% url 'home' %}">{% ui "crumb_home" %}</a>
           <span aria-hidden="true">/</span>
         </li>
         <li>
-          <a href="{% url 'cart' %}">{% trans "Кошик" %}</a>
+          <a href="{% url 'cart' %}">{% ui "cart" %}</a>
           <span aria-hidden="true">/</span>
         </li>
-        <li aria-current="page">{% trans "Оформлення" %}</li>
+        <li aria-current="page">{% ui "checkout_crumb" %}</li>
       </ol>
     </nav>
 
@@ -39,7 +39,7 @@
       <input type="hidden" name="idem" value="{{ idem }}">
 
       <div class="nd-co__main">
-        <h1 class="nd-co__title">{% trans "Оформлення замовлення" %}</h1>
+        <h1 class="nd-co__title">{% ui "checkout_title" %}</h1>
 
         {% if cart_notice %}
           <p class="nd-co-error" role="alert">{{ cart_notice }}</p>
@@ -49,13 +49,13 @@
         {% endif %}
 
         <fieldset class="nd-co-sec">
-          <legend class="nd-co-sec__legend">{% trans "Контактні дані" %}</legend>
+          <legend class="nd-co-sec__legend">{% ui "contacts_legend" %}</legend>
           <div class="nd-co-sec__fields">
             <label class="nd-co-field{% if form.name.errors %} is-invalid{% endif %}" data-field-wrap>
               <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
-              <input name="name" type="text" maxlength="120" autocomplete="name" autocapitalize="words" spellcheck="false" pattern="[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+(?:['’ʼ -][A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+)*" data-validate="name" aria-describedby="co-name-error" placeholder="{% trans 'Ім’я' %}" value="{{ form.name.value|default_if_none:'' }}">
+              <input name="name" type="text" maxlength="120" autocomplete="name" autocapitalize="words" spellcheck="false" pattern="[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+(?:['’ʼ -][A-Za-zА-Яа-яЁёІіЇїЄєҐґ]+)*" data-validate="name" aria-describedby="co-name-error" placeholder="{% ui "name_ph" %}" value="{{ form.name.value|default_if_none:'' }}">
             </label>
             <p class="nd-co-error" id="co-name-error" data-error-for="name"{% if not form.name.errors %} hidden{% endif %}>{% if form.name.errors %}{{ form.name.errors|striptags }}{% endif %}</p>
 
@@ -63,7 +63,7 @@
               <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
-              <input name="phone" type="tel" inputmode="tel" maxlength="19" autocomplete="tel" pattern="\+38 \(0(?:39|50|63|66|67|68|73|77|91|92|93|94|95|96|97|98|99)\) \d{3}-\d{2}-\d{2}" data-validate="phone" aria-describedby="co-phone-error" placeholder="{% trans 'Номер телефону' %}" value="{{ form.phone.value|default_if_none:'' }}">
+              <input name="phone" type="tel" inputmode="tel" maxlength="19" autocomplete="tel" pattern="\+38 \(0(?:39|50|63|66|67|68|73|77|91|92|93|94|95|96|97|98|99)\) \d{3}-\d{2}-\d{2}" data-validate="phone" aria-describedby="co-phone-error" placeholder="{% ui "phone_ph" %}" value="{{ form.phone.value|default_if_none:'' }}">
             </label>
             <p class="nd-co-error" id="co-phone-error" data-error-for="phone"{% if not form.phone.errors %} hidden{% endif %}>{% if form.phone.errors %}{{ form.phone.errors|striptags }}{% endif %}</p>
 
@@ -71,14 +71,14 @@
               <svg class="nd-co-field__ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M3 5h18v14H3zM3 6l9 7 9-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
-              <input name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" data-validate="email" aria-describedby="co-email-error" placeholder="{% trans 'Email' %}" value="{{ form.email.value|default_if_none:'' }}">
+              <input name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" data-validate="email" aria-describedby="co-email-error" placeholder="{% ui "email_ph" %}" value="{{ form.email.value|default_if_none:'' }}">
             </label>
             <p class="nd-co-error" id="co-email-error" data-error-for="email"{% if not form.email.errors %} hidden{% endif %}>{% if form.email.errors %}{{ form.email.errors|striptags }}{% endif %}</p>
           </div>
         </fieldset>
 
         <fieldset class="nd-co-sec">
-          <legend class="nd-co-sec__legend" id="ship-label">{% trans "Доставка" %}</legend>
+          <legend class="nd-co-sec__legend" id="ship-label">{% ui "delivery" %}</legend>
           <div class="nd-co-ship" role="radiogroup" aria-labelledby="ship-label">
             {% for value, label in form.delivery_method.field.choices %}
               <label class="nd-co-ship__tab">
@@ -96,18 +96,18 @@
             data-np-cities-url="{% url 'np_cities' %}"
             data-np-warehouses-url="{% url 'np_warehouses' %}"
             data-np-streets-url="{% url 'np_streets' %}"
-            data-label-branch="{% trans 'Відділення' %}"
-            data-label-locker="{% trans 'Поштомат' %}"
-            data-label-street="{% trans 'Вулиця' %}"
-            data-hint-np-off="{% trans 'Підказки недоступні — вкажіть місто і відділення вручну.' %}"
-            data-hint-cities-fail="{% trans 'Не вдалося завантажити міста. Спробуйте ще раз або введіть вручну.' %}"
-            data-hint-no-branches="{% trans 'Для цього міста відділень не знайдено — введіть вручну.' %}"
-            data-hint-branches-fail="{% trans 'Не вдалося завантажити відділення — введіть вручну.' %}"
-            data-hint-streets-off="{% trans 'Підказки вулиць недоступні — введіть вручну.' %}"
-            data-hint-no-streets="{% trans 'Вулиць не знайдено. Уточніть назву або введіть вручну.' %}"
-            data-hint-streets-fail="{% trans 'Не вдалося завантажити вулиці — введіть вручну.' %}"
-            data-hint-pick-city="{% trans 'Оберіть місто зі списку або введіть назву.' %}"
-            data-hint-street-format="{% trans 'Вулиця окремо; будинок і квартиру — у полях праворуч.' %}"
+            data-label-branch="{% ui "branch_ph" %}"
+            data-label-locker="{% ui "locker_ph" %}"
+            data-label-street="{% ui "street_ph" %}"
+            data-hint-np-off="{% ui "hint_np_off" %}"
+            data-hint-cities-fail="{% ui "hint_cities_fail" %}"
+            data-hint-no-branches="{% ui "hint_no_branches" %}"
+            data-hint-branches-fail="{% ui "hint_branches_fail" %}"
+            data-hint-streets-off="{% ui "hint_streets_off" %}"
+            data-hint-no-streets="{% ui "hint_no_streets" %}"
+            data-hint-streets-fail="{% ui "hint_streets_fail" %}"
+            data-hint-pick-city="{% ui "hint_pick_city" %}"
+            data-hint-street-format="{% ui "hint_street_format" %}"
           >
             <div class="nd-co-ship-pair">
               <div class="co-suggest">
@@ -128,7 +128,7 @@
                     data-np-city
                     data-validate="required"
                     aria-describedby="co-city-error"
-                    placeholder="{% trans 'Місто' %}"
+                    placeholder="{% ui "city_ph" %}"
                     value="{{ form.city.value|default_if_none:'' }}"
                   >
                 </label>
@@ -156,7 +156,7 @@
                       data-np-branch
                       data-validate="required"
                       aria-describedby="co-branch-error"
-                      placeholder="{% trans 'Відділення' %}"
+                      placeholder="{% ui "branch_ph" %}"
                       value="{{ form.branch.value|default_if_none:'' }}"
                     >
                     <svg class="nd-co-field__arrow" data-np-arrow width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -166,7 +166,7 @@
                   <ul id="np-branch-listbox" class="co-suggest__list" role="listbox" hidden></ul>
                 </div>
                 <label class="nd-co-field nd-co-field--house" data-np-house hidden>
-                  <span class="visually-hidden">{% trans "Будинок" %}</span>
+                  <span class="visually-hidden">{% ui "house" %}</span>
                   <input
                     name="house"
                     type="text"
@@ -174,12 +174,12 @@
                     inputmode="text"
                     autocomplete="off"
                     data-np-house-input
-                    placeholder="{% trans 'буд.' %}"
+                    placeholder="{% ui "house_ph" %}"
                     value="{{ form.house.value|default_if_none:'' }}"
                   >
                 </label>
                 <label class="nd-co-field nd-co-field--apt" data-np-apt hidden>
-                  <span class="visually-hidden">{% trans "Квартира" %}</span>
+                  <span class="visually-hidden">{% ui "apartment" %}</span>
                   <input
                     name="apartment"
                     type="text"
@@ -187,7 +187,7 @@
                     inputmode="text"
                     autocomplete="address-line2"
                     data-np-apartment
-                    placeholder="{% trans 'кв.' %}"
+                    placeholder="{% ui "apt_ph" %}"
                     value="{{ form.apartment.value|default_if_none:'' }}"
                   >
                 </label>
@@ -203,7 +203,7 @@
         </fieldset>
 
         <fieldset class="nd-co-sec">
-          <legend class="nd-co-sec__legend" id="pay-label">{% trans "Оплата" %}</legend>
+          <legend class="nd-co-sec__legend" id="pay-label">{% ui "payment" %}</legend>
           <div class="nd-co-pay" role="radiogroup" aria-labelledby="pay-label">
             {% for value, label in form.payment_method.field.choices %}
               <label class="nd-co-pay__opt">
@@ -219,13 +219,13 @@
         <label class="nd-co-consent" data-field-wrap>
           <input type="checkbox" name="consent" data-validate="consent"{% if form.consent.value %} checked{% endif %}>
           <span class="nd-co-consent__box" aria-hidden="true"></span>
-          <span class="nd-co-consent__text">{% trans "Погоджуюсь на обробку персональних даних згідно з" %} <a href="{% url 'privacy' %}">{% trans "Політикою конфіденційності" %}</a></span>
+          <span class="nd-co-consent__text">{% ui "consent" %} <a href="{% url 'privacy' %}">{% ui "privacy_link" %}</a></span>
         </label>
         <p class="nd-co-error" data-error-for="consent"{% if not form.consent.errors %} hidden{% endif %}>{% if form.consent.errors %}{{ form.consent.errors|striptags }}{% endif %}</p>
       </div>
 
-      <aside class="nd-co__aside" aria-label="{% trans 'Ваше замовлення' %}">
-        <h2 class="nd-co__aside-title">{% trans "Ваше замовлення" %}</h2>
+      <aside class="nd-co__aside" aria-label="{% ui "order_aside" %}">
+        <h2 class="nd-co__aside-title">{% ui "order_aside" %}</h2>
         <ul class="nd-co__lines">
           {% for row in rows %}
             <li class="nd-co__line"{% if row.over_stock %} data-over-stock{% endif %}>
@@ -234,19 +234,19 @@
             </li>
           {% endfor %}
         </ul>
-        <p class="nd-co__ship">{% trans "Доставка: за тарифом перевізника" %}</p>
+        <p class="nd-co__ship">{% ui "ship_rate" %}</p>
         <div class="nd-co__total">
-          <span class="nd-co__total-label">{% trans "Разом:" %}</span>
+          <span class="nd-co__total-label">{% ui "total_label" %}</span>
           <span class="nd-co__total-value">{% line_uah total %}</span>
         </div>
         <button
           class="nd-co__submit"
           type="submit"
           data-nd-checkout-submit
-          data-label-place="{% trans 'Оформити замовлення' %}"
-          data-label-pay="{% trans 'Оплатити замовлення' %}"
-        >{% trans "Оформити замовлення" %}</button>
-        <p class="nd-co__note">{% trans "Підтвердження замовлення та деталі оплати надсилаються після оформлення" %}</p>
+          data-label-place="{% ui "place_order" %}"
+          data-label-pay="{% ui "pay_order" %}"
+        >{% ui "place_order" %}</button>
+        <p class="nd-co__note">{% ui "checkout_note" %}</p>
       </aside>
     </form>
   </div>

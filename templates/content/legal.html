@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static richtext %}
+{% load i18n static richtext ui_tags %}
 
 {% block title %}{{ doc.seo_title }}{% endblock %}
 {% block description %}{{ doc.seo_description }}{% endblock %}
@@ -10,14 +10,14 @@
 
 {% block content %}
   <div class="legal-page" data-qa="legal-page">
-    {% trans "Головна" as home_label %}
+    {% ui "crumb_home" as home_label %}
     {% url 'home' as home_url %}
     {% include "partials/crumbs.html" with crumb_link_url=home_url crumb_link_label=home_label crumb_current=doc.title %}
     <article class="legal-card">
       <header class="legal-card__head">
         <h1>{{ doc.title }}</h1>
         {% if doc.updated %}
-          <p class="legal-card__updated">{% trans "Оновлено" %}: {{ doc.updated }}</p>
+          <p class="legal-card__updated">{% ui "legal_updated" %}: {{ doc.updated }}</p>
         {% endif %}
       </header>
       {% if doc.html %}
@@ -32,11 +32,11 @@
           </section>
         {% endfor %}
       {% endif %}
-      <nav class="legal-nav" aria-label="{% trans 'Юридичні документи' %}">
-        <a href="{% url 'offer' %}"{% if doc.slug == 'offer' %} class="is-current" aria-current="page"{% endif %}>{% trans "Оферта" %}</a>
-        <a href="{% url 'shipping' %}"{% if doc.slug == 'shipping' %} class="is-current" aria-current="page"{% endif %}>{% trans "Доставка та оплата" %}</a>
-        <a href="{% url 'privacy' %}"{% if doc.slug == 'privacy' %} class="is-current" aria-current="page"{% endif %}>{% trans "Конфіденційність" %}</a>
-        <a href="{% url 'cookies' %}"{% if doc.slug == 'cookies' %} class="is-current" aria-current="page"{% endif %}>{% trans "Cookies" %}</a>
+      <nav class="legal-nav" aria-label="{% ui "legal_nav" %}">
+        <a href="{% url 'offer' %}"{% if doc.slug == 'offer' %} class="is-current" aria-current="page"{% endif %}>{% ui "legal_offer" %}</a>
+        <a href="{% url 'shipping' %}"{% if doc.slug == 'shipping' %} class="is-current" aria-current="page"{% endif %}>{% ui "legal_shipping" %}</a>
+        <a href="{% url 'privacy' %}"{% if doc.slug == 'privacy' %} class="is-current" aria-current="page"{% endif %}>{% ui "legal_privacy" %}</a>
+        <a href="{% url 'cookies' %}"{% if doc.slug == 'cookies' %} class="is-current" aria-current="page"{% endif %}>{% ui "legal_cookies" %}</a>
       </nav>
     </article>
   </div>

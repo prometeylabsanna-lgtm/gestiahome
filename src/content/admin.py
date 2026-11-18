@@ -24,7 +24,9 @@ import src.content.admin_home_banners  # noqa: F401, E402
 import src.content.admin_legal  # noqa: F401, E402
 import src.content.admin_menu  # noqa: F401, E402
 import src.content.admin_styles  # noqa: F401, E402
+import src.content.admin_contacts  # noqa: F401, E402
 import src.content.admin_thankyou  # noqa: F401, E402
+import src.content.admin_ui  # noqa: F401, E402
 
 
 class SingletonAdmin(GestiaModelAdmin):
@@ -41,12 +43,31 @@ class SiteSettingsAdmin(SingletonAdmin):
         uk_fields=(
             "phone",
             "email",
+            "address_uk",
             "instagram_url",
             "pinterest_url",
             "telegram_url",
             "logo",
+            "logo_alt_uk",
+            "mark_light",
+            "mark_dark",
+            "nav_about_uk",
+            "nav_faq_uk",
+            "nav_contacts_uk",
+            "nav_all_uk",
+            "menu_title_uk",
+            "credit_uk",
         ),
-        en_fields=(),
+        en_fields=(
+            "address_en",
+            "logo_alt_en",
+            "nav_about_en",
+            "nav_faq_en",
+            "nav_contacts_en",
+            "nav_all_en",
+            "menu_title_en",
+            "credit_en",
+        ),
     )
 
 

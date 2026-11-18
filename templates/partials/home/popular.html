@@ -1,4 +1,4 @@
-{% load i18n shop_tags static content_tags %}
+{% load i18n shop_tags static content_tags ui_tags %}
 {% cms block.title "popular_title" as pop_title %}
 {% cms block.cta "popular_cta" as pop_cta %}
 {% if pop_nav %}
@@ -37,12 +37,12 @@
   {% if pop_cta %}
     <div class="pop-actions">
       <a class="figma-btn figma-btn--brown" href="{% url 'catalog' %}">{{ pop_cta }}</a>
-      <button class="pop-nav__btn" type="button" data-about-pop-prev aria-label="{% trans 'Попередні товари' %}">
+      <button class="pop-nav__btn" type="button" data-about-pop-prev aria-label="{% ui "prev_products" %}">
         <span class="pop-nav__turn">
           <img src="{% static 'figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg' %}" width="15" height="15" alt="">
         </span>
       </button>
-      <button class="pop-nav__btn pop-nav__btn--next" type="button" data-about-pop-next aria-label="{% trans 'Наступні товари' %}">
+      <button class="pop-nav__btn pop-nav__btn--next" type="button" data-about-pop-next aria-label="{% ui "next_products" %}">
         <span class="pop-nav__turn">
           <img src="{% static 'figma/about/m/0bb23f7c-e2ab-4658-a731-ca841f4df6c2.svg' %}" width="15" height="15" alt="">
         </span>

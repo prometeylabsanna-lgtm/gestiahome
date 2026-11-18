@@ -1,8 +1,8 @@
-{% load i18n %}
-<nav class="crumbs" aria-label="{% trans 'Розділ' %}">
+{% load i18n ui_tags %}
+<nav class="crumbs" aria-label="{% ui "crumb_section" %}">
   <ol>
-    <li><a href="{% url 'home' %}">{% trans "Головна" %}</a></li>
-    <li><a href="{% url 'catalog' %}">{% trans "Каталог" %}</a></li>
+    <li><a href="{% url 'home' %}">{% ui "crumb_home" %}</a></li>
+    <li><a href="{% url 'catalog' %}">{% ui "catalog" %}</a></li>
     {% for crumb in crumbs %}
       <li>
         {% if forloop.last and not product %}

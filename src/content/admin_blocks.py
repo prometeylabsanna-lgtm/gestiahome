@@ -455,6 +455,7 @@ class _SingletonAdmin(GestiaModelAdmin):
         return HttpResponseRedirect(url)
 
 
+@admin.register(ContactForms)
 class ContactFormsAdmin(_SingletonAdmin):
     """Сховано з меню; literals покривають підписи форм."""
 

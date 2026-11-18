@@ -70,6 +70,7 @@
 
   function bindField(field) {
     if (!field || field.dataset.gestiaCount === "1") return;
+    if ((field.getAttribute("name") || "") === "username") return;
     if (field.closest && field.closest(".tox-tinymce")) return;
     // TinyMCE textarea must not get a plain counter as a flex sibling —
     // that squeezes .tox-tinymce to ~100px. Counters attach via bindTiny.

@@ -1,4 +1,4 @@
-{% load i18n static content_tags richtext %}
+{% load i18n static content_tags richtext ui_tags %}
 {% if block %}
   {% cms block.title "collections_title" as col_title %}
   {% cms block.link_label "collections_link" as col_slogan %}
@@ -15,13 +15,15 @@
   </div>
   <div class="nd-cols__rule" aria-hidden="true">
     <span class="nd-cols__line"></span>
+    {% if site_settings.mark_light %}
     <img
       class="nd-cols__mark"
-      src="{% static 'nd/g-mark-light.png' %}"
+      src="{{ site_settings.mark_light.url }}"
       width="34"
       height="50"
       alt=""
     >
+    {% endif %}
     <span class="nd-cols__line"></span>
   </div>
   <div class="nd-cols__list">
@@ -65,7 +67,7 @@
             <a
               class="nd-col__arrow"
               href="{{ item.get_absolute_url }}"
-              aria-label="{% blocktrans with name=item.title %}Детальніше про колекцію {{ name }}{% endblocktrans %}"
+              aria-label="{% ui "more_collection" name=item.title %}"
             >
               <svg width="46" height="46" viewBox="0 0 46 46" fill="none" aria-hidden="true">
                 <path d="M1 1l44 44M45 8v37H8" stroke="currentColor" stroke-width="1.5"></path>

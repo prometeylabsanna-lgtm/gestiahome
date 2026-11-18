@@ -1,4 +1,4 @@
-{% load i18n shop_tags static content_tags %}
+{% load i18n shop_tags static content_tags ui_tags %}
 {% with locale=home_blocks.locale %}
 <div class="nd-header-spacer" aria-hidden="true"></div>
 <header class="site-header nd-header" data-header data-nd-header>
@@ -9,30 +9,30 @@
       data-burger
       aria-expanded="false"
       aria-controls="burger-panel"
-      aria-label="{% trans 'Меню' %}"
-      data-label-open="{% trans 'Меню' %}"
-      data-label-close="{% trans 'Закрити меню' %}"
+      aria-label="{% ui "menu" %}"
+      data-label-open="{% ui "menu" %}"
+      data-label-close="{% ui "menu_close" %}"
     >
       <span class="nd-header__burger-open">{% include "partials/nd/icons/burger.html" %}</span>
       <span class="nd-header__burger-close" hidden>{% include "partials/nd/icons/burger-close.html" %}</span>
     </button>
 
-    <nav class="head-nav nd-header__nav" aria-label="{% trans 'Основна навігація' %}">
+    <nav class="head-nav nd-header__nav" aria-label="{% ui "nav_main" %}">
       <button
         class="head-nav__catalog nd-header__catalog"
         type="button"
         data-catalog
         aria-expanded="false"
         aria-controls="mega-panel"
-      >{% trans "Каталог" %}</button>
-      <a class="head-nav__about nd-header__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
+      >{% ui "catalog" %}</button>
+      <a class="head-nav__about nd-header__about" href="{% url 'about' %}">{{ site_settings.nav_about }}</a>
       <button
         class="nd-header__search-btn"
         type="button"
         data-search-open
         aria-expanded="false"
         aria-controls="desk-search"
-        aria-label="{% trans 'Пошук' %}"
+        aria-label="{% ui "search" %}"
         data-search-closed
       >
         {% include "partials/nd/icons/search.html" %}
@@ -49,14 +49,14 @@
       >
         <label class="nd-header__search-label">
           {% include "partials/nd/icons/search.html" with size=18 %}
-          <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
+          <span class="visually-hidden">{% ui "search_goods" %}</span>
           <input
             type="search"
             name="q"
             maxlength="80"
             enterkeyhint="search"
             autocomplete="off"
-            aria-label="{% trans 'Пошук товарів' %}"
+            aria-label="{% ui "search_goods" %}"
             data-search-input
             aria-autocomplete="list"
             aria-controls="desk-search-suggest"
@@ -80,7 +80,7 @@
             <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
             <input type="hidden" name="language" value="uk">
           {% endif %}
-          <button type="submit" aria-label="{% trans 'Змінити мову' %}">
+          <button type="submit" aria-label="{% ui "lang_change" %}">
             <span class="nd-header__opt{% if LANGUAGE_CODE == 'uk' %} is-current{% endif %}">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if LANGUAGE_CODE == 'en' %} is-current{% endif %}">EN</span>
           </button>
         </form>
@@ -95,15 +95,15 @@
         data-region-open
         aria-expanded="false"
         aria-controls="region-dialog"
-        aria-label="{% trans 'Змінити місце доставки та валюту' %}"
+        aria-label="{% ui "locale_change" %}"
       >
         <span class="nd-header__opt{% if currency == 'uah' %} is-current{% endif %}">₴</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if currency == 'eur' %} is-current{% endif %}">€</span>
       </button>
-      <a class="nd-header__icon head-bag" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}" data-qa="header-wishlist">
+      <a class="nd-header__icon head-bag" href="{% url 'wishlist' %}" aria-label="{% ui "wishlist" %}" data-qa="header-wishlist">
         {% include "partials/nd/icons/heart.html" %}
         {% include "partials/wishlist_count.html" %}
       </a>
-      <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
+      <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% ui "cart" %}">
         {% include "partials/nd/icons/bag.html" %}
         {% include "partials/cart_count.html" %}
       </a>
@@ -116,16 +116,16 @@
         data-mobile-search-open
         aria-expanded="false"
         aria-controls="mobile-search-panel"
-        aria-label="{% trans 'Пошук' %}"
+        aria-label="{% ui "search" %}"
         data-mobile-search-btn
       >
         {% include "partials/nd/icons/search.html" %}
       </button>
-      <a class="nd-header__icon head-bag" href="{% url 'wishlist' %}" aria-label="{% trans 'Обране' %}" data-qa="header-wishlist-mobile">
+      <a class="nd-header__icon head-bag" href="{% url 'wishlist' %}" aria-label="{% ui "wishlist" %}" data-qa="header-wishlist-mobile">
         {% include "partials/nd/icons/heart.html" %}
         {% include "partials/wishlist_count_mobile.html" %}
       </a>
-      <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% trans 'Кошик' %}">
+      <a class="nd-header__icon head-bag" href="{% url 'cart' %}" aria-label="{% ui "cart" %}">
         {% include "partials/nd/icons/bag.html" %}
         {% include "partials/cart_count_mobile.html" %}
       </a>
@@ -133,11 +133,11 @@
   </div>
 
   <div class="mega nd-mega" id="mega-panel" data-mega hidden>
-    <button class="mega__scrim nd-mega__scrim" type="button" data-catalog-close tabindex="-1" aria-label="{% trans 'Закрити каталог' %}"></button>
+    <button class="mega__scrim nd-mega__scrim" type="button" data-catalog-close tabindex="-1" aria-label="{% ui "catalog_close" %}"></button>
     <div class="mega__panel nd-mega__panel">
       <div class="mega__inner nd-mega__inner">
-        <nav class="mega__nav nd-mega__nav" aria-label="{% trans 'Каталог' %}">
-          <a class="nd-mega__all" href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
+        <nav class="mega__nav nd-mega__nav" aria-label="{% ui "catalog" %}">
+          <a class="nd-mega__all" href="{% url 'catalog' %}">{{ site_settings.nav_all }}</a>
           <div class="mega__list nd-mega__list" data-menu-groups>
             {% for group in menu_groups %}
               <div
@@ -169,8 +169,8 @@
               </div>
             {% endfor %}
           </div>
-          <a class="nd-mega__faq" href="{% url 'faq' %}">{% cms "" "nav_faq" %}</a>
-          <a class="nd-mega__contacts" href="{% url 'contacts' %}">{% cms "" "nav_contacts" %}</a>
+          <a class="nd-mega__faq" href="{% url 'faq' %}">{{ site_settings.nav_faq }}</a>
+          <a class="nd-mega__contacts" href="{% url 'contacts' %}">{{ site_settings.nav_contacts }}</a>
           <ul class="nd-mega__social">
             <li>
               <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
@@ -221,19 +221,19 @@
   </div>
 
   <div class="nd-mobile-search" id="mobile-search-panel" data-mobile-search hidden>
-    <button class="nd-mobile-search__scrim" type="button" data-mobile-search-close tabindex="-1" aria-label="{% trans 'Закрити пошук' %}"></button>
+    <button class="nd-mobile-search__scrim" type="button" data-mobile-search-close tabindex="-1" aria-label="{% ui "search_close" %}"></button>
     <form class="nd-mobile-search__form" role="search" action="{% url 'catalog' %}" method="get" data-search-form data-suggest-url="{% url 'catalog_suggest' %}">
       <label class="nd-mobile-search__label">
         {% include "partials/nd/icons/search.html" with size=18 stroke="1.4" %}
-        <span class="visually-hidden">{% trans "Пошук товарів" %}</span>
+        <span class="visually-hidden">{% ui "search_goods" %}</span>
         <input
           type="search"
           name="q"
           maxlength="80"
           enterkeyhint="search"
           autocomplete="off"
-          placeholder="{% trans 'Пошук' %}"
-          aria-label="{% trans 'Пошук товарів' %}"
+          placeholder="{% ui "search" %}"
+          aria-label="{% ui "search_goods" %}"
           data-mobile-search-input
           aria-autocomplete="list"
           aria-controls="mobile-search-suggest"
@@ -258,7 +258,7 @@
       class="nd-region__close"
       type="button"
       data-region-close
-      aria-label="{% trans 'Закрити' %}"
+      aria-label="{% ui "close" %}"
       hidden
     >
       {% include "partials/nd/icons/close.html" %}
@@ -324,12 +324,12 @@
   {% endif %}
 </header>
 
-<nav class="burger nd-burger" id="burger-panel" data-burger-panel aria-label="{% trans 'Мобільна навігація' %}" hidden>
+<nav class="burger nd-burger" id="burger-panel" data-burger-panel aria-label="{% ui "burger" %}" hidden>
   <div class="burger__body nd-burger__body">
     <form class="burger-search nd-burger__search" action="{% url 'catalog' %}" method="get" role="search" data-search-form data-suggest-url="{% url 'catalog_suggest' %}">
       <label class="nd-burger__search-label">
         {% include "partials/nd/icons/search.html" with size=24 %}
-        <span class="visually-hidden" id="burger-q-label">{% trans "Пошук товарів" %}</span>
+        <span class="visually-hidden" id="burger-q-label">{% ui "search_goods" %}</span>
         <input id="burger-q" name="q" type="search" maxlength="80" enterkeyhint="search" autocomplete="off" aria-labelledby="burger-q-label" aria-autocomplete="list" aria-controls="burger-search-suggest" aria-expanded="false">
       </label>
       <ul class="nd-search-suggest" id="burger-search-suggest" role="listbox" hidden></ul>
@@ -343,11 +343,11 @@
         aria-expanded="true"
         aria-controls="burger-cats"
       >
-        <span>{% cms "" "menu_title" %}</span>
+        <span>{{ site_settings.menu_title }}</span>
         {% include "partials/nd/icons/chevron.html" %}
       </button>
       <div class="burger__cats nd-burger__cats" id="burger-cats" data-burger-cats data-menu-groups>
-        <a href="{% url 'catalog' %}">{% cms "" "nav_all" %}</a>
+        <a href="{% url 'catalog' %}">{{ site_settings.nav_all }}</a>
         {% for group in menu_groups %}
           <div
             class="nd-burger__group{% if group.open_by_default %} is-open{% endif %}"
@@ -377,14 +377,14 @@
             </ul>
           </div>
         {% endfor %}
-          <a href="{% url 'faq' %}">{% cms "" "nav_faq" %}</a>
-          <a href="{% url 'contacts' %}">{% cms "" "nav_contacts" %}</a>
+          <a href="{% url 'faq' %}">{{ site_settings.nav_faq }}</a>
+          <a href="{% url 'contacts' %}">{{ site_settings.nav_contacts }}</a>
         </div>
       </div>
 
       <div class="nd-burger__links">
-        <a class="burger__about" href="{% url 'about' %}">{% cms "" "nav_about" %}</a>
-        <a href="{% url 'wishlist' %}">{% trans "Обране" %}</a>
+        <a class="burger__about" href="{% url 'about' %}">{{ site_settings.nav_about }}</a>
+        <a href="{% url 'wishlist' %}">{% ui "wishlist" %}</a>
       </div>
 
     <ul class="nd-burger__foot">
@@ -417,7 +417,7 @@
               <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
               <input type="hidden" name="language" value="uk">
             {% endif %}
-            <button type="submit" aria-label="{% trans 'Змінити мову' %}">
+            <button type="submit" aria-label="{% ui "lang_change" %}">
               <span class="nd-header__opt{% if LANGUAGE_CODE == 'uk' %} is-current{% endif %}">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if LANGUAGE_CODE == 'en' %} is-current{% endif %}">EN</span>
             </button>
           </form>
@@ -426,7 +426,7 @@
           class="nd-header__currency"
           type="button"
           data-region-open
-          aria-label="{% trans 'Змінити місце доставки та валюту' %}"
+          aria-label="{% ui "locale_change" %}"
         >
           <span class="nd-header__opt{% if currency == 'uah' %} is-current{% endif %}">₴</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if currency == 'eur' %} is-current{% endif %}">€</span>
         </button>

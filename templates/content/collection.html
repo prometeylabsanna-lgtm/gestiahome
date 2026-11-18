@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n shop_tags static richtext %}
+{% load i18n shop_tags static richtext ui_tags %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/collection.css' %}">
@@ -12,14 +12,14 @@
 
 {% block content %}
   <article class="nd-colp" data-collection>
-    <nav class="nd-colp__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+    <nav class="nd-colp__crumbs" aria-label="{% ui "crumbs" %}">
       <ol class="nd-colp__crumbs-list">
         <li>
-          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <a href="{% url 'home' %}">{% ui "crumb_home" %}</a>
           <span aria-hidden="true">/</span>
         </li>
         <li>
-          <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
+          <a href="{% url 'catalog' %}">{% ui "catalog" %}</a>
           <span aria-hidden="true">/</span>
         </li>
         {% if menu_group %}
@@ -32,7 +32,7 @@
       </ol>
     </nav>
 
-    <section class="nd-colp__main" aria-labelledby="col-title" data-screen-label="Collection hero">
+    <section class="nd-colp__main" aria-labelledby="col-title" data-screen-label="{{ collection.title }}">
       {% if gallery %}
         <div class="nd-colp-gallery nd-scroll" data-colp-gallery>
           {% for photo in gallery %}
@@ -76,21 +76,21 @@
               {% csrf_token %}
               <input type="hidden" name="sku" value="{{ collection.product.sku }}">
               <button class="nd-colp__cart" type="submit">
-                <span>{% trans "Додати в кошик" %}</span>
+                <span>{% ui "add_to_cart" %}</span>
                 {% include "partials/nd/icons/bag.html" with size=16 %}
               </button>
             </form>
-            <a class="nd-colp__box-link" href="#box" data-scroll-box>{% trans "Що в боксі" %}</a>
+            <a class="nd-colp__box-link" href="#box" data-scroll-box>{% ui "box_link" %}</a>
           </div>
         {% else %}
           <div class="nd-colp__actions nd-colp__actions--solo">
-            <a class="nd-colp__box-link" href="#box" data-scroll-box>{% trans "Що в боксі" %}</a>
+            <a class="nd-colp__box-link" href="#box" data-scroll-box>{% ui "box_link" %}</a>
           </div>
         {% endif %}
 
         {% if addons %}
           <section class="nd-colp-addons" aria-labelledby="addons-title">
-            <h2 class="nd-colp-addons__title" id="addons-title">{% trans "Доповнити сет" %}</h2>
+            <h2 class="nd-colp-addons__title" id="addons-title">{% ui "addons" %}</h2>
             <ul class="nd-colp-addons__list">
               {% for addon in addons %}
                 <li class="nd-colp-addons__item">
@@ -127,7 +127,7 @@
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                         <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.5"></path>
                       </svg>
-                      <span>{% trans "Додати" %}</span>
+                      <span>{% ui "add" %}</span>
                     </button>
                   </form>
                 </li>
@@ -139,8 +139,8 @@
     </section>
 
     {% if collection.box_items %}
-      <section class="nd-colp-box" id="box" aria-labelledby="box-title" data-screen-label="In the box">
-        <h2 class="nd-colp-box__title" id="box-title">{% trans "У боксі" %}<br>{% trans "ти знайдеш" %}</h2>
+      <section class="nd-colp-box" id="box" aria-labelledby="box-title" data-screen-label="{% ui "box_line_1" %}">
+        <h2 class="nd-colp-box__title" id="box-title">{% ui "box_line_1" %}<br>{% ui "box_line_2" %}</h2>
         <ol class="nd-colp-box__list">
           {% for item in collection.box_items %}
             <li class="nd-colp-box__row">
@@ -153,7 +153,7 @@
     {% endif %}
 
     {% if ship_block or pay_block %}
-      <section class="nd-colp-notes" aria-label="{% trans 'Доставка та оплата' %}" data-screen-label="Delivery and payment">
+      <section class="nd-colp-notes" aria-label="{% ui "legal_shipping" %}" data-screen-label="{% ui "legal_shipping" %}">
         {% if ship_block %}
           <div class="nd-colp-note">
             {% if ship_block.title %}<h2 class="nd-colp-note__title">{{ ship_block.title }}</h2>{% endif %}
@@ -174,8 +174,8 @@
     {% endif %}
 
     {% if others %}
-      <section class="nd-colp-others" aria-labelledby="others-title" data-screen-label="{% trans 'Інші колекції' %}">
-        <h2 class="nd-colp-others__title" id="others-title">{% trans "Інші колекції" %}</h2>
+      <section class="nd-colp-others" aria-labelledby="others-title" data-screen-label="{% ui "others" %}">
+        <h2 class="nd-colp-others__title" id="others-title">{% ui "others" %}</h2>
         <ul class="nd-colp-others__list">
           {% for item in others %}
             <li>
@@ -202,7 +202,7 @@
     {% endif %}
 
     <div class="nd-colp__foot">
-      <a class="nd-colp__catalog" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
+      <a class="nd-colp__catalog" href="{% url 'catalog' %}">{% ui "go_catalog" %}</a>
     </div>
   </article>
 {% endblock %}

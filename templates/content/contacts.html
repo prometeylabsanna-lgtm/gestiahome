@@ -1,28 +1,28 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static ui_tags %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/contacts.css' %}">
 {% endblock %}
 
-{% block title %}{% trans "Контакти Gestia Home — телефон, пошта та майстерня" %}{% endblock %}
-{% block description %}{% trans "Контакти Gestia Home: телефон, електронна пошта й адреса майстерні. Напишіть у формі про святкові бокси, сервірування столу або доставку — ми відповімо." %}{% endblock %}
+{% block title %}{{ contacts_page.seo_title }}{% endblock %}
+{% block description %}{{ contacts_page.seo_description }}{% endblock %}
 
 {% block content %}
   <div class="nd-contacts">
-    <nav class="nd-contacts__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+    <nav class="nd-contacts__crumbs" aria-label="{% ui "crumbs" %}">
       <ol class="nd-contacts__crumbs-list">
         <li>
-          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <a href="{% url 'home' %}">{% ui "crumb_home" %}</a>
           <span aria-hidden="true">/</span>
         </li>
-        <li aria-current="page">{% trans "Контакти" %}</li>
+        <li aria-current="page">{{ contacts_page.title }}</li>
       </ol>
     </nav>
 
     <div class="nd-contacts__layout">
       <div class="nd-contacts__aside">
-        <h1 class="nd-contacts__title">{% trans "Контакти" %}</h1>
+        <h1 class="nd-contacts__title">{{ contacts_page.title }}</h1>
         <ul class="nd-contacts__nap">
           <li>
             <a class="nd-contacts__link" href="{{ nap.phone_href }}">{{ nap.phone }}</a>
@@ -42,15 +42,15 @@
           {% endif %}
         </ul>
         <p class="nd-contacts__more">
-          <a href="{% url 'catalog' %}">{% trans "Каталог" %}</a>
-          <a href="{% url 'shipping' %}">{% trans "Доставка та оплата" %}</a>
-          <a href="{% url 'faq' %}">{% trans "Актуальні питання" %}</a>
+          <a href="{% url 'catalog' %}">{% ui "catalog" %}</a>
+          <a href="{% url 'shipping' %}">{% ui "legal_shipping" %}</a>
+          <a href="{% url 'faq' %}">{{ site_settings.nav_faq }}</a>
         </p>
       </div>
 
       <div class="nd-contacts__main">
         <section class="nd-contacts__form" aria-labelledby="contacts-form">
-          <h2 id="contacts-form">{% trans "Зв'язатись з нами" %}</h2>
+          <h2 id="contacts-form">{{ contacts_page.form_title }}</h2>
           {% include "commerce/_contact_form.html" %}
         </section>
       </div>

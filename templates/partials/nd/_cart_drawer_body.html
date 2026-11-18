@@ -1,13 +1,13 @@
-{% load i18n static shop_tags %}
+{% load i18n static shop_tags ui_tags %}
 <div class="nd-cart-drawer__head">
   <h2 class="nd-cart-drawer__title">
-    {% trans "Кошик" %}{% if count_label %} {{ count_label }}{% endif %}
+    {% ui "cart" %}{% if count_label %} {{ count_label }}{% endif %}
   </h2>
   <button
     type="button"
     class="nd-cart-drawer__close"
     data-nd-cart-close
-    aria-label="{% trans 'Закрити кошик' %}"
+    aria-label="{% ui "cart_close" %}"
   >
     {% include "partials/nd/icons/close.html" with size=18 %}
   </button>
@@ -42,13 +42,13 @@
           <input type="hidden" name="sku" value="{{ focus.sku }}">
           <input type="hidden" name="panel" value="1">
           <input type="hidden" name="panel_sku" value="{{ panel_sku }}">
-          <div class="nd-cart-qty" role="group" aria-label="{% trans 'Кількість' %}">
-            <button type="button" class="nd-cart-qty__btn" data-qty-step="-1" aria-label="{% trans 'Зменшити кількість' %}">
+          <div class="nd-cart-qty" role="group" aria-label="{% ui "qty" %}">
+            <button type="button" class="nd-cart-qty__btn" data-qty-step="-1" aria-label="{% ui "qty_dec" %}">
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M1 6h10" stroke="currentColor" stroke-width="1.6"></path>
               </svg>
             </button>
-            <label class="visually-hidden" for="drawer-qty-{{ focus.sku }}">{% trans "Кількість" %}</label>
+            <label class="visually-hidden" for="drawer-qty-{{ focus.sku }}">{% ui "qty" %}</label>
             <input
               id="drawer-qty-{{ focus.sku }}"
               class="nd-cart-qty__value"
@@ -60,13 +60,13 @@
               inputmode="numeric"
               value="{{ focus.qty }}"
             >
-            <button type="button" class="nd-cart-qty__btn" data-qty-step="1" aria-label="{% trans 'Збільшити кількість' %}">
+            <button type="button" class="nd-cart-qty__btn" data-qty-step="1" aria-label="{% ui "qty_inc" %}">
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.6"></path>
               </svg>
             </button>
           </div>
-          <button class="nd-cart-drawer__remove" type="button" data-qty-set="0" aria-label="{% trans 'Видалити з кошика' %}">
+          <button class="nd-cart-drawer__remove" type="button" data-qty-set="0" aria-label="{% ui "cart_remove" %}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
             </svg>
@@ -77,7 +77,7 @@
   {% endif %}
 
   {% if has_addons %}
-    <h3 class="nd-cart-drawer__addons-title">{% trans "Доповнити сет" %}</h3>
+    <h3 class="nd-cart-drawer__addons-title">{% ui "addons" %}</h3>
     <ul class="nd-cart-drawer__addons">
       {% for item in addons %}
         <li class="nd-cart-drawer__addon">
@@ -113,12 +113,12 @@
               <button
                 class="nd-cart-drawer__addon-btn is-added"
                 type="submit"
-                aria-label="{% blocktrans with name=item.product.name %}Додано: {{ name }}{% endblocktrans %}"
+                aria-label="{% ui "added_name" name=item.product.name %}"
               >
                 <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path d="M1.5 6.5l3 3 6-7" stroke="currentColor" stroke-width="1.5"></path>
                 </svg>
-                <span>{% trans "Додано" %}</span>
+                <span>{% ui "added" %}</span>
               </button>
             </form>
           {% else %}
@@ -136,12 +136,12 @@
               <button
                 class="nd-cart-drawer__addon-btn"
                 type="submit"
-                aria-label="{% blocktrans with name=item.product.name %}Додати {{ name }}{% endblocktrans %}"
+                aria-label="{% ui "add_name" name=item.product.name %}"
               >
                 <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.5"></path>
                 </svg>
-                <span>{% trans "Додати" %}</span>
+                <span>{% ui "add" %}</span>
               </button>
             </form>
           {% endif %}
@@ -153,11 +153,11 @@
 
 <div class="nd-cart-drawer__foot">
   <div class="nd-cart-drawer__total">
-    <span>{% trans "Підсумок" %}</span>
+    <span>{% ui "drawer_summary" %}</span>
     <span>{% line_uah total %}</span>
   </div>
-  <a class="nd-cart-drawer__checkout" href="{% url 'checkout' %}">{% trans "Перейти до оформлення" %}</a>
-  <a class="nd-cart-drawer__view" href="{% url 'cart' %}">{% trans "Переглянути кошик" %}</a>
+  <a class="nd-cart-drawer__checkout" href="{% url 'checkout' %}">{% ui "cart_checkout" %}</a>
+  <a class="nd-cart-drawer__view" href="{% url 'cart' %}">{% ui "cart_view" %}</a>
 </div>
 
 {% if request.META.HTTP_HX_REQUEST and request.method == "POST" %}

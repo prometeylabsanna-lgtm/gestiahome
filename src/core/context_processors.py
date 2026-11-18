@@ -89,6 +89,13 @@ def shop(request):
         discount_modal = DiscountModal.load()
     except (OperationalError, ProgrammingError):
         discount_modal = None
+    ui_copy = None
+    try:
+        from src.content.models_ui import InterfaceCopy
+
+        ui_copy = InterfaceCopy.load()
+    except (OperationalError, ProgrammingError):
+        ui_copy = None
     next_path = _next_path(request)
     switch = {
         code: localize_path(next_path, code)
@@ -112,6 +119,7 @@ def shop(request):
         },
         "form_copy": form_copy,
         "discount_modal": discount_modal,
+        "ui": ui_copy,
         "page_style_key": page_style_key(request),
         "theme_font": theme_font_family(),
         "contact_form": apply_labels(style_form(ContactForm()), form_copy),

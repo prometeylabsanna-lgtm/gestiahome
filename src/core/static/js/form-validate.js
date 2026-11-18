@@ -1,19 +1,11 @@
 (function () {
-  const UK = {
-    required: "Поле обов'язкове для заповнення",
-    name: "Ім'я не може містити цифри або спецсимволи. Будь ласка, використовуйте лише букви",
-    nameShort: "Занадто коротке значення",
-    phone: "Введіть коректний номер мобільного телефону у форматі +380 (XX) XXX-XX-XX",
-    email: "Некоректний формат",
+  const DEFAULTS = {
+    required: "",
+    name: "",
+    nameShort: "",
+    phone: "",
+    email: "",
   };
-  const EN = {
-    required: "This field is required",
-    name: "The name cannot contain digits or special characters. Please use letters only",
-    nameShort: "The value is too short",
-    phone: "Enter a valid mobile number in the format +380 (XX) XXX-XX-XX",
-    email: "Invalid format",
-  };
-  const DEFAULTS = (document.documentElement.lang || "").toLowerCase().startsWith("en") ? EN : UK;
   const NAME_LETTERS = "A-Za-zА-Яа-яЁёІіЇїЄєҐґ";
   const NAME_PATTERN = "[" + NAME_LETTERS + "]+(?:['\u2019\u02bc -][" + NAME_LETTERS + "]+)*";
   const NAME_OK = new RegExp("^" + NAME_PATTERN + "$");

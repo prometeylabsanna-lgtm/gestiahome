@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static richtext %}
+{% load i18n static richtext ui_tags %}
 
 {% block title %}{% if kind == "contact" %}{{ thanks_page.contact_title }}{% else %}{{ thanks_page.order_title }}{% endif %}{% endblock %}
 
@@ -10,13 +10,15 @@
 {% block content %}
   <div class="nd-thanks" data-qa="thanks-page">
     <section class="nd-thanks__section" aria-labelledby="thanks-title">
+      {% if site_settings.mark_light %}
       <img
         class="nd-thanks__mark"
-        src="{% static 'nd/g-mark-light.png' %}"
+        src="{{ site_settings.mark_light.url }}"
         alt=""
         width="34"
         height="50"
       >
+      {% endif %}
       {% if kind == "contact" %}
         <h1 class="nd-thanks__title" id="thanks-title" data-qa="lead-success">{{ thanks_page.contact_title }}</h1>
         <div class="nd-thanks__text">{{ thanks_page.contact_text|richhtml }}</div>
@@ -26,14 +28,14 @@
           <div class="nd-thanks__text">{{ thanks_page.order_text|richhtml_number:number }}</div>
           {% if order and order.payment_method == "card" %}
             {% if order.payment_status == "paid" %}
-              <p class="nd-thanks__text" data-qa="pay-status">{% trans "Оплату отримано" %}</p>
+              <p class="nd-thanks__text" data-qa="pay-status">{% ui "pay_ok" %}</p>
             {% elif order.payment_status == "failed" %}
-              <p class="nd-thanks__text" data-qa="pay-status">{% trans "Оплата не пройшла" %}</p>
+              <p class="nd-thanks__text" data-qa="pay-status">{% ui "pay_fail" %}</p>
               {% if pay_retry_url %}
-                <a class="nd-thanks__link" href="{{ pay_retry_url }}" data-qa="pay-retry">{% trans "Спробувати оплатити знову" %}</a>
+                <a class="nd-thanks__link" href="{{ pay_retry_url }}" data-qa="pay-retry">{% ui "pay_retry" %}</a>
               {% endif %}
             {% else %}
-              <p class="nd-thanks__text" data-qa="pay-status">{% trans "Очікуємо підтвердження оплати" %}</p>
+              <p class="nd-thanks__text" data-qa="pay-status">{% ui "pay_wait" %}</p>
             {% endif %}
           {% endif %}
         {% else %}

@@ -210,6 +210,64 @@ NAV_TREE = [
         ],
     },
     {
+        "title": "Контакти",
+        "items": [
+            {
+                "key": "contacts_page",
+                "title": "Сторінка",
+                "icon": "contact_mail",
+                "url_name": "admin:content_contactspage_changelist",
+            },
+        ],
+    },
+    {
+        "title": "Тексти інтерфейсу",
+        "items": [
+            {
+                "key": "ui_header",
+                "title": "Шапка",
+                "icon": "web_asset",
+                "url_name": "admin:content_uiheader_changelist",
+            },
+            {
+                "key": "ui_catalog",
+                "title": "Каталог",
+                "icon": "inventory_2",
+                "url_name": "admin:content_uicatalog_changelist",
+            },
+            {
+                "key": "ui_product",
+                "title": "Товар і колекція",
+                "icon": "style",
+                "url_name": "admin:content_uiproduct_changelist",
+            },
+            {
+                "key": "ui_cart",
+                "title": "Кошик і обране",
+                "icon": "shopping_bag",
+                "url_name": "admin:content_uicart_changelist",
+            },
+            {
+                "key": "ui_checkout",
+                "title": "Оформлення і оплата",
+                "icon": "payments",
+                "url_name": "admin:content_uicheckout_changelist",
+            },
+            {
+                "key": "ui_utility",
+                "title": "Службові сторінки",
+                "icon": "error",
+                "url_name": "admin:content_uiutility_changelist",
+            },
+            {
+                "key": "ui_forms",
+                "title": "Підписи форм",
+                "icon": "edit_note",
+                "url_name": "admin:content_contactforms_changelist",
+            },
+        ],
+    },
+    {
         "title": "Хедер і футер",
         "items": [
             {

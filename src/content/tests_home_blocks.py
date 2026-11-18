@@ -25,11 +25,11 @@ class HomeBlockRenderTests(TestCase):
         self.assertContains(page, "Наша добірка")
         self.assertNotContains(page, "Популярні товари")
 
-    def test_empty_title_falls_back_to_the_current_copy(self):
+    def test_empty_title_does_not_fall_back_to_a_code_literal(self):
         _block("popular", title_uk="", title_en="", cta_uk="", cta_en="", sort=3)
         page = self.client.get("/")
-        self.assertContains(page, "Популярні товари")
-        self.assertContains(page, "Перейти до каталогу")
+        self.assertNotContains(page, ">Популярні товари<")
+        self.assertNotContains(page, ">Перейти до каталогу<")
 
     def test_english_block_uses_the_english_field(self):
         _block("popular", title_uk="Популярні товари", title_en="Guest picks", sort=4)

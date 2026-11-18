@@ -117,8 +117,9 @@ class SidebarTreeTests(TestCase):
         self.assertContains(response, "Недавні дії")
         self.assertNotContains(response, "id=\"content-related\"")
         self.assertContains(response, "Про нас")
-        with self.assertRaises(NoReverseMatch):
-            reverse("admin:content_contactforms_changelist")
+        self.assertContains(response, "Тексти інтерфейсу")
+        self.assertContains(response, "Підписи форм")
+        self.assertContains(response, reverse("admin:content_contactforms_changelist"))
         with self.assertRaises(NoReverseMatch):
             reverse("admin:content_footerlink_changelist")
         self.assertContains(response, "Інтро")

@@ -85,7 +85,7 @@
     burgerBtn.setAttribute("aria-expanded", open ? "true" : "false");
     burgerBtn.setAttribute(
       "aria-label",
-      open ? burgerBtn.getAttribute("data-label-close") || "Закрити меню" : burgerBtn.getAttribute("data-label-open") || "Меню"
+      open ? burgerBtn.getAttribute("data-label-close") || "" : burgerBtn.getAttribute("data-label-open") || ""
     );
   }
 

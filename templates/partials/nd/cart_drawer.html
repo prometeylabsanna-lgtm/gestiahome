@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static ui_tags %}
 <div
   class="nd-cart-drawer"
   data-nd-cart-drawer
@@ -11,7 +11,7 @@
     class="nd-cart-drawer__panel"
     role="dialog"
     aria-modal="true"
-    aria-label="{% trans 'Кошик' %}"
+    aria-label="{% ui "cart" %}"
     aria-hidden="true"
     tabindex="-1"
   >

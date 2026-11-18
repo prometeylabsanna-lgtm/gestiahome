@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static ui_tags %}
 <form
   class="wish-toggle{% if variant == 'nd' %} wish-toggle--nd{% endif %}"
   method="post"
@@ -17,7 +17,7 @@
     class="wish-toggle__btn{% if variant == 'nd' %} wish-toggle__btn--nd{% endif %}{% if in_wishlist %} is-on{% endif %}"
     type="submit"
     aria-pressed="{% if in_wishlist %}true{% else %}false{% endif %}"
-    aria-label="{% if in_wishlist %}{% trans 'Прибрати з обраного' %}{% else %}{% trans 'Додати в обране' %}{% endif %}"
+    aria-label="{% if in_wishlist %}{% ui "wish_remove" %}{% else %}{% ui "wish_add" %}{% endif %}"
   >
     {% if variant == "nd" %}
       {% include "partials/nd/icons/heart.html" with size=20 filled=in_wishlist %}

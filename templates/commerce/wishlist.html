@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static ui_tags %}
 
-{% block title %}{% trans "Обране" %}{% endblock %}
+{% block title %}{% ui "wishlist" %}{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/wishlist.css' %}">
@@ -9,13 +9,13 @@
 
 {% block content %}
   <div class="nd-wish" data-qa="wishlist-page">
-    <nav class="nd-wish__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+    <nav class="nd-wish__crumbs" aria-label="{% ui "crumbs" %}">
       <ol class="nd-wish__crumbs-list">
         <li>
-          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <a href="{% url 'home' %}">{% ui "crumb_home" %}</a>
           <span aria-hidden="true">/</span>
         </li>
-        <li aria-current="page">{% trans "Обране" %}</li>
+        <li aria-current="page">{% ui "wishlist" %}</li>
       </ol>
     </nav>
     <div id="wish-body">

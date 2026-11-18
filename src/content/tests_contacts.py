@@ -49,7 +49,7 @@ class ContactsPageTests(TestCase):
         self.assertIn("https://www.instagram.com/", main)
         self.assertNotIn("форма для питань", main)
         self.assertNotIn("https://www.instagram.com/", html.split('application/ld+json">', 1)[1].split("</script>", 1)[0])
-        self.assertIn("Зв'язатись з нами", html)
+        self.assertIn("Зв'язатись з нами", html.replace("&#x27;", "'"))
         self.assertIn('href="/katalog/"', html)
         self.assertIn('href="/dostavka-ta-oplata/"', html)
         self.assertIn('href="/aktualni-pytannia/"', html)

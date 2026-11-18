@@ -1,8 +1,8 @@
-{% load i18n content_tags %}
-{% cms "" "waitlist_email" as wl_email %}
-{% cms "" "waitlist_consent" as wl_consent %}
-{% cms "" "waitlist_privacy" as wl_privacy %}
-{% cms "" "waitlist_button" as wl_button %}
+{% load i18n content_tags ui_tags %}
+{% cms_field form_copy "waitlist_email" as wl_email %}
+{% cms_field form_copy "waitlist_consent" as wl_consent %}
+{% cms_field form_copy "waitlist_privacy" as wl_privacy %}
+{% cms_field form_copy "waitlist_button" as wl_button %}
 <form
   id="waitlist-form"
   class="waitlist-modal__form"
@@ -19,7 +19,7 @@
     <p class="waitlist-modal__error">{{ waitlist_form.non_field_errors|striptags }}</p>
   {% endif %}
   <label class="waitlist-modal__field{% if waitlist_form.email.errors %} is-invalid{% endif %}" data-field-wrap>
-    <span class="visually-hidden">{% trans "Email" %}</span>
+    <span class="visually-hidden">{% ui "email_ph" %}</span>
     <input
       class="waitlist-modal__input"
       type="email"

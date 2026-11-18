@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static ui_tags %}
 
-{% block title %}404 · {% trans "Сторінку не знайдено" %}{% endblock %}
+{% block title %}404 · {% ui "not_found" %}{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/pages/utility.css' %}">
@@ -14,13 +14,13 @@
         <img src="{% static 'figma/desktop/5493c.png' %}" width="113" height="43" alt="Gestia">
       </a>
       <p class="util-page__code" aria-hidden="true">404</p>
-      <h1>{% trans "Сторінку не знайдено" %}</h1>
+      <h1>{% ui "not_found" %}</h1>
       <p class="util-page__text">
-        {% trans "Схоже, цієї сторінки вже немає або адресу змінено." %}
+        {% ui "not_found_text" %}
       </p>
       <div class="util-page__actions">
-        <a class="figma-btn figma-btn--ink" href="{% url 'home' %}">{% trans "На головну" %}</a>
-        <a class="util-page__link" href="{% url 'catalog' %}">{% trans "До каталогу" %}</a>
+        <a class="figma-btn figma-btn--ink" href="{% url 'home' %}">{% ui "not_found_home" %}</a>
+        <a class="util-page__link" href="{% url 'catalog' %}">{% ui "not_found_catalog" %}</a>
       </div>
     </div>
   </section>

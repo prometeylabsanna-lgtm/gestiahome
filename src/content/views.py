@@ -217,11 +217,13 @@ def _contacts_nap():
 
 
 def _contacts_form_context(request, form):
-    from django.utils.translation import gettext
+    from src.content.models_contacts import ContactsPage
 
+    page = ContactsPage.load()
     return {
         "contact_form": form,
-        "submit_label": gettext("Зв'язатись з нами"),
+        "contacts_page": page,
+        "submit_label": page.form_title,
         "form_action": request.path,
     }
 

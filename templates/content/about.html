@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static richtext %}
+{% load i18n static richtext ui_tags %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/about.css' %}">
@@ -10,7 +10,7 @@
 
 {% block content %}
   <div class="nd-about">
-    <section class="nd-about-intro" aria-labelledby="about-title" data-screen-label="About intro">
+    <section class="nd-about-intro" aria-labelledby="about-title" data-screen-label="{{ page.title }}">
       {% if page.title %}
         <h1 class="nd-about-intro__title" id="about-title">{{ page.title }}</h1>
       {% endif %}
@@ -41,18 +41,20 @@
       </div>
       <div class="nd-about-mark" aria-hidden="true">
         <div class="nd-about-mark__line"></div>
+        {% if site_settings.mark_light %}
         <img
           class="nd-about-mark__icon"
-          src="{% static 'nd/g-mark-light.png' %}"
+          src="{{ site_settings.mark_light.url }}"
           alt=""
           width="34"
           height="50"
         >
+        {% endif %}
         <div class="nd-about-mark__line"></div>
       </div>
     </section>
 
-    <section class="nd-about-gestia" aria-label="{% trans 'Гестія' %}" data-screen-label="Gestia">
+    <section class="nd-about-gestia" aria-label="{% ui "gestia_aria" %}" data-screen-label="{% ui "gestia_aria" %}">
       <div class="nd-about-gestia__quote-col">
         {% if page.gestia_quote %}
           <blockquote class="nd-about-gestia__quote">{{ page.gestia_quote }}</blockquote>
@@ -91,8 +93,8 @@
     {% if page.approach_text %}
       <section
         class="nd-about-approach"
-        aria-label="{% trans 'Разом з Gestia home' %}"
-        data-screen-label="Approach"
+        aria-label="{% ui "approach_aria" %}"
+        data-screen-label="{% ui "approach_aria" %}"
       >
         <p class="nd-about-approach__text">{{ page.approach_text }}</p>
       </section>
@@ -100,8 +102,8 @@
 
     <section
       class="nd-about-together"
-      aria-label="{% trans 'Бути разом' %}"
-      data-screen-label="Together"
+      aria-label="{% ui "together_aria" %}"
+      data-screen-label="{% ui "together_aria" %}"
     >
       {% if page.together_photo %}
         <img
@@ -122,13 +124,15 @@
 
     <div class="nd-about-mark" aria-hidden="true">
       <div class="nd-about-mark__line"></div>
+      {% if site_settings.mark_light %}
       <img
         class="nd-about-mark__icon"
-        src="{% static 'nd/g-mark-light.png' %}"
+        src="{{ site_settings.mark_light.url }}"
         alt=""
         width="34"
         height="50"
       >
+      {% endif %}
       <div class="nd-about-mark__line"></div>
     </div>
 

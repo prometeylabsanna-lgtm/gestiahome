@@ -1,11 +1,11 @@
-{% load i18n static shop_tags %}
+{% load i18n static shop_tags ui_tags %}
 {% if cart_notice %}
   <p class="co-error" role="alert">{{ cart_notice }}</p>
 {% endif %}
 <div class="nd-cart__grid{% if not rows %} nd-cart__grid--empty{% endif %}">
   <section class="nd-cart__main" aria-labelledby="cart-title">
     <h1 class="nd-cart__title" id="cart-title">
-      {% trans "Кошик" %}{% if cart_count %} ({{ cart_count }}){% endif %}
+      {% ui "cart" %}{% if cart_count %} ({{ cart_count }}){% endif %}
     </h1>
 
     {% if rows %}
@@ -41,13 +41,13 @@
               >
                 {% csrf_token %}
                 <input type="hidden" name="sku" value="{{ row.sku }}">
-                <div class="nd-cart-qty" role="group" aria-label="{% trans 'Кількість' %}">
-                  <button type="button" class="nd-cart-qty__btn" data-qty-step="-1" aria-label="{% trans 'Зменшити кількість' %}">
+                <div class="nd-cart-qty" role="group" aria-label="{% ui "qty" %}">
+                  <button type="button" class="nd-cart-qty__btn" data-qty-step="-1" aria-label="{% ui "qty_dec" %}">
                     <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                       <path d="M1 6h10" stroke="currentColor" stroke-width="1.6"></path>
                     </svg>
                   </button>
-                  <label class="visually-hidden" for="qty-{{ row.sku }}">{% trans "Кількість" %}</label>
+                  <label class="visually-hidden" for="qty-{{ row.sku }}">{% ui "qty" %}</label>
                   <input
                     id="qty-{{ row.sku }}"
                     class="nd-cart-qty__value"
@@ -59,13 +59,13 @@
                     inputmode="numeric"
                     value="{{ row.qty }}"
                   >
-                  <button type="button" class="nd-cart-qty__btn" data-qty-step="1" aria-label="{% trans 'Збільшити кількість' %}">
+                  <button type="button" class="nd-cart-qty__btn" data-qty-step="1" aria-label="{% ui "qty_inc" %}">
                     <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                       <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.6"></path>
                     </svg>
                   </button>
                 </div>
-                <button class="nd-cart__remove" type="button" data-qty-set="0" aria-label="{% trans 'Видалити з кошика' %}">
+                <button class="nd-cart__remove" type="button" data-qty-set="0" aria-label="{% ui "cart_remove" %}">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
                   </svg>
@@ -75,11 +75,11 @@
           </li>
         {% endfor %}
       </ul>
-      <a class="nd-cart__continue" href="{% url 'catalog' %}">{% trans "Продовжити покупки" %}</a>
+      <a class="nd-cart__continue" href="{% url 'catalog' %}">{% ui "cart_continue" %}</a>
 
       {% if suggest %}
         <div class="nd-cart-suggest">
-          <h2 class="nd-cart-suggest__title">{% trans "Доповнити сет" %}</h2>
+          <h2 class="nd-cart-suggest__title">{% ui "addons" %}</h2>
           <ul class="nd-cart-suggest__list">
             {% for addon in suggest %}
               <li class="nd-cart-suggest__item">
@@ -114,7 +114,7 @@
                     <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                       <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.5"></path>
                     </svg>
-                    <span>{% trans "Додати" %}</span>
+                    <span>{% ui "add" %}</span>
                   </button>
                 </form>
               </li>
@@ -128,20 +128,20 @@
           <path d="M4 7h16v14H4z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
           <path d="M9 10V6a3 3 0 0 1 6 0v4" stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
         </svg>
-        <p class="nd-cart__empty-text">{% trans "Ваш кошик порожній" %}</p>
-        <a class="nd-cart__empty-link" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
+        <p class="nd-cart__empty-text">{% ui "cart_empty" %}</p>
+        <a class="nd-cart__empty-link" href="{% url 'catalog' %}">{% ui "go_catalog" %}</a>
       </div>
     {% endif %}
   </section>
 
   {% if rows %}
-    <aside class="nd-cart__aside" aria-label="{% trans 'Підсумок замовлення' %}">
+    <aside class="nd-cart__aside" aria-label="{% ui "cart_summary" %}">
       <div class="nd-cart__summary-row">
-        <span class="nd-cart__summary-label">{% trans "Загальна ціна" %}</span>
+        <span class="nd-cart__summary-label">{% ui "cart_total" %}</span>
         <span class="nd-cart__summary-value">{% line_uah total %}</span>
       </div>
-      <p class="nd-cart__delivery">{% trans "Вартість доставки розраховується за тарифами перевізника" %}</p>
-      <a class="nd-cart__checkout" data-qa="checkout-cta" href="{% url 'checkout' %}">{% trans "Перейти до оформлення" %}</a>
+      <p class="nd-cart__delivery">{% ui "cart_ship" %}</p>
+      <a class="nd-cart__checkout" data-qa="checkout-cta" href="{% url 'checkout' %}">{% ui "cart_checkout" %}</a>
     </aside>
   {% endif %}
 </div>

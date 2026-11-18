@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static ui_tags %}
 
-{% block title %}{% trans "Оплата замовлення" %}{% endblock %}
+{% block title %}{% ui "pay_title" %}{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/thanks.css' %}">
@@ -14,16 +14,18 @@
 {% block content %}
   <div class="nd-thanks" data-qa="pay-page">
     <section class="nd-thanks__section" aria-labelledby="pay-title">
+      {% if site_settings.mark_light %}
       <img
         class="nd-thanks__mark"
-        src="{% static 'nd/g-mark-light.png' %}"
+        src="{{ site_settings.mark_light.url }}"
         alt=""
         width="34"
         height="50"
       >
-      <h1 class="nd-thanks__title" id="pay-title">{% trans "Оплата замовлення" %}</h1>
+      {% endif %}
+      <h1 class="nd-thanks__title" id="pay-title">{% ui "pay_title" %}</h1>
       <div class="nd-thanks__text">
-        <p>{% blocktrans with number=order.number %}Замовлення № {{ number }} — переходимо до безпечної оплати LiqPay.{% endblocktrans %}</p>
+        <p>{% ui "pay_lead" number=order.number %}</p>
       </div>
       <form
         class="nd-thanks__pay-form"
@@ -34,7 +36,7 @@
       >
         <input type="hidden" name="data" value="{{ data }}">
         <input type="hidden" name="signature" value="{{ signature }}">
-        <button class="nd-thanks__link" type="submit">{% trans "Перейти до оплати" %}</button>
+        <button class="nd-thanks__link" type="submit">{% ui "pay_go" %}</button>
       </form>
     </section>
   </div>

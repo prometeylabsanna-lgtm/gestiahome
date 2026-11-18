@@ -11,12 +11,17 @@ from src.commerce.validators import (
     NAME_PATTERN,
     PHONE_ERRORS,
     PHONE_PATTERN,
+    apply_ui_messages,
     clean_name_value,
     clean_phone_value,
 )
 
 
 class ConsentForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_ui_messages(self)
+
     consent = forms.BooleanField(
         label=_("Погоджуюсь на обробку персональних даних"),
         required=True,
@@ -106,6 +111,23 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
             self.fields["payment_method"].choices = [on_delivery]
             if not self.is_bound:
                 self.fields["payment_method"].initial = Order.Payment.ON_DELIVERY
+        self._apply_choice_labels()
+
+    def _apply_choice_labels(self):
+        from src.content.ui_text import text
+
+        labels = {
+            Order.Delivery.BRANCH: text("ship_branch"),
+            Order.Delivery.LOCKER: text("ship_locker"),
+            Order.Delivery.COURIER: text("ship_courier"),
+            Order.Payment.CARD: text("pay_card"),
+            Order.Payment.ON_DELIVERY: text("pay_delivery"),
+        }
+        for name in ("delivery_method", "payment_method"):
+            self.fields[name].choices = [
+                (value, labels[value] or label)
+                for value, label in self.fields[name].choices
+            ]
 
     def clean(self):
         cleaned = super().clean()
@@ -117,24 +139,32 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
         apartment = (cleaned.get("apartment") or "").strip()
         if not address:
             if method == Order.Delivery.COURIER:
+                from src.content.ui_text import text
+
                 parts = [city, branch]
                 if house:
-                    parts.append(f"буд. {house}")
+                    parts.append(f"{text('house_ph') or 'буд.'} {house}")
                 if apartment:
-                    parts.append(f"кв. {apartment}")
+                    parts.append(f"{text('apt_ph') or 'кв.'} {apartment}")
                 address = ", ".join(part for part in parts if part)
             else:
                 address = ", ".join(part for part in (city, branch) if part)
         elif method == Order.Delivery.COURIER:
+            from src.content.ui_text import text
+
+            house_label = text("house_ph") or "буд."
+            apt_label = text("apt_ph") or "кв."
             extras = []
-            if house and f"буд. {house}" not in address:
-                extras.append(f"буд. {house}")
-            if apartment and f"кв. {apartment}" not in address:
-                extras.append(f"кв. {apartment}")
+            if house and f"{house_label} {house}" not in address:
+                extras.append(f"{house_label} {house}")
+            if apartment and f"{apt_label} {apartment}" not in address:
+                extras.append(f"{apt_label} {apartment}")
             if extras:
                 address = f"{address}, {', '.join(extras)}"
         if not address:
-            self.add_error("city", MSG_REQUIRED)
+            from src.content.ui_text import text
+
+            self.add_error("city", text("msg_required"))
         cleaned["address"] = address
         return cleaned
 

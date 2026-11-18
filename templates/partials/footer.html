@@ -1,13 +1,15 @@
-{% load i18n static content_tags %}
+{% load i18n static content_tags ui_tags %}
 <footer class="site-footer nd-footer">
   <div class="nd-footer__mark" aria-hidden="true">
     <div class="nd-footer__rule"></div>
-    <img class="nd-footer__g" src="{% static 'nd/g-mark-dark.png' %}" alt="" width="34" height="50">
+    {% if site_settings.mark_dark %}
+    <img class="nd-footer__g" src="{{ site_settings.mark_dark.url }}" alt="" width="34" height="50">
+    {% endif %}
     <div class="nd-footer__rule"></div>
   </div>
 
   <div class="nd-footer__grid">
-    <nav class="nd-footer__col" aria-label="{% trans 'Каталог' %}">
+    <nav class="nd-footer__col" aria-label="{% ui "catalog" %}">
       <ul>
         {% for link in footer_columns.category %}
           <li>
@@ -21,7 +23,7 @@
       </ul>
     </nav>
 
-    <nav class="nd-footer__col" aria-label="{% trans 'Інформація' %}">
+    <nav class="nd-footer__col" aria-label="{% ui "footer_info" %}">
       <ul>
         {% for link in footer_columns.info %}
           <li>
@@ -35,7 +37,7 @@
       </ul>
     </nav>
 
-    <nav class="nd-footer__col" aria-label="{% trans 'Документи' %}">
+    <nav class="nd-footer__col" aria-label="{% ui "footer_docs" %}">
       <ul>
         {% for link in footer_columns.legal %}
           <li>

@@ -48,6 +48,22 @@ class SiteSettings(SingletonModel):
         validators=[IMAGE_VALIDATOR],
         help_text="Шапка близько 113×43, підвал 191×73. JPG або PNG.",
     )
+    logo_alt_uk = models.CharField("Підпис логотипа", max_length=80, blank=True)
+    logo_alt_en = models.CharField("Підпис логотипа (EN)", max_length=80, blank=True)
+    mark_light = models.ImageField(
+        "Знак G, світлий",
+        upload_to="site/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Світлий знак на темному тлі. PNG.",
+    )
+    mark_dark = models.ImageField(
+        "Знак G, темний",
+        upload_to="site/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Темний знак на світлому тлі підвалу. PNG.",
+    )
     nav_about_uk = models.CharField("Пункт «Про нас»", max_length=16, blank=True)
     nav_about_en = models.CharField("Пункт «Про нас» (EN)", max_length=16, blank=True)
     nav_all_uk = models.CharField("Пункт «Усі товари»", max_length=20, blank=True)
@@ -59,6 +75,10 @@ class SiteSettings(SingletonModel):
         help_text="У мобільному меню. Кнопка в шапці лишається своєю.",
     )
     menu_title_en = models.CharField("Заголовок у меню (EN)", max_length=16, blank=True)
+    nav_faq_uk = models.CharField("Пункт «Актуальні питання»", max_length=40, blank=True)
+    nav_faq_en = models.CharField("Пункт «Актуальні питання» (EN)", max_length=40, blank=True)
+    nav_contacts_uk = models.CharField("Пункт «Контакти»", max_length=40, blank=True)
+    nav_contacts_en = models.CharField("Пункт «Контакти» (EN)", max_length=40, blank=True)
     credit_uk = models.CharField("Текст перед PrometeyLabs", max_length=32, blank=True)
     credit_en = models.CharField("Текст перед PrometeyLabs (EN)", max_length=32, blank=True)
     en_enabled = models.BooleanField("Англійська увімкнена", default=True)
@@ -97,6 +117,34 @@ class SiteSettings(SingletonModel):
     @property
     def address(self):
         return localized(self, "address")
+
+    @property
+    def logo_alt(self):
+        return localized(self, "logo_alt")
+
+    @property
+    def nav_about(self):
+        return localized(self, "nav_about")
+
+    @property
+    def nav_all(self):
+        return localized(self, "nav_all")
+
+    @property
+    def nav_faq(self):
+        return localized(self, "nav_faq")
+
+    @property
+    def nav_contacts(self):
+        return localized(self, "nav_contacts")
+
+    @property
+    def menu_title(self):
+        return localized(self, "menu_title")
+
+    @property
+    def credit(self):
+        return localized(self, "credit")
 
     @property
     def footer_note(self):
@@ -808,5 +856,7 @@ from src.content import models_home_slots as _home_slots  # noqa: E402,F401
 from src.content import models_legal as _legal_models  # noqa: E402,F401
 from src.content import models_menu as _menu_models  # noqa: E402,F401
 from src.content import models_styles as _style_models  # noqa: E402,F401
+from src.content import models_contacts as _contacts_models  # noqa: E402,F401
 from src.content import models_thankyou as _thankyou_models  # noqa: E402,F401
+from src.content import models_ui as _ui_models  # noqa: E402,F401
 from src.content import proxies as _home_proxies  # noqa: E402,F401

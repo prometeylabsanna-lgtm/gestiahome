@@ -1,6 +1,6 @@
-{% load i18n static shop_tags %}
+{% load i18n static shop_tags ui_tags %}
 <h1 class="nd-wish__title">
-  {% trans "Обране" %}{% if wishlist_count %} ({{ wishlist_count }}){% endif %}
+  {% ui "wishlist" %}{% if wishlist_count %} ({{ wishlist_count }}){% endif %}
 </h1>
 
 {% if rows %}
@@ -20,7 +20,7 @@
           <button
             class="nd-wish__remove"
             type="submit"
-            aria-label="{% trans 'Видалити з обраного' %}"
+            aria-label="{% ui "wish_remove_item" %}"
           >
             {% include "partials/nd/icons/heart.html" with size=20 filled=True %}
           </button>
@@ -55,7 +55,7 @@
             type="submit"
             {% if row.product.stock_status == "out" or row.product.stock_qty <= 0 %}disabled{% endif %}
           >
-            {% trans "В кошик" %}
+            {% ui "wish_to_cart" %}
           </button>
         </form>
       </li>
@@ -76,8 +76,8 @@
     >
       <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
     </svg>
-    <p class="nd-wish__empty-text">{% trans "У вас поки немає обраних товарів" %}</p>
-    <a class="nd-wish__empty-link" href="{% url 'catalog' %}">{% trans "Перейти до каталогу" %}</a>
+    <p class="nd-wish__empty-text">{% ui "wish_empty" %}</p>
+    <a class="nd-wish__empty-link" href="{% url 'catalog' %}">{% ui "go_catalog" %}</a>
   </div>
 {% endif %}
 {% if request.META.HTTP_HX_REQUEST %}

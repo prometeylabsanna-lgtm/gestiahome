@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n ui_tags %}
 <div class="nd-cat-sort{% if compact %} nd-cat-sort--compact{% endif %}" data-nd-sort>
   <button
     class="nd-cat-sort__btn"
@@ -10,31 +10,31 @@
   >
     <span data-nd-sort-label>
       {% if parsed.sort == "price_asc" %}
-        {% trans "Ціна: за зростанням" %}
+        {% ui "sort_price_asc" %}
       {% elif parsed.sort == "price_desc" %}
-        {% trans "Ціна: за спаданням" %}
+        {% ui "sort_price_desc" %}
       {% elif parsed.sort == "name" %}
-        {% trans "Назва: А–Я" %}
+        {% ui "sort_name" %}
       {% else %}
-        {% trans "Сортувати за" %}
+        {% ui "sort_by" %}
       {% endif %}
     </span>
     <span class="nd-cat-sort__chev" aria-hidden="true">
       {% include "partials/nd/icons/chevron.html" with size=10 %}
     </span>
   </button>
-  <ul class="nd-cat-sort__menu" id="{{ menu_id }}" role="listbox" hidden data-nd-sort-menu aria-label="{% trans 'Сортування' %}">
+  <ul class="nd-cat-sort__menu" id="{{ menu_id }}" role="listbox" hidden data-nd-sort-menu aria-label="{% ui "sort" %}">
     <li role="option" {% if not parsed.sort %}aria-selected="true"{% endif %}>
-      <button type="button" data-nd-sort-value=""{% if not parsed.sort %} class="is-active"{% endif %}>{% trans "Сортувати за" %}</button>
+      <button type="button" data-nd-sort-value=""{% if not parsed.sort %} class="is-active"{% endif %}>{% ui "sort_by" %}</button>
     </li>
     <li role="option" {% if parsed.sort == "price_asc" %}aria-selected="true"{% endif %}>
-      <button type="button" data-nd-sort-value="price_asc"{% if parsed.sort == "price_asc" %} class="is-active"{% endif %}>{% trans "Ціна: за зростанням" %}</button>
+      <button type="button" data-nd-sort-value="price_asc"{% if parsed.sort == "price_asc" %} class="is-active"{% endif %}>{% ui "sort_price_asc" %}</button>
     </li>
     <li role="option" {% if parsed.sort == "price_desc" %}aria-selected="true"{% endif %}>
-      <button type="button" data-nd-sort-value="price_desc"{% if parsed.sort == "price_desc" %} class="is-active"{% endif %}>{% trans "Ціна: за спаданням" %}</button>
+      <button type="button" data-nd-sort-value="price_desc"{% if parsed.sort == "price_desc" %} class="is-active"{% endif %}>{% ui "sort_price_desc" %}</button>
     </li>
     <li role="option" {% if parsed.sort == "name" %}aria-selected="true"{% endif %}>
-      <button type="button" data-nd-sort-value="name"{% if parsed.sort == "name" %} class="is-active"{% endif %}>{% trans "Назва: А–Я" %}</button>
+      <button type="button" data-nd-sort-value="name"{% if parsed.sort == "name" %} class="is-active"{% endif %}>{% ui "sort_name" %}</button>
     </li>
   </ul>
 </div>

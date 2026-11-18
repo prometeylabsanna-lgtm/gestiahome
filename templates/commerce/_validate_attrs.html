@@ -1,8 +1,8 @@
-{% load i18n %}
+{% load i18n ui_tags %}
 data-validate-form
 novalidate
-data-msg-required="{% trans "Поле обов'язкове для заповнення" %}"
-data-msg-name="{% trans "Ім'я не може містити цифри або спецсимволи. Будь ласка, використовуйте лише букви" %}"
-data-msg-name-short="{% trans "Занадто коротке значення" %}"
-data-msg-phone="{% trans "Введіть коректний номер мобільного телефону у форматі +380 (XX) XXX-XX-XX" %}"
-data-msg-email="{% trans "Некоректний формат" %}"
+data-msg-required="{% ui "msg_required" %}"
+data-msg-name="{% ui "msg_name" %}"
+data-msg-name-short="{% ui "msg_name_short" %}"
+data-msg-phone="{% ui "msg_phone" %}"
+data-msg-email="{% ui "msg_email" %}"

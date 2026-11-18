@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n ui_tags %}
 <fieldset class="nd-cat-facet">
-  <legend class="nd-cat-facet__title">{% trans "Категорії" %}</legend>
+  <legend class="nd-cat-facet__title">{% ui "categories" %}</legend>
   <ul class="nd-cat-facet__list">
     {% for group in menu_facets %}
       <li>

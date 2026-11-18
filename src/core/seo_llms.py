@@ -5,7 +5,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.db.utils import OperationalError, ProgrammingError
 from django.urls import reverse
-from django.utils.translation import gettext, override
+from django.utils.translation import override
 
 from src.core.seo import BRAND, clip_text, public_base, public_contacts
 
@@ -19,8 +19,8 @@ def llms_text(request) -> str:
         "",
         "## Розділи",
         "",
-        _pair(request, "Головна", "home"),
-        _pair(request, "Каталог", "catalog"),
+        _pair(request, lambda: _ui_label("crumb_home"), "home"),
+        _pair(request, lambda: _ui_label("catalog"), "catalog"),
         "",
         "## Категорії",
         "",
@@ -35,13 +35,13 @@ def llms_text(request) -> str:
             "",
             "## Ключові сторінки",
             "",
-            _pair(request, "Доставка та оплата", "shipping"),
-            _pair(request, "Про нас", "about"),
-            _pair(request, "Контакти", "contacts"),
-            _pair(request, "Актуальні питання", "faq"),
-            _pair(request, "Оферта", "offer"),
-            _pair(request, "Конфіденційність", "privacy"),
-            _pair(request, "Cookies", "cookies"),
+            _pair(request, lambda: _ui_label("legal_shipping"), "shipping"),
+            _pair(request, lambda: _nav_label("nav_about"), "about"),
+            _pair(request, lambda: _nav_label("nav_contacts"), "contacts"),
+            _pair(request, lambda: _nav_label("nav_faq"), "faq"),
+            _pair(request, lambda: _ui_label("legal_offer"), "offer"),
+            _pair(request, lambda: _ui_label("legal_privacy"), "privacy"),
+            _pair(request, lambda: _ui_label("legal_cookies"), "cookies"),
             _contact_lines(request),
             "",
             "## Правила для ШІ",
@@ -69,22 +69,34 @@ def _abs(request, viewname: str, *, lang: str, kwargs=None, suffix: str = "") ->
     return public_base(request) + path
 
 
-def _pair(request, msgid: str, viewname: str) -> str:
+def _pair(request, loader, viewname: str) -> str:
     rows = []
     for code, _label in settings.LANGUAGES:
         with override(code):
-            label = _md_label(gettext(msgid))
+            label = _md_label(loader())
         rows.append(f"- [{label}]({_abs(request, viewname, lang=code)})")
     return "\n".join(rows)
 
 
-def _contact_lines(request) -> str:
-    from src.content.literals import LITERALS
+def _ui_label(key):
+    from src.content.ui_text import text
 
+    return text(key)
+
+
+def _nav_label(field):
+    from src.content.models import SiteSettings
+    from src.core.utils import localized
+
+    return localized(SiteSettings.load(), field)
+
+
+def _contact_lines(request) -> str:
     rows = []
     for code, _label in settings.LANGUAGES:
-        label = _md_label(LITERALS["callback_title"][0 if code == "uk" else 1])
-        href = _abs(request, "home", lang=code, suffix="#callback")
+        with override(code):
+            label = _md_label(_nav_label("nav_contacts"))
+        href = _abs(request, "contacts", lang=code)
         rows.append(f"- [{label}]({href})")
     contacts = public_contacts()
     if contacts["phone"]:
@@ -113,10 +125,6 @@ def _shop_blurb() -> str:
                 text = " ".join((about.body_uk or "").split())
     except (OperationalError, ProgrammingError, AttributeError):
         text = ""
-    if not text:
-        from src.content.literals import LITERALS
-
-        text = " ".join(LITERALS["hero_text"][0].split())
     return clip_text(text, 500)
 
 

@@ -31,6 +31,32 @@ NAME_LETTER_RE = re.compile(rf"[{_NAME_LETTERS}]")
 PHONE_PATTERN = rf"\+38 \(0(?:{'|'.join(UA_MOBILE_CODES)})\) \d{{3}}-\d{{2}}-\d{{2}}"
 PHONE_LETTER_RE = re.compile(r"[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]")
 
+def _ui(key):
+    from src.content.ui_text import text
+
+    return text(key)
+
+
+def _required():
+    return _ui("msg_required")
+
+
+def _name_msg():
+    return _ui("msg_name")
+
+
+def _name_short():
+    return _ui("msg_name_short")
+
+
+def _phone_msg():
+    return _ui("msg_phone")
+
+
+def _email_msg():
+    return _ui("msg_email")
+
+
 MSG_REQUIRED = _("Поле обов'язкове для заповнення")
 MSG_NAME = _(
     "Ім'я не може містити цифри або спецсимволи. Будь ласка, використовуйте лише букви"
@@ -44,23 +70,35 @@ PHONE_ERRORS = {"required": MSG_REQUIRED}
 EMAIL_ERRORS = {"required": MSG_REQUIRED, "invalid": MSG_EMAIL}
 
 
+def apply_ui_messages(form):
+    required = _required()
+    email = _email_msg()
+    for field in form.fields.values():
+        if required and "required" in field.error_messages:
+            field.error_messages["required"] = required
+        if email and getattr(field, "error_messages", None) and "invalid" in field.error_messages:
+            if field.__class__.__name__ == "EmailField":
+                field.error_messages["invalid"] = email
+    return form
+
+
 def clean_name_value(name: str) -> str:
     name = re.sub(r"\s+", " ", (name or "").strip())
     if not name:
-        raise forms.ValidationError(MSG_REQUIRED)
+        raise forms.ValidationError(_required())
     if not NAME_ALLOWED_RE.fullmatch(name):
-        raise forms.ValidationError(MSG_NAME)
+        raise forms.ValidationError(_name_msg())
     if len(NAME_LETTER_RE.findall(name)) < 2:
-        raise forms.ValidationError(MSG_NAME_SHORT)
+        raise forms.ValidationError(_name_short())
     return name
 
 
 def clean_phone_value(phone: str) -> str:
     phone = (phone or "").strip()
     if not phone:
-        raise forms.ValidationError(MSG_REQUIRED)
+        raise forms.ValidationError(_required())
     if PHONE_LETTER_RE.search(phone):
-        raise forms.ValidationError(MSG_PHONE)
+        raise forms.ValidationError(_phone_msg())
     digits = re.sub(r"\D", "", phone)
     if digits.startswith("380") and len(digits) == 12:
         normalized = f"+{digits}"
@@ -69,7 +107,7 @@ def clean_phone_value(phone: str) -> str:
     elif len(digits) == 9:
         normalized = f"+380{digits}"
     else:
-        raise forms.ValidationError(MSG_PHONE)
+        raise forms.ValidationError(_phone_msg())
     if normalized[4:6] not in UA_MOBILE_CODES:
-        raise forms.ValidationError(MSG_PHONE)
+        raise forms.ValidationError(_phone_msg())
     return normalized

@@ -1,8 +1,8 @@
-{% load i18n %}
+{% load i18n ui_tags %}
 <p class="thanks-note" data-qa="lead-success">
   {% if long %}
-    {% trans "Дякуємо за замовлення, найближчим часом наш консультант зв'яжеться з вами" %}
+    {% ui "thanks_long" %}
   {% else %}
-    {% trans "Дякуємо" %}
+    {% ui "thanks_short" %}
   {% endif %}
 </p>

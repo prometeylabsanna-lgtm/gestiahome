@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n ui_tags %}
 {% if products %}
   <ul class="nd-cat__grid product-grid" data-qa="product-grid">
     {% for product in products %}
@@ -18,5 +18,5 @@
     </div>
   {% endif %}
 {% else %}
-  <p class="nd-cat__empty">{% trans "Товарів немає." %}</p>
+  <p class="nd-cat__empty">{% ui "empty_products" %}</p>
 {% endif %}

@@ -1,4 +1,4 @@
-{% load i18n seo_tags shop_tags static %}
+{% load i18n seo_tags shop_tags static ui_tags %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
@@ -58,7 +58,7 @@
   {% include "partials/footer.html" %}
   {% include "partials/nd/cart_drawer.html" %}
   {% include "partials/home/waitlist_modal.html" %}
-  <div hidden data-net-toast-root data-offline="{% trans "Немає з'єднання. Перевірте інтернет і спробуйте ще раз." %}" data-error="{% trans "Сталася помилка. Спробуйте ще раз." %}"></div>
+  <div hidden data-net-toast-root data-offline="{% ui "net_offline" %}" data-error="{% ui "net_error" %}"></div>
   <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/htmx-errors.js' %}" defer></script>
   <script src="{% static 'js/utils.js' %}" defer></script>

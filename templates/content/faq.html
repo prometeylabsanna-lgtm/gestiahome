@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static richtext %}
+{% load i18n static richtext ui_tags %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/faq.css' %}">
@@ -13,10 +13,10 @@
 
 {% block content %}
   <div class="nd-faq" data-faq>
-    <nav class="nd-faq__crumbs" aria-label="{% trans 'Хлібні крихти' %}">
+    <nav class="nd-faq__crumbs" aria-label="{% ui "crumbs" %}">
       <ol class="nd-faq__crumbs-list">
         <li>
-          <a href="{% url 'home' %}">{% trans "Головна" %}</a>
+          <a href="{% url 'home' %}">{% ui "crumb_home" %}</a>
           <span aria-hidden="true">/</span>
         </li>
         <li aria-current="page">{% if page.crumb %}{{ page.crumb }}{% else %}{{ page.title|striptags }}{% endif %}</li>

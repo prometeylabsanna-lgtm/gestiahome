@@ -1,4 +1,4 @@
-{% load i18n richtext %}
+{% load i18n richtext ui_tags %}
 {% if discount_modal and discount_modal.enabled %}
 <div
   class="waitlist-modal"
@@ -28,12 +28,12 @@
         <source src="{{ discount_modal.video.url }}" type="{% if '.webm' in discount_modal.video.name %}video/webm{% else %}video/mp4{% endif %}">
       </video>
     {% endif %}
-    <button class="waitlist-modal__close" type="button" data-waitlist-close aria-label="{% trans 'Закрити' %}">
+    <button class="waitlist-modal__close" type="button" data-waitlist-close aria-label="{% ui "close" %}">
       <span aria-hidden="true">×</span>
     </button>
     <div class="waitlist-modal__body" id="waitlist-modal-body">
       <div class="waitlist-modal__text" id="waitlist-modal-text">
-        <div id="waitlist-modal-title" class="visually-hidden">{% trans "Знижка" %}</div>
+        <div id="waitlist-modal-title" class="visually-hidden">{% ui "discount_name" %}</div>
         {{ discount_modal.text|richhtml }}
       </div>
       <div id="waitlist-form-slot">

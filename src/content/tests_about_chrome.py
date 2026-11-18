@@ -66,29 +66,29 @@ class HeaderFooterRenderTests(TestCase):
             },
         )
 
-    def test_nav_labels_use_fixed_literals(self):
+    def test_nav_labels_come_from_site_settings(self):
         self.site.nav_about_uk = "Історія"
         self.site.nav_about_en = "Story"
         self.site.nav_all_uk = "Все"
+        self.site.nav_all_en = "Everything"
         self.site.menu_title_uk = "Бокси"
         self.site.menu_title_en = "Boxes"
         self.site.save()
         page = self.client.get("/")
         self.assertContains(page, 'class="head-nav__about')
-        self.assertContains(page, ">Про нас</a>")
-        self.assertContains(page, ">Усі товари</a>")
-        self.assertContains(page, "<span>Каталог</span>")
+        self.assertContains(page, ">Історія</a>")
+        self.assertContains(page, ">Все</a>")
+        self.assertContains(page, "<span>Бокси</span>")
         self.assertContains(page, 'class="head-nav__catalog')
         self.assertContains(page, ">Актуальні питання</a>")
-        self.assertNotContains(page, ">Історія</a>")
-        self.assertNotContains(page, "<span>Бокси</span>")
+        self.assertNotContains(page, ">Про нас</a>")
         english = self.client.get("/en/")
-        self.assertContains(english, ">About</a>")
-        self.assertContains(english, ">All products</a>")
-        self.assertContains(english, "<span>Catalogue</span>")
+        self.assertContains(english, ">Story</a>")
+        self.assertContains(english, ">Everything</a>")
+        self.assertContains(english, "<span>Boxes</span>")
         self.assertContains(english, "Catalogue")
         self.assertContains(english, ">FAQ</a>")
-        self.assertNotContains(english, ">Story</a>")
+        self.assertNotContains(english, ">About</a>")
 
     def test_credit_and_logo_fall_back(self):
         self.site.credit_uk = ""
@@ -96,10 +96,10 @@ class HeaderFooterRenderTests(TestCase):
         self.site.logo = ""
         self.site.save()
         page = self.client.get("/")
-        self.assertContains(page, "Зроблено")
+        self.assertNotContains(page, "Зроблено")
         self.assertContains(page, "nd/logo.png")
         english = self.client.get("/en/")
-        self.assertContains(english, "Made by")
+        self.assertNotContains(english, "Made by")
 
     def test_telegram_url_in_footer_contacts(self):
         self.site.telegram_url = "https://t.me/gestia_home"

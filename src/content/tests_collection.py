@@ -108,9 +108,9 @@ class CollectionPageTests(TestCase):
         self.assertIn('href="/katalog/?menu=svyatkovi-boksy"', html)
         self.assertIn("«Квітка-душа»", html)
         self.assertIn('aria-labelledby="others-title"', html)
-        self.assertIn('data-screen-label="Collection hero"', html)
-        self.assertIn('data-screen-label="In the box"', html)
-        self.assertIn('data-screen-label="Delivery and payment"', html)
+        self.assertIn('data-screen-label="Квітка-душа"', html)
+        self.assertIn('data-screen-label="У боксі"', html)
+        self.assertIn('data-screen-label="Доставка та оплата"', html)
 
     def test_inactive_collection_is_404(self):
         page = self.client.get(reverse("collection", kwargs={"slug": "page-hidden-col"}))
@@ -140,3 +140,13 @@ class CollectionPageTests(TestCase):
         self.assertEqual(self.menu_item.get_href(), url)
         home = self.client.get(reverse("home"))
         self.assertContains(home, f'href="{url}"')
+
+
+class SeededCollectionEnglishTests(TestCase):
+    def test_english_page_uses_the_english_story(self):
+        page = self.client.get("/en/kolektsiia/kvitka-dusha/")
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "living amaryllis")
+        self.assertContains(page, "Coupe vases")
+        self.assertNotContains(page, "живі квіти амарилісу")
+        self.assertNotContains(page, "Вази-креманки")

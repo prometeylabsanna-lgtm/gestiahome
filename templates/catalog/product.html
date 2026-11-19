@@ -36,15 +36,17 @@
 
     <section class="nd-pdp__main" aria-labelledby="product-title" data-screen-label="{{ product.name }}">
       <div class="nd-pdp-gallery nd-scroll" data-pdp-gallery>
-        <div class="nd-pdp-gallery__wish product-card__wish">
-          {% if product.sku in wishlist_skus %}
-            {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
-          {% else %}
-            {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
-          {% endif %}
-        </div>
         {% for image in product.images.all %}
           <div class="nd-pdp-gallery__item">
+            {% if forloop.first %}
+              <div class="nd-pdp-gallery__wish product-card__wish">
+                {% if product.sku in wishlist_skus %}
+                  {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
+                {% else %}
+                  {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
+                {% endif %}
+              </div>
+            {% endif %}
             {% if image.shows_video %}
               {% include "partials/smart_media.html" with media=image width=636 height=770 alt="" %}
             {% elif image.still_image %}
@@ -58,6 +60,13 @@
         {% empty %}
           {% if product.card_image %}
             <div class="nd-pdp-gallery__item">
+              <div class="nd-pdp-gallery__wish product-card__wish">
+                {% if product.sku in wishlist_skus %}
+                  {% include "partials/wishlist_btn.html" with product=product in_wishlist=True variant="nd" %}
+                {% else %}
+                  {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
+                {% endif %}
+              </div>
               <img src="{{ product.card_image.url }}" alt="{{ product.name }}" width="636" height="770" fetchpriority="high">
             </div>
           {% endif %}

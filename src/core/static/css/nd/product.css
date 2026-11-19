@@ -92,7 +92,16 @@
   z-index: 2;
 }
 
+.nd-pdp-gallery__wish .wish-toggle,
+.nd-pdp-gallery__wish .wish-toggle__btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  touch-action: manipulation;
+}
+
 .nd-pdp-gallery__item {
+  position: relative;
   flex: 0 0 86%;
   width: 86%;
   min-width: 0;

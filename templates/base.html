@@ -44,9 +44,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@400;500&display=swap">
   <link rel="stylesheet" href="{% chrome_css_href %}">
-  {% if discount_modal and discount_modal.enabled %}
-    <link rel="stylesheet" href="{% static 'css/components/waitlist-modal.css' %}">
-  {% endif %}
   <link rel="stylesheet" href="{% url 'theme_css' %}">
   {% block extra_css %}{% endblock %}
 </head>
@@ -57,7 +54,6 @@
   </main>
   {% include "partials/footer.html" %}
   {% include "partials/nd/cart_drawer.html" %}
-  {% include "partials/home/waitlist_modal.html" %}
   <div hidden data-net-toast-root data-offline="{% ui "net_offline" %}" data-error="{% ui "net_error" %}"></div>
   <script src="{% static 'js/vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/htmx-errors.js' %}" defer></script>
@@ -67,9 +63,6 @@
   <script src="{% static 'js/nd/search-suggest.js' %}" defer></script>
   <script src="{% static 'js/dialog.js' %}" defer></script>
   <script type="module" src="{% static 'js/nd/cart-drawer.js' %}"></script>
-  {% if discount_modal and discount_modal.enabled %}
-    <script src="{% static 'js/pages/waitlist-modal.js' %}" defer></script>
-  {% endif %}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

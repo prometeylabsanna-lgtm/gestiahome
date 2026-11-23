@@ -35,6 +35,7 @@ MEDIA_FIELD_NAMES = frozenset(
         "image_large",
         "image_small",
         "video",
+        "poster",
         "logo",
         "card_image",
         "mark_light",

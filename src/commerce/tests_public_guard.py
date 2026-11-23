@@ -61,9 +61,7 @@ class PublicFormGuardTests(TestCase):
 
     def test_honeypot_is_rendered_on_personal_forms(self):
         home = self.client.get("/")
-        self.assertContains(home, HONEYPOT_MARK)
-        # Головна більше не рендерить callback-форму; honeypot лишається у waitlist-модалці.
-        self.assertGreaterEqual(home.content.decode().count(HONEYPOT_MARK), 1)
+        self.assertNotContains(home, HONEYPOT_MARK)
         product = self.client.get(self.product.get_absolute_url())
         self.assertContains(product, HONEYPOT_MARK)
         product_html = product.content.decode()
@@ -105,15 +103,6 @@ class PublicFormGuardTests(TestCase):
         saved = self.client.post("/", _person(message="Привіт"))
         self.assertEqual(saved.status_code, 302)
         self.assertEqual(Inquiry.objects.count(), 1)
-
-    def test_waitlist_honeypot_pretends_success(self):
-        response = self.client.post(
-            "/svyatkovi-boksy/",
-            {"email": "guest@example.com", "consent": "on", HONEYPOT_FIELD: "bot"},
-            HTTP_HX_REQUEST="true",
-        )
-        self.assertContains(response, "data-waitlist-success")
-        self.assertEqual(Inquiry.objects.count(), 0)
 
     def test_buy_now_honeypot_pretends_success(self):
         payload = _person(address="Київ", sku="GUARD", **{HONEYPOT_FIELD: "bot"})
@@ -164,23 +153,11 @@ class PublicFormGuardTests(TestCase):
         self.assertEqual(Inquiry.objects.count(), 1)
 
     @override_settings(RATE_LIMITS=LIMIT_ONE)
-    def test_contact_and_waitlist_return_429(self):
+    def test_contact_returns_429(self):
         self.client.post("/zvorotnyi-zvyazok/", _person(message="Привіт"))
         blocked = self.client.post("/zvorotnyi-zvyazok/", _person(message="Ще"))
         self.assertContains(blocked, TOO_MANY, status_code=429)
-        self.client.post(
-            "/svyatkovi-boksy/",
-            {"email": "guest@example.com", "consent": "on"},
-            HTTP_HX_REQUEST="true",
-        )
-        limited = self.client.post(
-            "/svyatkovi-boksy/",
-            {"email": "other@example.com", "consent": "on"},
-            HTTP_HX_REQUEST="true",
-        )
-        self.assertContains(limited, TOO_MANY, status_code=429)
-        self.assertEqual(limited["HX-Retarget"], "#waitlist-form-slot")
-        self.assertEqual(Inquiry.objects.filter(kind=Inquiry.Kind.WAITLIST).count(), 1)
+        self.assertEqual(Inquiry.objects.filter(kind=Inquiry.Kind.CONTACT).count(), 1)
 
     @override_settings(RATE_LIMITS=LIMIT_ONE)
     def test_buy_now_and_checkout_return_429(self):

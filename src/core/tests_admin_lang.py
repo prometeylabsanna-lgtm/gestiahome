@@ -14,12 +14,10 @@ from src.catalog.models import Category, Product, ProductAttribute, ProductAttri
 from src.content.admin import HomeBlockAdmin, HomeCollectionAdmin, SiteSettingsAdmin
 from src.content.admin_about import AboutIntroAdmin, FooterChromeAdmin
 from src.content.admin_blocks import HomeCollectionsAdmin, HomePopularAdmin
-from src.content.admin_discount import DiscountModalAdmin
 from src.content.admin_home_banners import HomeBannerMediaAdmin, HomeBannerTextAdmin
 from src.content.admin_legal import LegalPageAdmin
 from src.content.admin_menu import MenuGroupAdmin
 from src.content.models import HomeBlock, SiteSettings
-from src.content.models_discount import DiscountModal
 from src.core.admin_lang import assert_language_tab_fieldsets, language_tabs
 from src.core.html_sanitize import (
     strip_outer_p,
@@ -66,7 +64,6 @@ class VisibleTextHelperTests(TestCase):
 class AdminLanguageTabFieldsetTests(TestCase):
     def test_static_fieldsets_follow_the_rule(self):
         for admin_cls in (
-            DiscountModalAdmin,
             LegalPageAdmin,
             AboutIntroAdmin,
             FooterChromeAdmin,
@@ -110,13 +107,11 @@ class AdminLanguageTabRenderTests(TestCase):
             key=HomeBlock.Key.HERO,
             defaults={"sort": 1, "title_uk": "Банер"},
         )
-        self.discount = DiscountModal.load()
         SiteSettings.load()
 
     def test_change_forms_render_two_tabs_and_tinymce(self):
         urls = (
             reverse("admin:content_homebannertext_change", args=[self.hero.pk]),
-            reverse("admin:content_discountmodal_change", args=[self.discount.pk]),
             reverse("admin:catalog_category_change", args=[self.category.pk]),
             reverse("admin:catalog_product_change", args=[self.product.pk]),
         )

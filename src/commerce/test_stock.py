@@ -7,7 +7,7 @@ from django.test import Client, TestCase
 from django.utils import translation
 
 from src.catalog.models import Category, Product
-from src.commerce.models import Inquiry, Order
+from src.commerce.models import Order
 from src.commerce.services import (
     OrderValidationError,
     create_order,
@@ -118,7 +118,7 @@ class StockTests(TestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock_qty, 3)
 
-    def test_reaching_zero_sets_out_and_keeps_waitlist(self):
+    def test_reaching_zero_sets_out(self):
         self.product.stock_qty = 2
         self.product.save()
         self._order(2)
@@ -139,13 +139,6 @@ class StockTests(TestCase):
         )
         self.assertContains(buy, "Цей товар зараз не можна замовити.")
         self.assertEqual(Order.objects.count(), 1)
-        wait = self.client.post(
-            "/svyatkovi-boksy/",
-            {"email": "guest@example.com", "consent": "on"},
-            HTTP_HX_REQUEST="true",
-        )
-        self.assertEqual(wait.status_code, 200)
-        self.assertEqual(Inquiry.objects.filter(kind=Inquiry.Kind.WAITLIST).count(), 1)
 
     def test_on_order_stays_until_quantity_hits_zero(self):
         self.product.stock_status = Product.Stock.ON_ORDER

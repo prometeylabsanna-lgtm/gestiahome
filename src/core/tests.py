@@ -200,14 +200,10 @@ class SeoTests(TestCase):
         response = self.client.get("/robots.txt")
         self.assertContains(response, "Sitemap: http://testserver/sitemap.xml")
 
-    def test_english_waitlist_modal(self):
+    def test_english_page_chrome(self):
         response = self.client.get("/en/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'lang="en"')
-        self.assertContains(
-            response,
-            "adding the final touches to the Gestia Home festive boxes",
-        )
-        self.assertNotContains(response, "Ми додаємо останні штрихи")
+        self.assertNotContains(response, 'id="waitlist-modal"')
         self.assertContains(response, "No connection. Check your internet and try again.")
         self.assertContains(response, "Something went wrong. Please try again.")

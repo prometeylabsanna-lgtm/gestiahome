@@ -170,7 +170,6 @@
             {% endfor %}
           </div>
           <a class="nd-mega__faq" href="{% url 'faq' %}">{{ site_settings.nav_faq }}</a>
-          <a class="nd-mega__contacts" href="{% url 'contacts' %}">{{ site_settings.nav_contacts }}</a>
           <ul class="nd-mega__social">
             <li>
               <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
@@ -378,11 +377,11 @@
           </div>
         {% endfor %}
           <a href="{% url 'faq' %}">{{ site_settings.nav_faq }}</a>
-          <a href="{% url 'contacts' %}">{{ site_settings.nav_contacts }}</a>
         </div>
       </div>
 
       <div class="nd-burger__links">
+        <a href="{% url 'contacts' %}">{{ site_settings.nav_contacts }}</a>
         <a class="burger__about" href="{% url 'about' %}">{{ site_settings.nav_about }}</a>
         <a href="{% url 'wishlist' %}">{% ui "wishlist" %}</a>
       </div>

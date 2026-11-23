@@ -2,7 +2,11 @@
 {% cms block.title "hero_title" as hero_title %}
 {% cms block.text "hero_text" as hero_text %}
 {% cms block.cta "hero_cta" as hero_cta %}
-<section class="nd-hero{% if block.shows_video %} nd-hero--video{% endif %}" aria-label="Gestia Home">
+<section
+  class="nd-hero{% if block.shows_video %} nd-hero--video{% endif %}"
+  aria-label="Gestia Home"
+  {% if block.shows_video and block.poster_src %}style="--nd-hero-poster: url('{{ block.poster_src }}')"{% endif %}
+>
   {% if block.shows_video %}
     <video
       class="nd-hero__media"
@@ -10,6 +14,7 @@
       muted
       loop
       playsinline
+      webkit-playsinline
       preload="metadata"
       {% if block.poster %}poster="{{ block.poster.url }}"{% elif block.image %}poster="{{ block.image.url }}"{% endif %}
     >

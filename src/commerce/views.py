@@ -19,7 +19,6 @@ from src.commerce.forms import (
     CallbackForm,
     CheckoutForm,
     ContactForm,
-    WaitlistForm,
     style_form,
 )
 from src.commerce.models import Inquiry, Order
@@ -77,19 +76,6 @@ def _pretend_order_thanks(request):
         response["HX-Redirect"] = target
         return response
     return HttpResponseRedirect(target)
-
-
-def _waitlist_form_response(request, form, status):
-    response = render(
-        request,
-        "partials/home/_waitlist_form.html",
-        {"waitlist_form": form},
-        status=status,
-    )
-    if _hx(request):
-        response["HX-Retarget"] = "#waitlist-form-slot"
-        response["HX-Reswap"] = "innerHTML"
-    return response
 
 
 def _no_stock(product):
@@ -643,25 +629,3 @@ def contact(request):
         consent=True,
     )
     return render(request, "commerce/_thanks_lead.html", {"long": False})
-
-
-@require_POST
-def waitlist(request):
-    if honeypot_filled(request):
-        return render(request, "partials/home/_waitlist_thanks.html")
-    form = style_form(WaitlistForm(request.POST))
-    if reject_if_limited(request, form, "waitlist"):
-        return _waitlist_form_response(request, form, 429)
-    if not form.is_valid():
-        status = 422 if _hx(request) else 200
-        return _waitlist_form_response(request, form, status)
-    email = form.cleaned_data["email"]
-    create_inquiry(
-        kind=Inquiry.Kind.WAITLIST,
-        name=email.split("@")[0][:120],
-        phone="",
-        email=email,
-        message=_("Підписка на старт святкових боксів"),
-        consent=True,
-    )
-    return render(request, "partials/home/_waitlist_thanks.html")

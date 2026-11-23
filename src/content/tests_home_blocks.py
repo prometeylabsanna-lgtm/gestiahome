@@ -6,9 +6,7 @@ from django.utils import translation
 
 from src.catalog.models import Category, Product
 from src.content.home_slots import home_categories, home_popular
-from src.content.literals import LITERALS
 from src.content.models import Advantage, HomeBlock
-from src.content.models_discount import DiscountModal
 from src.content.models_home_slots import HomeCategorySlot, HomePopularSlot
 
 
@@ -34,36 +32,6 @@ class HomeBlockRenderTests(TestCase):
         page = self.client.get("/en/")
         self.assertContains(page, "Guest picks")
         self.assertNotContains(page, ">Популярні товари<")
-
-
-class ContactFormCopyTests(TestCase):
-    def setUp(self):
-        cache.clear()
-        translation.activate("uk")
-
-    def test_waitlist_text_and_english_fallback(self):
-        modal = DiscountModal.load()
-        modal.enabled = True
-        modal.text_uk = "<p>Майже готово</p><p>Лише для підписників</p>"
-        modal.text_en = "<p>Almost ready</p><p>Subscribers only</p>"
-        modal.save()
-        self.assertContains(self.client.get("/"), "Майже готово")
-        self.assertContains(self.client.get("/"), "Лише для підписників")
-        english = self.client.get("/en/")
-        self.assertContains(english, "Almost ready")
-        self.assertContains(english, "Subscribers only")
-
-    def test_waitlist_form_uses_fixed_literals(self):
-        modal = DiscountModal.load()
-        modal.enabled = True
-        modal.text_uk = "<p>Оферта</p>"
-        modal.waitlist_button_uk = "Інша кнопка"
-        modal.waitlist_button_en = "Other button"
-        modal.save()
-        self.assertContains(self.client.get("/"), "Повідомити мене")
-        self.assertNotContains(self.client.get("/"), "Інша кнопка")
-        self.assertContains(self.client.get("/en/"), "Notify me")
-        self.assertEqual(LITERALS["waitlist_button"][0], "Повідомити мене")
 
 
 class HomeBlockAdminTests(TestCase):

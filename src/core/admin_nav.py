@@ -164,17 +164,6 @@ NAV_TREE = [
         ],
     },
     {
-        "title": "Знижка",
-        "items": [
-            {
-                "key": "discount",
-                "title": "Знижка",
-                "icon": "percent",
-                "url_name": "admin:content_discountmodal_changelist",
-            },
-        ],
-    },
-    {
         "title": "Юридичні сторінки",
         "items": [
             {

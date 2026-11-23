@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db.utils import OperationalError, ProgrammingError
 
-from src.commerce.forms import ContactForm, WaitlistForm, style_form
+from src.commerce.forms import ContactForm, style_form
 from src.content.form_labels import apply_labels
 from src.content.theme import page_style_key, theme_font_family
 from src.core.i18n import localize_path
@@ -33,7 +33,6 @@ def shop(request):
     cart_count = 0
     wishlist_count = 0
     form_copy = None
-    discount_modal = None
     try:
         from src.catalog.models import Category, Product
         from src.catalog.selectors import nav_categories as load_nav
@@ -83,12 +82,6 @@ def shop(request):
         wishlist_count = wish_count(request)
     except (OperationalError, ProgrammingError):
         pass
-    try:
-        from src.content.models_discount import DiscountModal
-
-        discount_modal = DiscountModal.load()
-    except (OperationalError, ProgrammingError):
-        discount_modal = None
     ui_copy = None
     try:
         from src.content.models_ui import InterfaceCopy
@@ -118,11 +111,9 @@ def shop(request):
             code: language_enabled(code) for code, _label in settings.LANGUAGES
         },
         "form_copy": form_copy,
-        "discount_modal": discount_modal,
         "ui": ui_copy,
         "page_style_key": page_style_key(request),
         "theme_font": theme_font_family(),
         "contact_form": apply_labels(style_form(ContactForm()), form_copy),
-        "waitlist_form": apply_labels(style_form(WaitlistForm()), form_copy),
         "seo": build_head(request, site),
     }

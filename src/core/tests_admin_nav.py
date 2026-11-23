@@ -39,7 +39,7 @@ class SidebarTreeTests(TestCase):
 
     def test_pending_entries_stay_in_the_tree(self):
         keys = {entry["key"] for entry in iter_nav_entries(NAV_TREE)}
-        self.assertIn("discount", keys)
+        self.assertNotIn("discount", keys)
         self.assertIn("styles", keys)
         self.assertIn("recent_actions", keys)
         self.assertIn("legal_offer", keys)
@@ -70,7 +70,7 @@ class SidebarTreeTests(TestCase):
         self.assertIn("Головна", titles)
         self.assertIn("Каталог", titles)
         self.assertIn("Юридичні сторінки", titles)
-        self.assertIn("Знижка", titles)
+        self.assertNotIn("Знижка", titles)
         self.assertIn("Стилі", titles)
         self.assertIn("Система", titles)
         labels = _labels(groups)
@@ -132,7 +132,7 @@ class SidebarTreeTests(TestCase):
         self.assertContains(response, reverse("admin:content_menugroup_changelist"))
         self.assertContains(response, "Користувачі")
         self.assertContains(response, "Вийти")
-        self.assertContains(response, "Знижка")
+        self.assertNotContains(response, "Знижка")
         self.assertNotContains(response, "homevideoblock")
         self.assertNotContains(response, "homeheroblock")
         with self.assertRaises(NoReverseMatch):

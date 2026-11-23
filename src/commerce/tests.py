@@ -8,7 +8,7 @@ from django.utils import translation
 
 from src.catalog.models import Category, Product
 from src.commerce.forms import CallbackForm
-from src.commerce.models import Inquiry, Order
+from src.commerce.models import Order
 from src.commerce.services import OrderValidationError, create_order, row_from_product
 from src.commerce.validators import MSG_NAME, MSG_PHONE
 
@@ -422,35 +422,27 @@ class CheckoutTests(TestCase):
         self.assertIn("/thank-you/", response["Location"])
 
 
-class WaitlistTests(TestCase):
+class WaitlistRemovedTests(TestCase):
     def setUp(self):
         translation.activate("uk")
 
-    def test_waitlist_modal_on_any_page(self):
+    def test_waitlist_modal_is_gone(self):
         home = self.client.get("/")
         about = self.client.get("/pro-nas/")
         self.assertEqual(home.status_code, 200)
         self.assertEqual(about.status_code, 200)
         for page in (home, about):
-            self.assertContains(page, 'id="waitlist-modal"')
-            self.assertContains(page, "data-delay-ms=\"15000\"")
-            self.assertContains(page, "js/pages/waitlist-modal.js")
-            self.assertContains(page, "Твоє ідеальне свято вже майже у коробці")
+            self.assertNotContains(page, 'id="waitlist-modal"')
+            self.assertNotContains(page, "waitlist-modal.js")
+            self.assertNotContains(page, "Твоє ідеальне свято вже майже у коробці")
 
-    def test_waitlist_saves_inquiry(self):
+    def test_waitlist_url_is_gone(self):
         response = self.client.post(
             "/svyatkovi-boksy/",
             {"email": "guest@example.com", "consent": "on"},
             HTTP_HX_REQUEST="true",
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Дякуємо")
-        self.assertContains(response, "data-waitlist-success")
-        self.assertNotContains(response, "Не пропусти старт продажів")
-        inquiry = Inquiry.objects.get()
-        self.assertEqual(inquiry.kind, Inquiry.Kind.WAITLIST)
-        self.assertEqual(inquiry.email, "guest@example.com")
-        self.assertTrue(inquiry.consent)
+        self.assertEqual(response.status_code, 404)
 
 
 def _customer():

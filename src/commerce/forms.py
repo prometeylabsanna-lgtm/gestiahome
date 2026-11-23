@@ -71,10 +71,6 @@ class BuyNowForm(NamePhoneMixin, ConsentForm):
             self.fields["idem"].initial = secrets.token_urlsafe(16)
 
 
-class WaitlistForm(ConsentForm):
-    email = forms.EmailField(label=_("Email"), max_length=254, error_messages=EMAIL_ERRORS.copy())
-
-
 class CheckoutForm(NamePhoneMixin, ConsentForm):
     name = forms.CharField(label=_("Ім’я"), max_length=120, error_messages=NAME_ERRORS.copy())
     phone = forms.CharField(label=_("Номер телефону"), max_length=32, error_messages=PHONE_ERRORS.copy())

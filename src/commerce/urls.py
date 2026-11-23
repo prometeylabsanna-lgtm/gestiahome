@@ -21,5 +21,4 @@ urlpatterns = [
     path("zayavka/", views.callback, name="callback"),
     path("zamovyty-odrazu/", views.buy_now, name="buy_now"),
     path("zvorotnyi-zvyazok/", views.contact, name="contact"),
-    path("svyatkovi-boksy/", views.waitlist, name="waitlist"),
 ]

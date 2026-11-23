@@ -164,6 +164,18 @@ class FrenchLocaleTests(TestCase):
             self.assertNotIn("« ", blob, rel)
             self.assertNotIn(" »", blob, rel)
 
+    def test_english_copy_uses_guillemets(self):
+        from pathlib import Path
+
+        from src.core.utils import curly_to_guillemets
+
+        self.assertEqual(curly_to_guillemets("Easter box “Ukrainian”"), "Easter box «Ukrainian»")
+        blob = (Path(settings.BASE_DIR) / "locale" / "en" / "LC_MESSAGES" / "django.po").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("“", blob)
+        self.assertNotIn("”", blob)
+
     def test_french_copy_covers_collection_addons(self):
         from src.content.french_copy import CATEGORY_NAMES, PRODUCTS
 

@@ -209,7 +209,7 @@ class StockTests(TestCase):
         with translation.override("en"):
             self.assertEqual(
                 insufficient_stock_message("Snow", 2),
-                "Only 2 pcs of “Snow” left.",
+                "Only 2 pcs of «Snow» left.",
             )
 
     def test_admin_shows_stock_qty(self):

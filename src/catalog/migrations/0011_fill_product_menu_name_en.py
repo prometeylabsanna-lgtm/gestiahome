@@ -3,7 +3,7 @@ from django.db import migrations
 # English menu labels for rows whose Ukrainian menu name is not the product name.
 # Matched by sku. Same-name rows copy name_en. Empty targets are left untouched.
 MENU_NAME_EN_BY_SKU = {
-    "GH-02": "Christmas box “Pine Cones”",
+    "GH-02": "Christmas box «Pine Cones»",
 }
 
 

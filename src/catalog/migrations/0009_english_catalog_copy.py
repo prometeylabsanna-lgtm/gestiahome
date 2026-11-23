@@ -38,18 +38,18 @@ ATTRIBUTE_NAMES = {
 }
 
 NEST_DESCRIPTION = (
-    "The Easter box “The Nest” is a festive arrangement for an atmospheric Easter table.\n"
+    "The Easter box «The Nest» is a festive arrangement for an atmospheric Easter table.\n"
     "It includes decorative Easter eggs, flower-shaped candle holders, and details for the festive arrangement."
 )
 
 PRODUCTS = {
     "GH-01": {
         "slug": "velykodnii-ukrainskyi",
-        "name_en": "Easter box “Ukrainian”",
+        "name_en": "Easter box «Ukrainian»",
     },
     "GH-02": {
         "slug": "boks-rizdvyanyi-shyshky",
-        "name_en": "Christmas box “Pine Cones”",
+        "name_en": "Christmas box «Pine Cones»",
     },
     "GH-04": {
         "slug": "vesilnyi",
@@ -65,7 +65,7 @@ PRODUCTS = {
     },
     "TL-0012": {
         "slug": "velykodnii-hnizdo",
-        "name_en": "Easter box “The Nest”",
+        "name_en": "Easter box «The Nest»",
         "description_en": NEST_DESCRIPTION,
     },
 }

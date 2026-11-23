@@ -5,6 +5,12 @@ from django.utils.translation import get_language
 SUPPORTED = ("uk", "en", "fr")
 
 
+def curly_to_guillemets(value: str) -> str:
+    if not isinstance(value, str) or ("“" not in value and "”" not in value):
+        return value
+    return value.replace("“", "«").replace("”", "»")
+
+
 def localized(obj, field: str, language: str | None = None) -> str:
     lang = (language or get_language() or "uk").split("-")[0]
     if lang not in SUPPORTED:

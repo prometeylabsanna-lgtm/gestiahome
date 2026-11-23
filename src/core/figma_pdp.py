@@ -79,7 +79,7 @@ def seed_pdp(products):
             surface=CatalogCell.Surface.PDP_MOBILE,
             slot=CatalogCell.Slot.TILE,
             label_uk=label,
-            label_en="Easter box “Ukrainian”" if label == "Бокс Великодній «Український»" else "",
+            label_en="Easter box «Ukrainian»" if label == "Бокс Великодній «Український»" else "",
             sort=sort,
             price_uah=Decimal("8990.00"),
             crop=crop,

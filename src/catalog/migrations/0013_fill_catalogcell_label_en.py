@@ -1,7 +1,7 @@
 from django.db import migrations
 
 LABEL_UK = "Бокс Великодній «Український»"
-LABEL_EN = "Easter box “Ukrainian”"
+LABEL_EN = "Easter box «Ukrainian»"
 
 
 def fill_catalogcell_label_en(apps, schema_editor):

@@ -134,7 +134,7 @@ def collection_meta_description(collection) -> str:
     if not title:
         return BRAND
     if _language() == "en":
-        return f"Collection “{title}”. {BRAND}"
+        return f"Collection «{title}». {BRAND}"
     return f"Колекція «{title}». {BRAND}"
 
 

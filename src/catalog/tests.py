@@ -368,7 +368,7 @@ class EnglishCatalogCopyTests(TestCase):
         self.assertEqual(Category.objects.get(slug="not-in-shop").name_en, "")
         self.assertEqual(self.product.name_en, "Wedding box")
         self.assertEqual(Product.objects.get(sku="GH-01").name_en, "Custom English name")
-        self.assertEqual(self.nest.name_en, "Easter box “The Nest”")
+        self.assertEqual(self.nest.name_en, "Easter box «The Nest»")
         self.assertIn("flower-shaped candle holders", self.nest.description_en)
         self.assertEqual(ProductAttributeGroup.objects.get(slug="style").name_en, "Kept style")
         self.assertEqual(ProductAttribute.objects.get(slug="scandi").name_en, "Scandinavian")
@@ -384,7 +384,7 @@ class EnglishCatalogCopyTests(TestCase):
         self.assertContains(page, "<h1")
         self.assertNotContains(page, "Бокс «Весільний»")
         nest = self.client.get("/en/tovar/velykodnii-hnizdo/")
-        self.assertContains(nest, "Easter box “The Nest”")
+        self.assertContains(nest, "Easter box «The Nest»")
         self.assertContains(nest, "flower-shaped candle holders")
         self.assertNotContains(nest, "Бокс Великодній «Гніздо»")
 
@@ -399,7 +399,7 @@ class MenuNameEnTests(TestCase):
             sku="GH-02",
             slug="boks-rizdvyanyi-shyshky",
             name_uk="Бокс «Різдвяний Шишки»",
-            name_en="Christmas box “Pine Cones”",
+            name_en="Christmas box «Pine Cones»",
             menu_name_uk="Бокс Різдвяний Шишки",
             price_uah=Decimal("4980.00"),
             price_eur=Decimal("110.00"),
@@ -423,13 +423,13 @@ class MenuNameEnTests(TestCase):
         with translation.override("uk"):
             self.assertEqual(self.cones.menu_name, "Бокс «Різдвяний Шишки»")
         with translation.override("en"):
-            self.assertEqual(self.cones.menu_name, "Christmas box “Pine Cones”")
+            self.assertEqual(self.cones.menu_name, "Christmas box «Pine Cones»")
         self.cones.menu_name_uk = "Інша в меню"
         self.cones.menu_name_en = "Other menu"
         with translation.override("uk"):
             self.assertEqual(self.cones.menu_name, "Бокс «Різдвяний Шишки»")
         with translation.override("en"):
-            self.assertEqual(self.cones.menu_name, "Christmas box “Pine Cones”")
+            self.assertEqual(self.cones.menu_name, "Christmas box «Pine Cones»")
 
     def test_fill_copies_same_name_and_translates_by_sku(self):
         same = self._product(
@@ -458,7 +458,7 @@ class MenuNameEnTests(TestCase):
         same.refresh_from_db()
         kept.refresh_from_db()
         blank.refresh_from_db()
-        self.assertEqual(self.cones.menu_name_en, "Christmas box “Pine Cones”")
+        self.assertEqual(self.cones.menu_name_en, "Christmas box «Pine Cones»")
         self.assertEqual(same.menu_name_en, "The same")
         self.assertEqual(kept.menu_name_en, "Custom menu")
         self.assertEqual(blank.menu_name_en, "")
@@ -466,7 +466,7 @@ class MenuNameEnTests(TestCase):
     def test_english_menu_shows_product_name_en(self):
         page = self.client.get("/en/")
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, "Christmas box “Pine Cones”")
+        self.assertContains(page, "Christmas box «Pine Cones»")
         self.assertNotContains(page, "Бокс Різдвяний Шишки")
 
 
@@ -518,10 +518,10 @@ class EnglishFrameLabelTests(TestCase):
         copy.fill_catalogcell_label_en(apps, None)
         cell.refresh_from_db()
         kept.refresh_from_db()
-        self.assertEqual(cell.label_en, "Easter box “Ukrainian”")
+        self.assertEqual(cell.label_en, "Easter box «Ukrainian»")
         self.assertEqual(kept.label_en, "Custom")
         with translation.override("en"):
-            self.assertEqual(cell.label, "Easter box “Ukrainian”")
+            self.assertEqual(cell.label, "Easter box «Ukrainian»")
         with translation.override("uk"):
             self.assertEqual(cell.label, "Бокс Великодній «Український»")
 

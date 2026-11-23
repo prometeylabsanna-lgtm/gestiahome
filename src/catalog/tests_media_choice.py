@@ -1,6 +1,8 @@
 from decimal import Decimal
 from io import BytesIO
+from pathlib import Path
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from PIL import Image
@@ -78,3 +80,12 @@ class CatalogMediaChoiceTests(TestCase):
         self.assertContains(page, "<video")
         self.assertContains(page, "/media/products/video/")
         self.assertContains(page, "/media/products/shot")
+
+    def test_pdp_gallery_css_keeps_gap(self):
+        css = (
+            Path(settings.BASE_DIR) / "src" / "core" / "static" / "css" / "nd" / "product.css"
+        ).read_text(encoding="utf-8")
+        self.assertIn("gap: var(--nd-pdp-gallery-gap)", css)
+        desktop = css.split("@media (min-width: 700px)")[1].split("@media")[0]
+        self.assertIn("gap: var(--nd-pdp-gallery-gap)", desktop)
+        self.assertNotIn("gap: 0", desktop)

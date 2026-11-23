@@ -1,5 +1,7 @@
 from decimal import Decimal
+from pathlib import Path
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import translation
@@ -143,6 +145,14 @@ class CollectionPageTests(TestCase):
         self.assertEqual(self.menu_item.get_href(), url)
         home = self.client.get(reverse("home"))
         self.assertContains(home, f'href="{url}"')
+
+    def test_desktop_gallery_keeps_gap(self):
+        css = (
+            Path(settings.BASE_DIR) / "src" / "core" / "static" / "css" / "nd" / "collection.css"
+        ).read_text(encoding="utf-8")
+        desktop = css.split("@media (min-width: 1024px)")[1].split("@supports")[0]
+        self.assertIn("gap: var(--nd-colp-gallery-gap)", desktop)
+        self.assertNotIn("gap: 0", desktop)
 
 
 class SeededCollectionEnglishTests(TestCase):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -62,6 +63,26 @@ class VercelSettingsSourceTests(SimpleTestCase):
     def test_wsgi_does_not_auto_ensure_superuser(self):
         wsgi = (ROOT / "config" / "wsgi.py").read_text(encoding="utf-8")
         self.assertNotIn("ensure_demo_superuser", wsgi)
+
+    def test_demo_sqlite_has_french_schema(self):
+        demo_db = ROOT / "demo" / "gestia_demo.sqlite3"
+        self.assertTrue(demo_db.is_file(), demo_db)
+        con = sqlite3.connect(demo_db)
+        try:
+            product_cols = {row[1] for row in con.execute("PRAGMA table_info(catalog_product)")}
+            settings_cols = {
+                row[1] for row in con.execute("PRAGMA table_info(content_sitesettings)")
+            }
+            migs = {
+                (app, name)
+                for app, name in con.execute("SELECT app, name FROM django_migrations")
+            }
+        finally:
+            con.close()
+        self.assertIn("name_fr", product_cols)
+        self.assertIn("fr_enabled", settings_cols)
+        self.assertIn(("catalog", "0024_french_locale"), migs)
+        self.assertIn(("content", "0054_french_copy_addons"), migs)
 
 
 class VercelSettingsIsolatedTests(SimpleTestCase):
@@ -144,7 +165,7 @@ class VercelSettingsIsolatedTests(SimpleTestCase):
             "with override_settings(STORAGES=storage, STATICFILES_STORAGE="
             "'django.contrib.staticfiles.storage.StaticFilesStorage'):\n"
             "    c = Client()\n"
-            "    for path in ('/', '/katalog/'):\n"
+            "    for path in ('/', '/katalog/', '/fr/', '/fr/katalog/'):\n"
             "        r = c.get(path, HTTP_HOST=host, secure=True)\n"
             "        assert r.status_code == 200, (path, r.status_code)\n"
             "print('pages-ok')\n"

@@ -3,7 +3,7 @@
 from src.content.french_copy import _empty, _set_if_empty, _save_changed
 
 ABOUT_FR = {
-    "title_fr": "Salut, je suis Gestia",
+    "title_fr": "Hi, I\u2019m Gestia",
     "lead_fr": "Une femme moderne peut tout.",
     "crumb_fr": "Accueil",
     "story_label_fr": "À propos de Gestia Home",

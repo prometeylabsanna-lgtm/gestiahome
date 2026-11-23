@@ -201,9 +201,10 @@ class FrenchLocaleTests(TestCase):
         from src.content.french_copy import STUDIO_ADDRESS
         from src.content.french_copy_pages import ABOUT_FR
 
-        self.assertEqual(ABOUT_FR["title_fr"], "Salut, je suis Gestia")
+        self.assertEqual(ABOUT_FR["title_fr"], "Hi, I\u2019m Gestia")
         self.assertIn("Gestia", ABOUT_FR["title_fr"])
         self.assertNotEqual(ABOUT_FR["title_fr"], "À propos")
+        self.assertNotEqual(ABOUT_FR["title_fr"], "Salut, je suis Gestia")
         self.assertEqual(STUDIO_ADDRESS["fr"], "Kyiv, atelier Gestia")
 
     def test_cell_stamp_gets_french_label(self):

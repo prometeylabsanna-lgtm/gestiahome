@@ -82,6 +82,7 @@ class VercelSettingsSourceTests(SimpleTestCase):
         self.assertIn("name_fr", product_cols)
         self.assertIn("fr_enabled", settings_cols)
         self.assertIn(("catalog", "0024_french_locale"), migs)
+        self.assertIn(("catalog", "0025_fill_catalogcell_label_fr"), migs)
         self.assertIn(("content", "0054_french_copy_addons"), migs)
 
 

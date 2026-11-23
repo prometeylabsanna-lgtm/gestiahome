@@ -37,7 +37,7 @@ class _OpenSingleton(GestiaModelAdmin):
 
 @admin.register(AboutIntro)
 class AboutIntroAdmin(_OpenSingleton):
-    text_limits = {"title_uk": 40, "title_en": 40}
+    text_limits = {"title_uk": 40, "title_en": 40, "title_fr": 40}
     tiny_fields = ("intro_text_uk", "intro_text_en", "intro_text_fr")
     fieldsets = language_tabs(
         uk_fields=(

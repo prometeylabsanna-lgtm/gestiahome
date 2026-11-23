@@ -80,6 +80,7 @@ def seed_pdp(products):
             slot=CatalogCell.Slot.TILE,
             label_uk=label,
             label_en="Easter box «Ukrainian»" if label == "Бокс Великодній «Український»" else "",
+            label_fr="Coffret de Pâques «Ukrainien»" if label == "Бокс Великодній «Український»" else "",
             sort=sort,
             price_uah=Decimal("8990.00"),
             crop=crop,

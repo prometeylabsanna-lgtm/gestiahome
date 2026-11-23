@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -7,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
-from src.catalog.models import Category, Product
+from src.catalog.models import CatalogCell, Category, Product
 from src.content.models import HomeBlock, SiteSettings
 from src.content.models_faq import FaqItem, FaqPage
 from src.content.models_home_slots import HomePopularSlot
@@ -196,3 +197,44 @@ class FrenchLocaleTests(TestCase):
         ):
             self.assertEqual(PRODUCTS[sku]["slug"], slug)
             self.assertTrue(PRODUCTS[sku]["name_fr"].strip())
+
+        from src.content.french_copy import STUDIO_ADDRESS
+        from src.content.french_copy_pages import ABOUT_FR
+
+        self.assertEqual(ABOUT_FR["title_fr"], "Salut, je suis Gestia")
+        self.assertIn("Gestia", ABOUT_FR["title_fr"])
+        self.assertNotEqual(ABOUT_FR["title_fr"], "À propos")
+        self.assertEqual(STUDIO_ADDRESS["fr"], "Kyiv, atelier Gestia")
+
+    def test_cell_stamp_gets_french_label(self):
+        import importlib
+
+        copy = importlib.import_module("src.catalog.migrations.0025_fill_catalogcell_label_fr")
+        cell = CatalogCell.objects.create(
+            product=self.product,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            sort=1,
+            price_uah=Decimal("10"),
+            label_uk="Бокс Великодній «Український»",
+        )
+        kept = CatalogCell.objects.create(
+            product=self.product,
+            band=0,
+            layout=CatalogCell.Layout.ROW,
+            role=CatalogCell.Role.GRID,
+            sort=2,
+            price_uah=Decimal("10"),
+            label_uk="Бокс Великодній «Український»",
+            label_fr="Personnalisé",
+        )
+        copy.fill_catalogcell_label_fr(apps, None)
+        cell.refresh_from_db()
+        kept.refresh_from_db()
+        self.assertEqual(cell.label_fr, "Coffret de Pâques «Ukrainien»")
+        self.assertEqual(kept.label_fr, "Personnalisé")
+        with translation.override("fr"):
+            self.assertEqual(cell.label, "Coffret de Pâques «Ukrainien»")
+        with translation.override("uk"):
+            self.assertEqual(cell.label, "Бокс Великодній «Український»")

@@ -97,3 +97,18 @@ class ContactsPageTests(TestCase):
         )
         self.assertRedirects(response, "/thank-you/?kind=contact", fetch_redirect_response=False)
         self.assertEqual(Inquiry.objects.count(), 0)
+
+    def test_french_address_is_translated(self):
+        from src.content.models import SiteSettings
+
+        SiteSettings.objects.update_or_create(pk=1, defaults={"en_enabled": True, "fr_enabled": True})
+        _save_site(
+            address_uk="Київ, майстерня Gestia",
+            address_en="Kyiv, Gestia studio",
+            address_fr="Kyiv, atelier Gestia",
+        )
+        french = self.client.get("/fr/kontakty/")
+        html = french.content.decode().split("<main", 1)[1].split("</main>", 1)[0]
+        self.assertEqual(french.status_code, 200)
+        self.assertIn("Kyiv, atelier Gestia", html)
+        self.assertNotIn("Київ, майстерня Gestia", html)

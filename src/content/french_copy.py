@@ -214,6 +214,12 @@ NAV = {
     "footer_note_fr": "Tous droits réservés.",
 }
 
+STUDIO_ADDRESS = {
+    "uk": "Київ, майстерня Gestia",
+    "en": "Kyiv, Gestia studio",
+    "fr": "Kyiv, atelier Gestia",
+}
+
 MENU_GROUPS = {
     "Святкові бокси": "Coffrets de fête",
     "Столові аксесуари": "Accessoires de table",
@@ -329,6 +335,11 @@ def fill_french_copy(apps, schema_editor):
         fr = pair[2] if len(pair) > 2 else ""
         if _pair(site, stem, "", "", fr):
             site_changed.append(f"{stem}_fr")
+    if (site.address_uk or "").strip() == STUDIO_ADDRESS["uk"]:
+        if _set_if_empty(site, "address_en", STUDIO_ADDRESS["en"]):
+            site_changed.append("address_en")
+        if _set_if_empty(site, "address_fr", STUDIO_ADDRESS["fr"]):
+            site_changed.append("address_fr")
     _save_changed(site, site_changed)
 
     ContactsPage = apps.get_model("content", "ContactsPage")
@@ -377,6 +388,12 @@ def fill_french_copy(apps, schema_editor):
             if field == "slug":
                 continue
             qs.filter(**{field: ""}).update(**{field: value})
+
+    CatalogCell = apps.get_model("catalog", "CatalogCell")
+    CatalogCell.objects.filter(
+        label_uk="Бокс Великодній «Український»",
+        label_fr="",
+    ).update(label_fr=PRODUCTS["GH-01"]["name_fr"])
 
     Group = apps.get_model("catalog", "ProductAttributeGroup")
     for slug, value in GROUP_NAMES.items():

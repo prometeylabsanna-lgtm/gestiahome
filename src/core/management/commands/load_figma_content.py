@@ -76,12 +76,18 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("load_figma_content завершено"))
 
     def _fill_english(self):
+        import importlib
+
         from django.apps import apps as django_apps
 
-        from src.catalog.migrations.0013_fill_catalogcell_label_en import fill_catalogcell_label_en
         from src.content.migrations.0007_english_content_copy import fill_english_content
 
-        fill_catalogcell_label_en(django_apps, None)
+        importlib.import_module(
+            "src.catalog.migrations.0013_fill_catalogcell_label_en"
+        ).fill_catalogcell_label_en(django_apps, None)
+        importlib.import_module(
+            "src.catalog.migrations.0025_fill_catalogcell_label_fr"
+        ).fill_catalogcell_label_fr(django_apps, None)
         fill_english_content(django_apps, None)
 
     def _wipe(self):
@@ -299,6 +305,7 @@ class Command(BaseCommand):
                 slot=slot,
                 label_uk=label,
                 label_en="Easter box «Ukrainian»" if label == stamped else "",
+                label_fr="Coffret de Pâques «Ukrainien»" if label == stamped else "",
                 sort=sort,
                 price_uah=Decimal(price),
                 crop=crop,

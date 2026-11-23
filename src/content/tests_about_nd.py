@@ -142,6 +142,14 @@ class AboutNdRenderTests(TestCase):
         self.assertContains(response, "Go to catalogue")
         self.assertNotContains(response, "Hi, I’m Gestia")
 
+    def test_about_french_title_keeps_gestia(self):
+        self.page.title_fr = "Salut, je suis Gestia"
+        self.page.save(update_fields=["title_fr"])
+        cache.clear()
+        response = self.client.get("/fr/pro-nas/")
+        self.assertContains(response, "Salut, je suis Gestia")
+        self.assertNotContains(response, ">À propos</h1>")
+
 
 class AboutNdAdminTests(TestCase):
     def setUp(self):

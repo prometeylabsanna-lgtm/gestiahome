@@ -42,7 +42,7 @@ ABOUT_FR = {
         "<p>Car une table bien dressée n’est pas une démonstration de richesse. C’est un "
         "geste d’attention.<br>C’est à table que naissent l’amitié, la confiance, les "
         "souvenirs partagés et les traditions familiales.<br>C’est une façon de dire "
-        "sans mots : « Je suis si heureuse que tu sois là ce soir. »</p>"
+        "sans mots : «Je suis si heureuse que tu sois là ce soir.»</p>"
     ),
     "closing_text_fr": (
         "<p>Nous croyons qu’une femme moderne peut réussir dans tout ce qu’elle choisit. "
@@ -93,7 +93,7 @@ FAQ_ITEMS_FR = [
         "answer_fr": (
             "<p>Nos coffrets de fête sont polyvalents et apportent une ambiance festive "
             "à toute vaisselle et tout linge de table. Pour un accord parfait, essayez "
-            "les pièces de la rubrique « Accessoires de table » — elles sont choisies "
+            "les pièces de la rubrique «Accessoires de table» — elles sont choisies "
             "pour chaque ensemble.</p>"
         ),
         "sort": 1,
@@ -140,7 +140,7 @@ COLLECTIONS = {
         "label_fr": "Collection",
         "title_fr": "Fleur-âme",
         "text_fr": (
-            "<p>« Fleur-âme », ce sont des amaryllis vivantes que la famille cultive "
+            "<p>«Fleur-âme», ce sont des amaryllis vivantes que la famille cultive "
             "jusqu’à Noël. Elle unit la beauté de l’hippeastrum vivant à l’art de la "
             "table de fête. Pétales rouge profond, coupes d’argent, pin naturel et "
             "flamme des bougies composent un arrangement raffiné que vous cultivez et "

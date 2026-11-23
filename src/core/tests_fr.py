@@ -138,6 +138,32 @@ class FrenchLocaleTests(TestCase):
         self.assertContains(page, "Français")
         self.assertContains(page, 'name="name_fr"')
 
+    def test_french_guillemets_have_no_inner_space(self):
+        from pathlib import Path
+
+        from src.content.french_copy import MENU_ITEMS, PRODUCTS, tighten_fr_guillemets
+
+        self.assertEqual(tighten_fr_guillemets("« Ukrainien »"), "«Ukrainien»")
+        self.assertEqual(tighten_fr_guillemets("«Ukrainien»"), "«Ukrainien»")
+        for data in PRODUCTS.values():
+            for value in data.values():
+                if isinstance(value, str):
+                    self.assertNotIn("« ", value)
+                    self.assertNotIn(" »", value)
+        for fr in MENU_ITEMS.values():
+            self.assertNotIn("« ", fr)
+            self.assertNotIn(" »", fr)
+        root = Path(settings.BASE_DIR)
+        for rel in (
+            "src/content/french_copy.py",
+            "src/content/french_copy_pages.py",
+            "src/content/legal_copy_fr.py",
+            "locale/fr/LC_MESSAGES/django.po",
+        ):
+            blob = (root / rel).read_text(encoding="utf-8")
+            self.assertNotIn("« ", blob, rel)
+            self.assertNotIn(" »", blob, rel)
+
     def test_french_copy_covers_collection_addons(self):
         from src.content.french_copy import CATEGORY_NAMES, PRODUCTS
 

@@ -1,10 +1,47 @@
 """Заповнює порожні *_fr. Викликає лише міграція."""
 
+import re
+
+from django.db import models
+
 from src.content.ui_fr import UI_FR
 from src.content.ui_seed import CONTACTS, SITE_EXTRA, _empty, _fits, _pair
 
+_FR_GUILLEMET_OPEN = re.compile(r"«[\s\u00a0\u202f\u2009]+")
+_FR_GUILLEMET_CLOSE = re.compile(r"[\s\u00a0\u202f\u2009]+»")
+
+
+def tighten_fr_guillemets(value: str) -> str:
+    if not isinstance(value, str) or ("«" not in value and "»" not in value):
+        return value
+    return _FR_GUILLEMET_CLOSE.sub("»", _FR_GUILLEMET_OPEN.sub("«", value))
+
+
+def tighten_stored_fr_guillemets(apps, schema_editor):
+    del schema_editor
+    for model in apps.get_models():
+        names = [
+            field.name
+            for field in model._meta.local_concrete_fields
+            if field.name.endswith("_fr") and isinstance(field, (models.CharField, models.TextField))
+        ]
+        if not names:
+            continue
+        for obj in model.objects.all().iterator():
+            changed = []
+            for name in names:
+                value = getattr(obj, name)
+                new = tighten_fr_guillemets(value)
+                if new != value:
+                    setattr(obj, name, new)
+                    changed.append(name)
+            if changed:
+                obj.save(update_fields=changed)
+
 
 def _set_if_empty(obj, name, value):
+    if isinstance(value, str):
+        value = tighten_fr_guillemets(value)
     if not hasattr(obj, name) or not value:
         return False
     if not _empty(getattr(obj, name)):
@@ -53,25 +90,25 @@ CATEGORY_NAMES = {
 SET_NAMES = {"velykodni": "Pâques"}
 
 PRODUCTS = {
-    "GH-01": {"slug": "velykodnii-ukrainskyi", "name_fr": "Coffret de Pâques « Ukrainien »"},
-    "GH-02": {"slug": "boks-rizdvyanyi-shyshky", "name_fr": "Coffret de Noël « Pommes de pin »"},
+    "GH-01": {"slug": "velykodnii-ukrainskyi", "name_fr": "Coffret de Pâques «Ukrainien»"},
+    "GH-02": {"slug": "boks-rizdvyanyi-shyshky", "name_fr": "Coffret de Noël «Pommes de pin»"},
     "GH-04": {"slug": "vesilnyi", "name_fr": "Coffret de mariage"},
     "GH-05": {"slug": "vesnianyi", "name_fr": "Coffret de printemps"},
     "GH-06": {"slug": "gazetnyi", "name_fr": "Coffret journal"},
     "TL-0012": {
         "slug": "velykodnii-hnizdo",
-        "name_fr": "Coffret de Pâques « Le Nid »",
+        "name_fr": "Coffret de Pâques «Le Nid»",
         "description_fr": (
-            "Le coffret de Pâques « Le Nid » est une composition festive pour une table de Pâques.\n"
+            "Le coffret de Pâques «Le Nid» est une composition festive pour une table de Pâques.\n"
             "Il comprend des œufs décoratifs, des bougeoirs en forme de fleurs et des détails pour la composition."
         ),
     },
-    "COL-KVITKA": {"slug": "kvitka-dusha", "name_fr": "Coffret « Fleur-âme »"},
-    "COL-KORINNIA": {"slug": "korinnia", "name_fr": "Coffret « Racines »"},
-    "COL-KRYSHTAL": {"slug": "rodynnyi-kryshtal", "name_fr": "Coffret « Cristal familial »"},
-    "COL-TARTAN": {"slug": "tartan", "name_fr": "Coffret « Tartan »"},
-    "COL-DYTYNSTVO": {"slug": "dytynstvo", "name_fr": "Coffret « Enfance »"},
-    "COL-SPADSHCHYNA": {"slug": "spadshchyna", "name_fr": "Coffret « Héritage »"},
+    "COL-KVITKA": {"slug": "kvitka-dusha", "name_fr": "Coffret «Fleur-âme»"},
+    "COL-KORINNIA": {"slug": "korinnia", "name_fr": "Coffret «Racines»"},
+    "COL-KRYSHTAL": {"slug": "rodynnyi-kryshtal", "name_fr": "Coffret «Cristal familial»"},
+    "COL-TARTAN": {"slug": "tartan", "name_fr": "Coffret «Tartan»"},
+    "COL-DYTYNSTVO": {"slug": "dytynstvo", "name_fr": "Coffret «Enfance»"},
+    "COL-SPADSHCHYNA": {"slug": "spadshchyna", "name_fr": "Coffret «Héritage»"},
     "ADD-HOLDERS": {"slug": "addon-pidsvichnyky", "name_fr": "Bougeoirs avec bougies"},
     "ADD-HOLDERS-2": {"slug": "addon-pidsvichnyky-2", "name_fr": "2 bougeoirs + 2 bougies"},
     "ADD-HOLDERS-EXTRA": {
@@ -183,12 +220,12 @@ MENU_GROUPS = {
 }
 
 MENU_ITEMS = {
-    "«Квітка-душа»": "« Fleur-âme »",
-    "«Коріння»": "« Racines »",
-    "«Родинний кришталь»": "« Cristal familial »",
-    "«Тартан»": "« Tartan »",
-    "«Дитинство»": "« Enfance »",
-    "«Спадщина»": "« Héritage »",
+    "«Квітка-душа»": "«Fleur-âme»",
+    "«Коріння»": "«Racines»",
+    "«Родинний кришталь»": "«Cristal familial»",
+    "«Тартан»": "«Tartan»",
+    "«Дитинство»": "«Enfance»",
+    "«Спадщина»": "«Héritage»",
     "Підсвічники": "Bougeoirs",
     "Серветки": "Serviettes",
     "Кільця для серветок": "Ronds de serviette",

@@ -106,7 +106,7 @@ LOCALE_FIELD_META = {
     "title_fr": ("Titre du dialogue", "Titre de l’étape Confirmer."),
     "text_uk": ("Поточний регіон", "Рядок під заголовком, напр. «Україна/Гривня»."),
     "text_en": ("Current region", "Line under the title, e.g. «Ukraine/Hryvnia»."),
-    "text_fr": ("Région actuelle", "Ligne sous le titre, p. ex. « Ukraine/Hryvnia »."),
+    "text_fr": ("Région actuelle", "Ligne sous le titre, p. ex. «Ukraine/Hryvnia»."),
     "cta_uk": ("Кнопка підтвердження", "Текст кнопки «Підтвердити»."),
     "cta_en": ("Confirm button", "Confirm button label."),
     "cta_fr": ("Bouton confirmer", "Libellé du bouton Confirmer."),

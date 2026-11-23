@@ -105,11 +105,11 @@ msgstr ""
 
 #, python-format
 msgid "Товар «%(name)s» зараз відсутній. Приберіть його з кошика."
-msgstr "« %(name)s » est actuellement indisponible. Retirez-le du panier."
+msgstr "«%(name)s» est actuellement indisponible. Retirez-le du panier."
 
 #, python-format
 msgid "Товару «%(name)s» залишилось лише %(left)s шт."
-msgstr "Il ne reste que %(left)s pce de « %(name)s »."
+msgstr "Il ne reste que %(left)s pce de «%(name)s»."
 
 msgid "Поле обов'язкове для заповнення"
 msgstr "Ce champ est obligatoire"
@@ -509,8 +509,8 @@ msgstr ""
 
 msgid "Це спосіб сказати без слів: «Я рада, що ти сьогодні тут»."
 msgstr ""
-"C’est une façon de dire, sans mots : « Je suis heureuse que tu sois "
-"là aujourd’hui. »"
+"C’est une façon de dire, sans mots : «Je suis heureuse que tu sois "
+"là aujourd’hui.»"
 
 msgid ""
 "Ми впевнені, що сучасна жінка може бути успішною в усьому, що вона "
@@ -656,10 +656,10 @@ msgstr ""
 "disponibles."
 
 msgid "Бокс «Різдвяний Шишки»"
-msgstr "Coffret de Noël « Pommes de pin »"
+msgstr "Coffret de Noël «Pommes de pin»"
 
 msgid "Бокс Великодній «Український»"
-msgstr "Coffret de Pâques « Ukrainien »"
+msgstr "Coffret de Pâques «Ukrainien»"
 
 msgid "Твоє ідеальне свято вже майже у коробці…"
 msgstr "Ta fête parfaite est presque dans la boîte…"

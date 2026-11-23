@@ -15,7 +15,7 @@ def offer_doc() -> dict:
             {
                 "heading": "1. Dispositions générales",
                 "paragraphs": [
-                    "1.1. Le présent document constitue une proposition publique (offre) du vendeur Gestia Home (le « Vendeur ») de conclure un contrat de vente au détail à distance, aux conditions énoncées ci-dessous.",
+                    "1.1. Le présent document constitue une proposition publique (offre) du vendeur Gestia Home (le «Vendeur») de conclure un contrat de vente au détail à distance, aux conditions énoncées ci-dessous.",
                     "1.2. L’offre est acceptée lorsque l’Acheteur passe commande sur le site, confirme la commande et/ou paie les marchandises. Dès l’acceptation, le contrat est réputé conclu.",
                     "1.3. En passant commande, l’Acheteur confirme qu’il a pris connaissance des conditions de l’offre, de la politique de confidentialité et de la politique cookies, et qu’il les accepte.",
                 ],
@@ -57,7 +57,7 @@ def offer_doc() -> dict:
             {
                 "heading": "6. Retours et échanges",
                 "paragraphs": [
-                    "6.1. Les retours et échanges de marchandises de qualité conforme sont effectués conformément à la loi ukrainienne « Sur la protection des droits des consommateurs ».",
+                    "6.1. Les retours et échanges de marchandises de qualité conforme sont effectués conformément à la loi ukrainienne «Sur la protection des droits des consommateurs».",
                     "6.2. Les marchandises fabriquées sur commande individuelle, ou portant des traces d’usage ou de dommages imputables à l’Acheteur, peuvent ne pas être reprises, dans les limites prévues par la loi.",
                     "6.3. Pour un retour, l’Acheteur contacte le Vendeur via les coordonnées du site. Le remboursement est effectué par le même mode de paiement, ou par un autre mode convenu, après réception et contrôle des marchandises.",
                 ],
@@ -75,7 +75,7 @@ def offer_doc() -> dict:
                 "paragraphs": [
                     "8.1. Le Vendeur peut modifier les conditions de l’offre. La nouvelle version s’applique dès sa publication sur le site, pour les commandes passées après cette publication.",
                     "8.2. Tous les litiges sont réglés par négociation et, à défaut, selon les modalités prévues par la législation de l’Ukraine.",
-                    "8.3. Pour toute question relative aux commandes, utilisez les coordonnées indiquées dans la rubrique « Contacts » du site Gestia Home.",
+                    "8.3. Pour toute question relative aux commandes, utilisez les coordonnées indiquées dans la rubrique «Contacts» du site Gestia Home.",
                 ],
             },
         ],
@@ -94,8 +94,8 @@ def privacy_doc() -> dict:
             {
                 "heading": "1. Qui nous sommes et ce que régit cette politique",
                 "paragraphs": [
-                    "1.1. La présente politique de confidentialité explique comment Gestia Home (« nous », le « Vendeur ») traite les données personnelles des utilisateurs du site et des clients.",
-                    "1.2. Le traitement est effectué conformément à la loi ukrainienne « Sur la protection des données personnelles » et aux autres règles applicables.",
+                    "1.1. La présente politique de confidentialité explique comment Gestia Home («nous», le «Vendeur») traite les données personnelles des utilisateurs du site et des clients.",
+                    "1.2. Le traitement est effectué conformément à la loi ukrainienne «Sur la protection des données personnelles» et aux autres règles applicables.",
                     "1.3. En utilisant le site, en passant commande ou en envoyant une demande, vous confirmez avoir pris connaissance de cette politique.",
                 ],
             },
@@ -111,7 +111,7 @@ def privacy_doc() -> dict:
                 "heading": "3. Finalité du traitement",
                 "paragraphs": [
                     "3.1. Passation, confirmation et exécution des commandes ; livraison ; communication sur le statut d’une commande.",
-                    "3.2. Réponse aux demandes envoyées via les formulaires de contact et « Commander maintenant ».",
+                    "3.2. Réponse aux demandes envoyées via les formulaires de contact et «Commander maintenant».",
                     "3.3. Amélioration du site, prévention de la fraude et respect des obligations légales (comptabilité et fiscalité).",
                     "3.4. Nous ne transmettons pas vos données à des tiers à des fins de publicité qui leur est propre.",
                 ],
@@ -160,7 +160,7 @@ def privacy_doc() -> dict:
                 "heading": "9. Modifications de la politique",
                 "paragraphs": [
                     "9.1. Nous pouvons mettre à jour cette politique. La version en vigueur est toujours disponible sur cette page, avec la date de mise à jour.",
-                    "9.2. Pour toute question relative aux données personnelles, utilisez la rubrique « Contacts » du site Gestia Home.",
+                    "9.2. Pour toute question relative aux données personnelles, utilisez la rubrique «Contacts» du site Gestia Home.",
                 ],
             },
         ],
@@ -212,7 +212,7 @@ def cookies_doc() -> dict:
             {
                 "heading": "5. Comment gérer les cookies",
                 "paragraphs": [
-                    "5.1. Vous pouvez limiter ou supprimer les cookies dans les paramètres de votre navigateur. Les instructions se trouvent généralement dans la rubrique « Confidentialité ».",
+                    "5.1. Vous pouvez limiter ou supprimer les cookies dans les paramètres de votre navigateur. Les instructions se trouvent généralement dans la rubrique «Confidentialité».",
                     "5.2. Désactiver les cookies nécessaires peut faire mal fonctionner le panier, les formulaires de commande et le changement de langue et de devise.",
                     "5.3. Sur mobile, le contrôle des cookies se trouve dans les réglages du navigateur (Safari, Chrome et autres).",
                 ],
@@ -228,7 +228,7 @@ def cookies_doc() -> dict:
                 "heading": "7. Mises à jour de la politique",
                 "paragraphs": [
                     "7.1. Nous pouvons mettre à jour la Politique cookies. La version en vigueur est publiée sur cette page, avec la date de mise à jour.",
-                    "7.2. Les questions relatives aux cookies et aux données personnelles peuvent être envoyées via le formulaire de la rubrique « Contacts ».",
+                    "7.2. Les questions relatives aux cookies et aux données personnelles peuvent être envoyées via le formulaire de la rubrique «Contacts».",
                 ],
             },
         ],
@@ -298,7 +298,7 @@ def shipping_doc() -> dict:
             {
                 "heading": "7. Contacts",
                 "paragraphs": [
-                    "7.1. Pour les questions de livraison et de paiement, utilisez le formulaire de la rubrique « Contacts » ou le numéro de téléphone indiqué sur le site.",
+                    "7.1. Pour les questions de livraison et de paiement, utilisez le formulaire de la rubrique «Contacts» ou le numéro de téléphone indiqué sur le site.",
                     "7.2. Les conditions applicables peuvent être mises à jour. La date de la dernière mise à jour figure sur cette page.",
                 ],
             },

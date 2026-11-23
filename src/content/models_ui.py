@@ -25,6 +25,10 @@ for _key, _label, _uk, _en, _limit, _aria, _group in UI_FIELDS:
         f"{_key}_en",
         models.CharField(f"{_label} (EN)", max_length=_limit, blank=True, help_text=_help),
     )
+    InterfaceCopy.add_to_class(
+        f"{_key}_fr",
+        models.CharField(f"{_label} (FR)", max_length=_limit, blank=True, help_text=_help),
+    )
 
 
 def _proxy(name, title):

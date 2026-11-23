@@ -57,11 +57,13 @@ class CatalogLanguageTabTests(TestCase):
             self.assertEqual(page.status_code, 200, url)
             self.assertContains(page, "Українська")
             self.assertContains(page, "English")
+            self.assertContains(page, "Français")
             self.assertContains(page, "activeFieldsetTab")
 
     def test_product_gallery_is_stacked_and_sortable(self):
         self.assertEqual(ProductImageInline.ordering_field, "sort")
         self.assertTrue(ProductImageInline.hide_ordering_field)
+        self.assertEqual(ProductImageInline.extra, 2)
         raw = BytesIO()
         Image.new("RGB", (4, 4), (1, 2, 3)).save(raw, format="PNG")
         ProductImage.objects.create(

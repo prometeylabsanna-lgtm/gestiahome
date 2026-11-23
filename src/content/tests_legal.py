@@ -8,6 +8,7 @@ from django.utils.html import strip_tags
 
 from src.content.legal_copy import DOCS, get_legal, sections_to_html
 from src.content.legal_copy_en import DOCS_EN
+from src.content.legal_copy_fr import DOCS_FR
 from src.content.models_legal import LegalPage
 from src.core.html_sanitize import sanitize_rich_html
 
@@ -32,8 +33,13 @@ class LegalPageRenderTests(TestCase):
             self.assertEqual(page.body_en, sections_to_html(english["sections"]))
             self.assertEqual(page.seo_title_en, english["seo_title"])
             self.assertEqual(page.seo_description_en, english["seo_description"])
+            french = DOCS_FR[key]()
+            self.assertEqual(page.title_fr, french["title"])
+            self.assertEqual(page.body_fr, sections_to_html(french["sections"]))
             self.assertEqual(page.body_uk.count("<h2>"), page.body_en.count("<h2>"))
+            self.assertEqual(page.body_uk.count("<h2>"), page.body_fr.count("<h2>"))
             self.assertEqual(page.body_uk.count("<p>"), page.body_en.count("<p>"))
+            self.assertEqual(page.body_uk.count("<p>"), page.body_fr.count("<p>"))
             self.assertEqual(page.seo_title_uk, literal["seo_title"])
             self.assertEqual(page.updated_on.strftime("%d.%m.%Y"), literal["updated"])
             self.assertEqual(page.body_uk, sections_to_html(literal["sections"]))
@@ -58,6 +64,13 @@ class LegalPageRenderTests(TestCase):
             self.assertNotRegex(main, r"[\u0400-\u04FF]")
             self.assertIn(english["title"], main)
             self.assertIn(english["sections"][0]["heading"], main)
+            french = DOCS_FR[key]()
+            french_page = self.client.get(f"/fr{path}")
+            self.assertEqual(french_page.status_code, 200)
+            french_main = french_page.content.decode().split('<main id="main">', 1)[1].split("</main>", 1)[0]
+            self.assertNotRegex(french_main, r"[\u0400-\u04FF]")
+            self.assertIn(french["title"], french_main)
+            self.assertIn(french["sections"][0]["heading"], french_main)
 
     def test_empty_model_falls_back_to_the_literal(self):
         translation.activate("uk")
@@ -107,6 +120,7 @@ class LegalPageRenderTests(TestCase):
             self.assertEqual(form.status_code, 200)
             self.assertContains(form, "Українська")
             self.assertContains(form, "English")
+            self.assertContains(form, "Français")
             self.assertContains(form, "tinymce")
             self.assertContains(form, "Якщо порожньо")
 

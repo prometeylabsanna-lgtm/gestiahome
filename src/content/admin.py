@@ -52,6 +52,8 @@ class SiteSettingsAdmin(SingletonAdmin):
             "nav_all_uk",
             "menu_title_uk",
             "credit_uk",
+            "en_enabled",
+            "fr_enabled",
         ),
         en_fields=(
             "address_en",
@@ -101,7 +103,7 @@ class HomeBlockAdmin(GestiaModelAdmin):
         ),
     )
 
-    tiny_fields = ("text_uk", "text_en")
+    tiny_fields = ("text_uk", "text_en", "text_fr")
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
@@ -122,7 +124,7 @@ class HomeCollectionImageInline(GestiaTabularInline):
     verbose_name_plural = "Галерея"
     ordering_field = "sort"
     hide_ordering_field = True
-    fields = ("image", "alt_uk", "alt_en", "sort")
+    fields = ("image", "alt_uk", "alt_en", "alt_fr", "sort")
 
 
 @admin.register(HomeCollection)
@@ -133,7 +135,7 @@ class HomeCollectionAdmin(GestiaModelAdmin):
     ordering = ("sort", "id")
     autocomplete_fields = ("category", "product", "addons")
     inlines = (HomeCollectionImageInline,)
-    tiny_fields = ("text_uk", "text_en", "story_uk", "story_en")
+    tiny_fields = ("text_uk", "text_en", "story_uk", "story_en", "text_fr", "story_fr")
     fieldsets = language_tabs(
         uk_fields=(
             "is_active",

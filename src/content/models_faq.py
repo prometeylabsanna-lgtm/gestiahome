@@ -13,11 +13,15 @@ class FaqPage(SingletonModel):
         "title_en",
         "contact_text_uk",
         "contact_text_en",
+        "title_fr",
+        "contact_text_fr",
     )
     title_uk = models.TextField("Заголовок", blank=True)
     title_en = models.TextField("Заголовок (EN)", blank=True)
+    title_fr = models.TextField("Заголовок (FR)", blank=True)
     crumb_uk = models.CharField("Крихітка", max_length=40, blank=True)
     crumb_en = models.CharField("Крихітка (EN)", max_length=40, blank=True)
+    crumb_fr = models.CharField("Крихітка (FR)", max_length=40, blank=True)
     image = WebPImageField(
         "Фото",
         upload_to="faq/",
@@ -27,14 +31,19 @@ class FaqPage(SingletonModel):
     )
     image_alt_uk = models.CharField("Alt фото", max_length=200, blank=True)
     image_alt_en = models.CharField("Alt фото (EN)", max_length=200, blank=True)
+    image_alt_fr = models.CharField("Alt фото (FR)", max_length=200, blank=True)
     contact_title_uk = models.CharField("Заголовок контактів", max_length=80, blank=True)
     contact_title_en = models.CharField("Заголовок контактів (EN)", max_length=80, blank=True)
+    contact_title_fr = models.CharField("Заголовок контактів (FR)", max_length=80, blank=True)
     contact_text_uk = models.TextField("Текст контактів", blank=True)
     contact_text_en = models.TextField("Текст контактів (EN)", blank=True)
+    contact_text_fr = models.TextField("Текст контактів (FR)", blank=True)
     seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
     seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
     seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
     seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
     updated_at = models.DateTimeField("Оновлено", auto_now=True)
 
     class Meta:
@@ -76,7 +85,7 @@ class FaqPage(SingletonModel):
 
 
 class FaqItem(models.Model):
-    rich_text_fields = ("answer_uk", "answer_en")
+    rich_text_fields = ("answer_uk", "answer_en", "answer_fr")
     page = models.ForeignKey(
         FaqPage,
         related_name="items",
@@ -84,8 +93,10 @@ class FaqItem(models.Model):
     )
     question_uk = models.CharField("Питання", max_length=200)
     question_en = models.CharField("Питання (EN)", max_length=200, blank=True)
+    question_fr = models.CharField("Питання (FR)", max_length=200, blank=True)
     answer_uk = models.TextField("Відповідь", blank=True)
     answer_en = models.TextField("Відповідь (EN)", blank=True)
+    answer_fr = models.TextField("Відповідь (FR)", blank=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
     is_active = models.BooleanField("Активне", default=True)
 

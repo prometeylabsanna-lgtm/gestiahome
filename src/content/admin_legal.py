@@ -42,7 +42,7 @@ class LegalPageAdmin(GestiaModelAdmin):
         obj.key = self.page_key
         super().save_model(request, obj, form, change)
 
-    tiny_fields = ("body_uk", "body_en")
+    tiny_fields = ("body_uk", "body_en", "body_fr")
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:

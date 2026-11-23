@@ -1,0 +1,14 @@
+{% load i18n ui_tags %}
+<nav class="nd-header__lang" aria-label="{% ui "lang_label" %}">
+  {% for item in lang_switcher %}
+    {% if not forloop.first %}<span class="nd-header__slash" aria-hidden="true">/</span>{% endif %}
+    <form action="{% url 'set_language' %}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ item.url }}">
+      <input type="hidden" name="language" value="{{ item.code }}">
+      <button type="submit" aria-label="{% ui "lang_change" %}"{% if LANGUAGE_CODE == item.code %} aria-current="true"{% endif %}>
+        <span class="nd-header__opt{% if LANGUAGE_CODE == item.code %} is-current{% endif %}">{{ item.short }}</span>
+      </button>
+    </form>
+  {% endfor %}
+</nav>

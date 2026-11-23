@@ -39,6 +39,7 @@ class ContactsPageTests(TestCase):
         self.assertIn("Контакти Gestia Home — телефон, пошта та майстерня", html)
         self.assertIn('rel="canonical" href="http://testserver/kontakty/"', html)
         self.assertIn('hreflang="en" href="http://testserver/en/kontakty/"', html)
+        self.assertIn('hreflang="fr" href="http://testserver/fr/kontakty/"', html)
         self.assertIn('"@type":"ContactPage"', html)
         self.assertIn("BreadcrumbList", html)
         self.assertNotIn("noindex", html)

@@ -38,7 +38,7 @@ class HomeCollectionInline(GestiaStackedInline):
     ordering_field = "sort"
     hide_ordering_field = True
     autocomplete_fields = ("category",)
-    tiny_fields = ("text_uk", "text_en")
+    tiny_fields = ("text_uk", "text_en", "text_fr")
     fields = (
         "is_active",
         "sort",
@@ -103,26 +103,36 @@ class HomePopularAdmin(KeyedBlockAdmin):
 LOCALE_FIELD_META = {
     "title_uk": ("Заголовок діалогу", "Крок «Підтвердити»: «Країна та мова»."),
     "title_en": ("Dialog title", "Confirm step heading."),
+    "title_fr": ("Titre du dialogue", "Titre de l’étape Confirmer."),
     "text_uk": ("Поточний регіон", "Рядок під заголовком, напр. «Україна/Гривня»."),
     "text_en": ("Current region", "Line under the title, e.g. «Ukraine/Hryvnia»."),
+    "text_fr": ("Région actuelle", "Ligne sous le titre, p. ex. « Ukraine/Hryvnia »."),
     "cta_uk": ("Кнопка підтвердження", "Текст кнопки «Підтвердити»."),
     "cta_en": ("Confirm button", "Confirm button label."),
+    "cta_fr": ("Bouton confirmer", "Libellé du bouton Confirmer."),
     "link_uk": ("Посилання «Змінити»", "Відкриває крок вибору регіону."),
     "link_en": ("Change link", "Opens the region step."),
+    "link_fr": ("Lien modifier", "Ouvre l’étape de la région."),
     "note_uk": (
         "Опис кроку регіону",
         "Текст під «Місце доставки» про ціни й доставку.",
     ),
     "note_en": ("Region step description", "Copy under the delivery place heading."),
+    "note_fr": ("Description de l’étape région", "Texte sous le titre du lieu de livraison."),
     "lines_uk": (
         "Рядки діалогу (по одному в рядку)",
         "1) Місце доставки 2) Україна 3) Міжнародна доставка "
-        "4) Мова сайту 5) Оберіть мову / Choose language 6) Українська 7) English",
+        "4) Мова сайту 5) Оберіть мову / Choose language 6) Українська 7) English 8) Français",
     ),
     "lines_en": (
         "Dialog lines (one per row)",
         "1) Delivery place 2) Ukraine 3) International delivery "
-        "4) Site language 5) Choose language 6) Українська 7) English",
+        "4) Site language 5) Choose language 6) Українська 7) English 8) Français",
+    ),
+    "lines_fr": (
+        "Lignes du dialogue (une par ligne)",
+        "1) Lieu de livraison 2) Ukraine 3) Livraison internationale "
+        "4) Langue du site 5) Choisissez la langue 6) Українська 7) English 8) Français",
     ),
 }
 

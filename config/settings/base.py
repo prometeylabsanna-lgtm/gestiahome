@@ -90,6 +90,7 @@ LANGUAGE_CODE = "uk"
 LANGUAGES = [
     ("uk", "Українська"),
     ("en", "English"),
+    ("fr", "Français"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Europe/Kyiv"

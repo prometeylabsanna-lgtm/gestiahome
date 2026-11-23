@@ -93,6 +93,7 @@ class AboutPick(models.Model):
     )
     title_uk = models.CharField("Назва", max_length=40)
     title_en = models.CharField("Назва (EN)", max_length=40, blank=True)
+    title_fr = models.CharField("Назва (FR)", max_length=40, blank=True)
     price = models.CharField("Ціна на картці", max_length=16)
     slug = models.CharField(
         "Адреса товару",

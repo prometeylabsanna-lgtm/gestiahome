@@ -38,7 +38,7 @@ class _OpenSingleton(GestiaModelAdmin):
 @admin.register(AboutIntro)
 class AboutIntroAdmin(_OpenSingleton):
     text_limits = {"title_uk": 40, "title_en": 40}
-    tiny_fields = ("intro_text_uk", "intro_text_en")
+    tiny_fields = ("intro_text_uk", "intro_text_en", "intro_text_fr")
     fieldsets = language_tabs(
         uk_fields=(
             "title_uk",
@@ -74,7 +74,7 @@ class AboutIntroAdmin(_OpenSingleton):
 
 @admin.register(AboutGestia)
 class AboutGestiaAdmin(_OpenSingleton):
-    tiny_fields = ("gestia_text_uk", "gestia_text_en")
+    tiny_fields = ("gestia_text_uk", "gestia_text_en", "gestia_text_fr")
     fieldsets = language_tabs(
         uk_fields=(
             "gestia_quote_uk",
@@ -113,7 +113,7 @@ class AboutApproachAdmin(_OpenSingleton):
 
 @admin.register(AboutTogether)
 class AboutTogetherAdmin(_OpenSingleton):
-    tiny_fields = ("together_text_uk", "together_text_en")
+    tiny_fields = ("together_text_uk", "together_text_en", "together_text_fr")
     fieldsets = language_tabs(
         uk_fields=("together_photo", "together_photo_alt_uk", "together_text_uk"),
         en_fields=("together_photo_alt_en", "together_text_en"),
@@ -132,7 +132,7 @@ class AboutTogetherAdmin(_OpenSingleton):
 
 @admin.register(AboutClosing)
 class AboutClosingAdmin(_OpenSingleton):
-    tiny_fields = ("closing_text_uk", "closing_text_en")
+    tiny_fields = ("closing_text_uk", "closing_text_en", "closing_text_fr")
     text_limits = {"cta_uk": 40, "cta_en": 40}
     fieldsets = language_tabs(
         uk_fields=("closing_text_uk", "cta_uk"),

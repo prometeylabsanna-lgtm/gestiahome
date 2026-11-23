@@ -40,6 +40,11 @@ class InterfaceFallbackTests(TestCase):
         copy.save()
         translation.activate("en")
         self.assertEqual(text("cart"), "Кошик")
+        copy.cart_en = "Basket"
+        copy.cart_fr = ""
+        copy.save()
+        translation.activate("fr")
+        self.assertEqual(text("cart"), "Кошик")
 
     def test_cms_tag_does_not_read_literals(self):
         from django.template import Context, Template

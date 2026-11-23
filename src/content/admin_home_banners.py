@@ -33,7 +33,7 @@ class HomeBannerMediaAdmin(MediaOnlyBlockAdmin):
 class HomeBannerTextAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.HERO
     default_sort = 1
-    tiny_fields = ("text_uk", "text_en")
+    tiny_fields = ("text_uk", "text_en", "text_fr")
     text_limits = {
         "title_uk": 64,
         "title_en": 64,

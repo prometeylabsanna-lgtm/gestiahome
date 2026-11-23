@@ -109,7 +109,7 @@ class AdminLanguageTabRenderTests(TestCase):
         )
         SiteSettings.load()
 
-    def test_change_forms_render_two_tabs_and_tinymce(self):
+    def test_change_forms_render_three_tabs_and_tinymce(self):
         urls = (
             reverse("admin:content_homebannertext_change", args=[self.hero.pk]),
             reverse("admin:catalog_category_change", args=[self.category.pk]),
@@ -120,14 +120,17 @@ class AdminLanguageTabRenderTests(TestCase):
             self.assertEqual(page.status_code, 200, url)
             self.assertContains(page, "Українська")
             self.assertContains(page, "English")
+            self.assertContains(page, "Français")
             self.assertContains(page, "activeFieldsetTab")
             body = page.content.decode()
             uk_pos = body.find("Українська")
             en_pos = body.find(">English<")
             if en_pos < 0:
                 en_pos = body.find("English")
+            fr_pos = body.find("Français")
             self.assertGreater(uk_pos, 0, url)
             self.assertGreater(en_pos, uk_pos, url)
+            self.assertGreater(fr_pos, en_pos, url)
 
         banner_page = self.client.get(
             reverse("admin:content_homebannertext_change", args=[self.hero.pk])
@@ -146,5 +149,6 @@ class AdminLanguageTabRenderTests(TestCase):
 
         product_page = self.client.get(reverse("admin:catalog_product_change", args=[self.product.pk]))
         self.assertContains(product_page, 'name="description_uk"')
+        self.assertContains(product_page, 'name="name_fr"')
         self.assertContains(product_page, "tinymce")
         self.assertContains(product_page, "data-mce-conf")

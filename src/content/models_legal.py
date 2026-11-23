@@ -10,16 +10,20 @@ class LegalPage(models.Model):
         COOKIES = "cookies", "Політика cookies"
         SHIPPING = "shipping", "Доставка та оплата"
 
-    rich_text_fields = ("body_uk", "body_en")
+    rich_text_fields = ("body_uk", "body_en", "body_fr")
     key = models.CharField("Сторінка", max_length=16, choices=Key.choices, unique=True)
     title_uk = models.CharField("Заголовок", max_length=200)
     title_en = models.CharField("Заголовок (EN)", max_length=200, blank=True)
+    title_fr = models.CharField("Заголовок (FR)", max_length=200, blank=True)
     body_uk = models.TextField("Текст", blank=True)
     body_en = models.TextField("Текст (EN)", blank=True)
+    body_fr = models.TextField("Текст (FR)", blank=True)
     seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
     seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
     seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
     seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
     updated_on = models.DateField("Дата оновлення", null=True, blank=True)
     updated_at = models.DateTimeField("Оновлено", auto_now=True)
 

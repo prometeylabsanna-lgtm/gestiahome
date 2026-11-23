@@ -70,25 +70,7 @@
     {% include "partials/brand.html" with kind="header" %}
 
     <div class="head-actions nd-header__actions">
-      {% if lang_enabled.en %}
-        <form class="nd-header__lang" action="{% url 'set_language' %}" method="post">
-          {% csrf_token %}
-          {% if LANGUAGE_CODE == 'uk' %}
-            <input type="hidden" name="next" value="{{ lang_switch_urls.en }}">
-            <input type="hidden" name="language" value="en">
-          {% else %}
-            <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
-            <input type="hidden" name="language" value="uk">
-          {% endif %}
-          <button type="submit" aria-label="{% ui "lang_change" %}">
-            <span class="nd-header__opt{% if LANGUAGE_CODE == 'uk' %} is-current{% endif %}">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if LANGUAGE_CODE == 'en' %} is-current{% endif %}">EN</span>
-          </button>
-        </form>
-      {% else %}
-        <span class="nd-header__lang" aria-hidden="true">
-          <span class="nd-header__opt is-current">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt">EN</span>
-        </span>
-      {% endif %}
+      {% include "partials/lang_switch.html" %}
       <button
         class="nd-header__currency"
         type="button"
@@ -301,22 +283,16 @@
       <h2 class="nd-region__title">{{ locale.field_labels.3 }}</h2>
       {% if locale.field_labels.4 %}<p class="nd-region__note">{{ locale.field_labels.4 }}</p>{% endif %}
       <div class="nd-region__picks">
-        {% if lang_enabled.uk %}
+        {% for item in lang_switcher %}
         <form action="{% url 'set_language' %}" method="post">
           {% csrf_token %}
-          <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
-          <input type="hidden" name="language" value="uk">
-          <button type="submit">{{ locale.field_labels.5 }}</button>
+          <input type="hidden" name="next" value="{{ item.url }}">
+          <input type="hidden" name="language" value="{{ item.code }}">
+          <button type="submit">
+            {% if item.code == "uk" %}{{ locale.field_labels.5|default:item.name }}{% elif item.code == "en" %}{{ locale.field_labels.6|default:item.name }}{% else %}{{ locale.field_labels.7|default:item.name }}{% endif %}
+          </button>
         </form>
-        {% endif %}
-        {% if lang_enabled.en %}
-        <form action="{% url 'set_language' %}" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ lang_switch_urls.en }}">
-          <input type="hidden" name="language" value="en">
-          <button type="submit">{{ locale.field_labels.6 }}</button>
-        </form>
-        {% endif %}
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -406,21 +382,7 @@
             <span>{{ site_settings.phone }}</span>
           </a>
         {% endif %}
-        {% if lang_enabled.en %}
-          <form class="nd-header__lang" action="{% url 'set_language' %}" method="post">
-            {% csrf_token %}
-            {% if LANGUAGE_CODE == 'uk' %}
-              <input type="hidden" name="next" value="{{ lang_switch_urls.en }}">
-              <input type="hidden" name="language" value="en">
-            {% else %}
-              <input type="hidden" name="next" value="{{ lang_switch_urls.uk }}">
-              <input type="hidden" name="language" value="uk">
-            {% endif %}
-            <button type="submit" aria-label="{% ui "lang_change" %}">
-              <span class="nd-header__opt{% if LANGUAGE_CODE == 'uk' %} is-current{% endif %}">UA</span><span class="nd-header__slash">/</span><span class="nd-header__opt{% if LANGUAGE_CODE == 'en' %} is-current{% endif %}">EN</span>
-            </button>
-          </form>
-        {% endif %}
+        {% include "partials/lang_switch.html" %}
         <button
           class="nd-header__currency"
           type="button"

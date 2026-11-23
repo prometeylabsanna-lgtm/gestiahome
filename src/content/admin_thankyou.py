@@ -34,6 +34,8 @@ class ThankYouOrderAdmin(_OpenSingleton):
         "order_text_en",
         "order_text_nonum_uk",
         "order_text_nonum_en",
+        "order_text_fr",
+        "order_text_nonum_fr",
     )
     fieldsets = language_tabs(
         uk_fields=(
@@ -64,7 +66,7 @@ class ThankYouOrderAdmin(_OpenSingleton):
 
 @admin.register(ThankYouContact)
 class ThankYouContactAdmin(_OpenSingleton):
-    tiny_fields = ("contact_text_uk", "contact_text_en")
+    tiny_fields = ("contact_text_uk", "contact_text_en", "contact_text_fr")
     fieldsets = language_tabs(
         uk_fields=("contact_title_uk", "contact_text_uk"),
         en_fields=("contact_title_en", "contact_text_en"),

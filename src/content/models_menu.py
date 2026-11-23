@@ -9,6 +9,7 @@ from src.core.utils import localized
 class MenuGroup(models.Model):
     title_uk = models.CharField("Назва", max_length=120)
     title_en = models.CharField("Назва (EN)", max_length=120, blank=True)
+    title_fr = models.CharField("Назва (FR)", max_length=120, blank=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
     is_active = models.BooleanField("Показувати", default=True)
     open_by_default = models.BooleanField(
@@ -39,6 +40,7 @@ class MenuGroupItem(models.Model):
     )
     label_uk = models.CharField("Підпис", max_length=160)
     label_en = models.CharField("Підпис (EN)", max_length=160, blank=True)
+    label_fr = models.CharField("Підпис (FR)", max_length=160, blank=True)
     collection = models.ForeignKey(
         "content.HomeCollection",
         on_delete=models.SET_NULL,

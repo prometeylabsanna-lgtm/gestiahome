@@ -20,6 +20,7 @@ UI_FIELDS = (
     ("cart_close", "Закрити кошик", "Закрити кошик", "Close basket", 40, True, "header"),
     ("lang_name", "Назва української", "Українська", "Ukrainian", 40, False, "header"),
     ("lang_en_name", "Назва англійської", "English", "English", 40, False, "header"),
+    ("lang_fr_name", "Назва французької", "Français", "French", 40, False, "header"),
     ("lang_label", "Мова", "Мова", "Language", 40, True, "header"),
     ("currency_label", "Валюта", "Валюта", "Currency", 40, True, "header"),
     ("brand_home", "Логотип на головну", "Gestia Home — на головну", "Gestia Home — home", 80, True, "header"),

@@ -43,8 +43,8 @@ class LanguageTests(TestCase):
         self.assertEqual(response["Location"], "/en/katalog/")
         self.assertEqual(self.client.session.get("currency"), "eur")
 
-    def test_languages_are_uk_and_en_only(self):
-        self.assertEqual([code for code, _label in settings.LANGUAGES], ["uk", "en"])
+    def test_languages_are_uk_en_and_fr(self):
+        self.assertEqual([code for code, _label in settings.LANGUAGES], ["uk", "en", "fr"])
 
     def test_ru_prefix_redirects_to_uk_path(self):
         response = self.client.get("/ru/")
@@ -70,6 +70,13 @@ class LanguageTests(TestCase):
         SiteSettings.objects.filter(pk=1).update(en_enabled=False)
         cache.clear()
         response = self.client.get("/en/")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/")
+
+    def test_disabled_french_redirects_home(self):
+        SiteSettings.objects.filter(pk=1).update(fr_enabled=False)
+        cache.clear()
+        response = self.client.get("/fr/")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], "/")
 
@@ -166,6 +173,7 @@ class SeoTests(TestCase):
         self.assertContains(home, '<title>Gestia Home</title>')
         self.assertContains(home, 'hreflang="uk"')
         self.assertContains(home, 'hreflang="en"')
+        self.assertContains(home, 'hreflang="fr"')
         self.assertNotContains(home, 'hreflang="ru"')
         product = self.client.get(self.product.get_absolute_url())
         self.assertContains(product, '<link rel="canonical" href="http://testserver/tovar/seo-box/">')
@@ -207,3 +215,11 @@ class SeoTests(TestCase):
         self.assertNotContains(response, 'id="waitlist-modal"')
         self.assertContains(response, "No connection. Check your internet and try again.")
         self.assertContains(response, "Something went wrong. Please try again.")
+
+    def test_french_page_chrome(self):
+        response = self.client.get("/fr/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'lang="fr"')
+        self.assertNotContains(response, 'id="waitlist-modal"')
+        self.assertContains(response, "Pas de connexion. Vérifiez Internet et réessayez.")
+        self.assertContains(response, "Une erreur s’est produite. Veuillez réessayer.")

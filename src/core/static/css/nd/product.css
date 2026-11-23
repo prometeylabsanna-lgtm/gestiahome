@@ -79,7 +79,7 @@
   position: relative;
   display: flex;
   flex-direction: row;
-  gap: var(--nd-pdp-gallery-gap-mobile);
+  gap: var(--nd-pdp-gallery-gap);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   min-width: 0;
@@ -497,7 +497,7 @@
     flex-direction: column;
     overflow-x: visible;
     scroll-snap-type: none;
-    gap: 0;
+    gap: var(--nd-pdp-gallery-gap);
   }
 
   .nd-pdp-gallery__item {

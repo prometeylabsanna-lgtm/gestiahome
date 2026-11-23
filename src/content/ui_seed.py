@@ -19,6 +19,7 @@ BLOCK_FIELDS = {
 CONTACTS = {
     "title_uk": "Контакти",
     "title_en": "Contacts",
+    "title_fr": "Contacts",
     "seo_title_uk": "Контакти Gestia Home — телефон, пошта та майстерня",
     "seo_title_en": "Contact Gestia Home — phone, studio address, email",
     "seo_description_uk": (
@@ -31,12 +32,18 @@ CONTACTS = {
     ),
     "form_title_uk": "Зв'язатись з нами",
     "form_title_en": "Contact us",
+    "form_title_fr": "Nous contacter",
+    "seo_title_fr": "Contacter Gestia Home — téléphone, atelier, email",
+    "seo_description_fr": (
+        "Contactez Gestia Home par téléphone, email ou via le formulaire. "
+        "Coffrets de fête, arts de la table et livraison — l’atelier vous répondra."
+    ),
 }
 
 SITE_EXTRA = {
-    "nav_faq": ("Актуальні питання", "FAQ"),
-    "nav_contacts": ("Контакти", "Contacts"),
-    "logo_alt": ("Gestia Home", "Gestia Home"),
+    "nav_faq": ("Актуальні питання", "FAQ", "Questions fréquentes"),
+    "nav_contacts": ("Контакти", "Contacts", "Contacts"),
+    "logo_alt": ("Gestia Home", "Gestia Home", "Gestia Home"),
 }
 
 
@@ -50,9 +57,11 @@ def _fits(obj, name, value):
     return not limit or len(value) <= limit
 
 
-def _pair(obj, stem, uk, en):
+def _pair(obj, stem, uk, en, fr=""):
     changed = False
-    for suffix, value in (("_uk", uk), ("_en", en)):
+    for suffix, value in (("_uk", uk), ("_en", en), ("_fr", fr)):
+        if not value:
+            continue
         name = f"{stem}{suffix}"
         if not hasattr(obj, name) or not _empty(getattr(obj, name)):
             continue
@@ -68,16 +77,19 @@ def seed_ui_slots(apps, schema_editor):
     from src.content.literals import LITERALS
     from src.content.static_seed import place_static
     from src.content.ui_defaults import UI_FIELDS
+    from src.content.ui_fr import UI_FR
 
     InterfaceCopy = apps.get_model("content", "InterfaceCopy")
     copy, _created = InterfaceCopy.objects.get_or_create(pk=1)
     for key, _label, uk, en, _limit, _aria, _group in UI_FIELDS:
-        _pair(copy, key, uk, en)
+        _pair(copy, key, uk, en, UI_FR.get(key, ""))
     copy.save()
 
     ContactsPage = apps.get_model("content", "ContactsPage")
     page, _created = ContactsPage.objects.get_or_create(pk=1)
     for name, value in CONTACTS.items():
+        if not hasattr(page, name):
+            continue
         if _empty(getattr(page, name)) and _fits(page, name, value):
             setattr(page, name, value)
     page.save()
@@ -88,7 +100,7 @@ def seed_ui_slots(apps, schema_editor):
         uk, en = LITERALS[stem]
         _pair(site, stem, uk, en)
     for stem, pair in SITE_EXTRA.items():
-        _pair(site, stem, pair[0], pair[1])
+        _pair(site, stem, *pair[:3])
     light = place_static("nd/g-mark-light.png", "site/g-mark-light.png")
     dark = place_static("nd/g-mark-dark.png", "site/g-mark-dark.png")
     if light and not site.mark_light:

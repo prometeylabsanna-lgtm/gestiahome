@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.utils.translation import get_language
 
-SUPPORTED = ("uk", "en")
+SUPPORTED = ("uk", "en", "fr")
 
 
 def localized(obj, field: str, language: str | None = None) -> str:

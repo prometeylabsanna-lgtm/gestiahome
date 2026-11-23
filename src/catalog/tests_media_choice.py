@@ -1,7 +1,9 @@
 from decimal import Decimal
+from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from PIL import Image
 
 from src.catalog.models import Category, Product, ProductImage
 from src.content.media import MediaChoice
@@ -57,3 +59,22 @@ class CatalogMediaChoiceTests(TestCase):
         shot.save()
         self.assertTrue(shot.shows_video)
         self.assertFalse(bool(shot.image))
+
+    def test_pdp_gallery_renders_extra_photo_and_video(self):
+        raw = BytesIO()
+        Image.new("RGB", (4, 4), (10, 20, 30)).save(raw, format="PNG")
+        ProductImage.objects.create(
+            product=self.product,
+            image=SimpleUploadedFile("shot.png", raw.getvalue(), content_type="image/png"),
+            sort=0,
+        )
+        clip = ProductImage(product=self.product, sort=1)
+        clip.media_kind = MediaChoice.Kind.VIDEO
+        clip.video = _video("pdp.mp4")
+        clip.save()
+        page = self.client.get("/tovar/box/")
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "nd-pdp-gallery__item", count=2)
+        self.assertContains(page, "<video")
+        self.assertContains(page, "/media/products/video/")
+        self.assertContains(page, "/media/products/shot")

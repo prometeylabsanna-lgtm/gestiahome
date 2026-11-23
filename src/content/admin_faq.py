@@ -30,7 +30,7 @@ class _OpenSingleton(GestiaModelAdmin):
 
 @admin.register(FaqHeader)
 class FaqHeaderAdmin(_OpenSingleton):
-    tiny_fields = ("title_uk", "title_en")
+    tiny_fields = ("title_uk", "title_en", "title_fr")
     fieldsets = language_tabs(
         uk_fields=(
             "title_uk",
@@ -64,7 +64,7 @@ class FaqItemAdmin(GestiaModelAdmin):
     list_display_links = ("question_uk",)
     ordering = ("sort", "id")
     exclude = ("page",)
-    tiny_fields = ("answer_uk", "answer_en")
+    tiny_fields = ("answer_uk", "answer_en", "answer_fr")
     fieldsets = language_tabs(
         uk_fields=("question_uk", "answer_uk", "sort", "is_active"),
         en_fields=("question_en", "answer_en"),
@@ -90,7 +90,7 @@ class FaqItemAdmin(GestiaModelAdmin):
 
 @admin.register(FaqContact)
 class FaqContactAdmin(_OpenSingleton):
-    tiny_fields = ("contact_text_uk", "contact_text_en")
+    tiny_fields = ("contact_text_uk", "contact_text_en", "contact_text_fr")
     fieldsets = language_tabs(
         uk_fields=("contact_title_uk", "contact_text_uk"),
         en_fields=("contact_title_en", "contact_text_en"),

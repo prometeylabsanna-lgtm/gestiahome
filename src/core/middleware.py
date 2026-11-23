@@ -20,6 +20,8 @@ def language_enabled(lang: str) -> bool:
         return True
     if lang == "en":
         return site.en_enabled
+    if lang == "fr":
+        return site.fr_enabled
     return False
 
 

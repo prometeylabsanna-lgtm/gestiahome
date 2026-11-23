@@ -119,12 +119,26 @@
   color: var(--nd-off);
 }
 
+.nd-header__lang {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+}
+
+.nd-header__lang form {
+  display: flex;
+  margin: 0;
+}
+
 .nd-header__lang button,
 .nd-header__currency {
   display: flex;
   align-items: center;
+  justify-content: center;
   min-height: 44px;
-  font-size: var(--nd-fs-18);
+  min-width: 44px;
+  font-size: var(--nd-fs-16);
   letter-spacing: var(--nd-ls-01);
   background: none;
   border: 0;

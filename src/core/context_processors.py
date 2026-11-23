@@ -94,6 +94,18 @@ def shop(request):
         code: localize_path(next_path, code)
         for code, _label in settings.LANGUAGES
     }
+    shorts = {"uk": "UA", "en": "EN", "fr": "FR"}
+    names = {"uk": "Українська", "en": "English", "fr": "Français"}
+    lang_switcher = [
+        {
+            "code": code,
+            "short": shorts.get(code, code.upper()),
+            "name": names.get(code, code),
+            "url": switch[code],
+        }
+        for code, _label in settings.LANGUAGES
+        if language_enabled(code)
+    ]
     return {
         "site_settings": site,
         "home_blocks": home_blocks,
@@ -107,6 +119,7 @@ def shop(request):
         "wishlist_count": wishlist_count,
         "next_path": next_path,
         "lang_switch_urls": switch,
+        "lang_switcher": lang_switcher,
         "lang_enabled": {
             code: language_enabled(code) for code, _label in settings.LANGUAGES
         },

@@ -82,8 +82,15 @@ def _folded_names(qs, query):
     """Порівнює вже згорнуті назви, тож «тартан» знаходить «Тартан»."""
     needle = query.casefold()
     fold = _PyFold if connection.vendor == "sqlite" else Lower
-    return qs.annotate(_fold_uk=fold("name_uk"), _fold_en=fold("name_en")).filter(
-        Q(_fold_uk__contains=needle) | Q(_fold_en__contains=needle) | Q(sku__iexact=query)
+    return qs.annotate(
+        _fold_uk=fold("name_uk"),
+        _fold_en=fold("name_en"),
+        _fold_fr=fold("name_fr"),
+    ).filter(
+        Q(_fold_uk__contains=needle)
+        | Q(_fold_en__contains=needle)
+        | Q(_fold_fr__contains=needle)
+        | Q(sku__iexact=query)
     )
 
 

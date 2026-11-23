@@ -84,12 +84,6 @@
     font-size: var(--nd-fs-16);
   }
 
-  .nd-header__lang button,
-  .nd-header__currency {
-    min-height: 0;
-    font-size: var(--nd-fs-16);
-  }
-
   .nd-header__icon {
     min-width: 0;
     height: auto;
@@ -266,5 +260,14 @@
 
   body.is-burger .nd-header__burger-close {
     display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nd-header__lang button,
+  .nd-header__currency {
+    min-height: 0;
+    min-width: 0;
+    font-size: var(--nd-fs-16);
   }
 }

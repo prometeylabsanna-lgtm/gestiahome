@@ -370,6 +370,8 @@ class CheckoutTests(TestCase):
         english = self.client.get("/en/zamovlennia/")
         self.assertContains(english, "Contact details")
         self.assertContains(english, "Courier delivery")
+        french = self.client.get("/fr/zamovlennia/")
+        self.assertContains(french, "Coordonnées")
         ukrainian = self.client.get("/zamovlennia/")
         self.assertContains(ukrainian, "Контактні дані")
 

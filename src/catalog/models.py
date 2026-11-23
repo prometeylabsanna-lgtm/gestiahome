@@ -25,6 +25,7 @@ class Category(MediaChoice, TimeStampedModel):
     slug = models.SlugField("Слаг", max_length=80, unique=True)
     name_uk = models.CharField("Назва", max_length=160)
     name_en = models.CharField("Назва (EN)", max_length=160, blank=True)
+    name_fr = models.CharField("Назва (FR)", max_length=160, blank=True)
     image = models.ImageField(
         "Зображення",
         upload_to="categories/",
@@ -56,6 +57,12 @@ class Category(MediaChoice, TimeStampedModel):
         blank=True,
         help_text="Цільова довжина: 50–60 символів.",
     )
+    seo_title_fr = models.CharField(
+        "SEO title (FR)",
+        max_length=200,
+        blank=True,
+        help_text="Цільова довжина: 50–60 символів.",
+    )
     seo_description_uk = models.CharField(
         "SEO description",
         max_length=300,
@@ -64,6 +71,12 @@ class Category(MediaChoice, TimeStampedModel):
     )
     seo_description_en = models.CharField(
         "SEO description (EN)",
+        max_length=300,
+        blank=True,
+        help_text="Цільова довжина: 140–160 символів.",
+    )
+    seo_description_fr = models.CharField(
+        "SEO description (FR)",
         max_length=300,
         blank=True,
         help_text="Цільова довжина: 140–160 символів.",
@@ -128,6 +141,7 @@ class ProductAttributeGroup(models.Model):
     slug = models.SlugField("Слаг", max_length=32, unique=True)
     name_uk = models.CharField("Назва", max_length=80)
     name_en = models.CharField("Назва (EN)", max_length=80, blank=True)
+    name_fr = models.CharField("Назва (FR)", max_length=80, blank=True)
 
     class Meta:
         verbose_name = "Група фільтра"
@@ -151,6 +165,7 @@ class ProductAttribute(models.Model):
     slug = models.SlugField("Слаг", max_length=80)
     name_uk = models.CharField("Назва", max_length=80)
     name_en = models.CharField("Назва (EN)", max_length=80, blank=True)
+    name_fr = models.CharField("Назва (FR)", max_length=80, blank=True)
     is_filterable = models.BooleanField("У фільтрі", default=True)
     show_on_pdp = models.BooleanField("На картці", default=True)
     sort = models.PositiveSmallIntegerField("Порядок", default=0)
@@ -182,6 +197,7 @@ class ProductSet(models.Model):
     slug = models.SlugField("Слаг", max_length=80, unique=True)
     name_uk = models.CharField("Назва", max_length=160)
     name_en = models.CharField("Назва (EN)", max_length=160, blank=True)
+    name_fr = models.CharField("Назва (FR)", max_length=160, blank=True)
 
     class Meta:
         verbose_name = "Сет"
@@ -207,7 +223,7 @@ class Product(MediaChoice, TimeStampedModel):
         ON_ORDER = "on_order", _("Під замовлення")
         OUT = "out", _("Немає в наявності")
 
-    rich_text_fields = ("description_uk", "description_en")
+    rich_text_fields = ("description_uk", "description_en", "description_fr")
     category = models.ForeignKey(
         Category,
         verbose_name="Категорія",
@@ -226,8 +242,10 @@ class Product(MediaChoice, TimeStampedModel):
     slug = models.SlugField("Слаг", max_length=120, unique=True)
     name_uk = models.CharField("Назва", max_length=200)
     name_en = models.CharField("Назва (EN)", max_length=200, blank=True)
+    name_fr = models.CharField("Назва (FR)", max_length=200, blank=True)
     description_uk = models.TextField("Опис", blank=True)
     description_en = models.TextField("Опис (EN)", blank=True)
+    description_fr = models.TextField("Опис (FR)", blank=True)
     price_uah = models.DecimalField("Ціна, грн", max_digits=10, decimal_places=2)
     price_eur = models.DecimalField("Ціна, євро", max_digits=10, decimal_places=2)
     stock_status = models.CharField(
@@ -242,6 +260,7 @@ class Product(MediaChoice, TimeStampedModel):
     is_popular = models.BooleanField("Популярний на головній", default=False)
     menu_name_uk = models.CharField("Назва в меню", max_length=200, blank=True)
     menu_name_en = models.CharField("Назва в меню (EN)", max_length=200, blank=True)
+    menu_name_fr = models.CharField("Назва в меню (FR)", max_length=200, blank=True)
     price_weight = models.PositiveSmallIntegerField("Насиченість ціни на головній", default=400)
     card_crop = models.CharField(
         "Кадр картки",
@@ -286,8 +305,10 @@ class Product(MediaChoice, TimeStampedModel):
     )
     seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
     seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
     seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
     seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
 
     class Meta:
         ordering = ["sort", "name_uk"]
@@ -441,6 +462,7 @@ class CatalogCell(models.Model):
     slot = models.CharField("Слот", max_length=16, choices=Slot.choices, blank=True, default="")
     label_uk = models.CharField("Підпис у фреймі", max_length=200, blank=True)
     label_en = models.CharField("Підпис у фреймі (EN)", max_length=200, blank=True)
+    label_fr = models.CharField("Підпис у фреймі (FR)", max_length=200, blank=True)
     image = models.ImageField(
         "Фото комірки",
         upload_to="catalog/cells/",

@@ -31,12 +31,12 @@ GALLERY_POSTER_HINT = "Кадр до старту відео. Якщо поро�
 class ProductImageInline(GestiaStackedInline):
     model = ProductImage
     fields = ("media_kind", "image", "video", "poster", "sort")
-    extra = 1
+    extra = 2
     ordering_field = "sort"
     hide_ordering_field = True
     classes = ("gestia-product-gallery",)
-    verbose_name = "Фото / відео"
-    verbose_name_plural = "Галерея"
+    verbose_name = "Фото або відео"
+    verbose_name_plural = "Галерея картки"
 
     class Media:
         css = {"all": ("css/admin/product_gallery.css",)}
@@ -65,7 +65,7 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         "menu_featured",
     )
     list_filter = ("is_active", "parent")
-    search_fields = ("name_uk", "name_en", "slug")
+    search_fields = ("name_uk", "name_en", "name_fr", "slug")
     ordering = ("sort", "name_uk")
     fieldsets = language_tabs(
         uk_fields=(
@@ -126,7 +126,7 @@ class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
 class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
     list_display = ("name_uk", "group", "slug", "sort", "is_filterable")
     list_filter = ("group", "is_filterable")
-    search_fields = ("name_uk", "name_en", "slug")
+    search_fields = ("name_uk", "name_en", "name_fr", "slug")
     fieldsets = language_tabs(
         uk_fields=("group", "slug", "is_filterable", "show_on_pdp", "sort", "name_uk"),
         en_fields=("name_en",),
@@ -211,7 +211,7 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         "set_sale",
         "unset_sale",
     )
-    search_fields = ("name_uk", "name_en", "sku", "slug")
+    search_fields = ("name_uk", "name_en", "name_fr", "sku", "slug")
     autocomplete_fields = ("category", "related_manual")
     inlines = [ProductImageInline]
     ordering = ("sort", "name_uk")
@@ -248,7 +248,7 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         ),
     )
 
-    tiny_fields = ("description_uk", "description_en")
+    tiny_fields = ("description_uk", "description_en", "description_fr")
 
     def get_fieldsets(self, request, obj=None):
         filter_fields = tuple(filter_field_names())

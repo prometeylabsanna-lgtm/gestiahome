@@ -13,9 +13,13 @@ class ThankYouPage(SingletonModel):
         "order_text_nonum_en",
         "contact_text_uk",
         "contact_text_en",
+        "order_text_fr",
+        "order_text_nonum_fr",
+        "contact_text_fr",
     )
     order_title_uk = models.CharField("Заголовок замовлення", max_length=200, blank=True)
     order_title_en = models.CharField("Заголовок замовлення (EN)", max_length=200, blank=True)
+    order_title_fr = models.CharField("Заголовок замовлення (FR)", max_length=200, blank=True)
     order_text_uk = models.TextField(
         "Текст із номером",
         blank=True,
@@ -26,14 +30,23 @@ class ThankYouPage(SingletonModel):
         blank=True,
         help_text="Placeholder {number} is substituted safely.",
     )
+    order_text_fr = models.TextField(
+        "Текст із номером (FR)",
+        blank=True,
+        help_text="Placeholder {number} is substituted safely.",
+    )
     order_text_nonum_uk = models.TextField("Текст без номера", blank=True)
     order_text_nonum_en = models.TextField("Текст без номера (EN)", blank=True)
+    order_text_nonum_fr = models.TextField("Текст без номера (FR)", blank=True)
     link_uk = models.CharField("Підпис посилання", max_length=80, blank=True)
     link_en = models.CharField("Підпис посилання (EN)", max_length=80, blank=True)
+    link_fr = models.CharField("Підпис посилання (FR)", max_length=80, blank=True)
     contact_title_uk = models.CharField("Заголовок повідомлення", max_length=120, blank=True)
     contact_title_en = models.CharField("Заголовок повідомлення (EN)", max_length=120, blank=True)
+    contact_title_fr = models.CharField("Заголовок повідомлення (FR)", max_length=120, blank=True)
     contact_text_uk = models.TextField("Текст повідомлення", blank=True)
     contact_text_en = models.TextField("Текст повідомлення (EN)", blank=True)
+    contact_text_fr = models.TextField("Текст повідомлення (FR)", blank=True)
 
     class Meta:
         verbose_name = "Сторінка подяки"

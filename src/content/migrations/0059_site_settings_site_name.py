@@ -26,51 +26,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='AboutBanner',
-        ),
-        migrations.DeleteModel(
-            name='AboutGallery',
-        ),
-        migrations.DeleteModel(
-            name='AboutPopularBlock',
-        ),
-        migrations.DeleteModel(
-            name='AboutReview',
-        ),
-        migrations.DeleteModel(
-            name='AboutReviewsBlock',
-        ),
-        migrations.DeleteModel(
-            name='AboutStory',
-        ),
-        migrations.DeleteModel(
-            name='HomeAdvantagesBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeBottomBanner',
-        ),
-        migrations.DeleteModel(
-            name='HomeCallbackBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeCategoriesBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeMidBanner',
-        ),
-        migrations.DeleteModel(
-            name='HomeReview',
-        ),
-        migrations.DeleteModel(
-            name='HomeReviewsBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeVideo2Block',
-        ),
-        migrations.DeleteModel(
-            name='HomeVideoBlock',
-        ),
         migrations.AddField(
             model_name='sitesettings',
             name='site_name_en',

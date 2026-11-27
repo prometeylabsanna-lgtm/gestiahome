@@ -31,7 +31,7 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v7"
+    cache_key = "site_settings_v8"
     site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
     site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
     site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
@@ -51,6 +51,9 @@ class SiteSettings(SingletonModel):
     instagram_url = models.URLField("Instagram", blank=True)
     pinterest_url = models.URLField("Pinterest", blank=True)
     telegram_url = models.URLField("Telegram", blank=True, help_text="Посилання t.me/… у соцряді.")
+    instagram_label = models.CharField("Підпис Instagram", max_length=40, default="Instagram")
+    pinterest_label = models.CharField("Підпис Pinterest", max_length=40, default="Pinterest")
+    telegram_label = models.CharField("Підпис Telegram", max_length=40, default="Telegram")
     developer_note_uk = models.CharField("Підпис розробника", max_length=160, blank=True)
     developer_note_en = models.CharField("Підпис розробника (EN)", max_length=160, blank=True)
     developer_note_fr = models.CharField("Підпис розробника (FR)", max_length=160, blank=True)

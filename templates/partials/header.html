@@ -157,7 +157,7 @@
               <li>
                 <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer">
                   {% include "partials/nd/icons/instagram.html" %}
-                  <span>Instagram</span>
+                  <span>{{ site_settings.instagram_label }}</span>
                 </a>
               </li>
             {% endif %}
@@ -165,7 +165,7 @@
               <li>
                 <a href="{{ site_settings.pinterest_url }}" target="_blank" rel="noopener noreferrer">
                   {% include "partials/nd/icons/pinterest.html" %}
-                  <span>Pinterest</span>
+                  <span>{{ site_settings.pinterest_label }}</span>
                 </a>
               </li>
             {% endif %}
@@ -371,7 +371,7 @@
         <li>
           <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer">
             {% include "partials/nd/icons/instagram.html" with size=18 stroke="1.5" %}
-            <span>Instagram</span>
+            <span>{{ site_settings.instagram_label }}</span>
           </a>
         </li>
       {% endif %}
@@ -379,7 +379,7 @@
         <li>
           <a href="{{ site_settings.pinterest_url }}" target="_blank" rel="noopener noreferrer">
             {% include "partials/nd/icons/pinterest.html" with size=18 %}
-            <span>Pinterest</span>
+            <span>{{ site_settings.pinterest_label }}</span>
           </a>
         </li>
       {% endif %}

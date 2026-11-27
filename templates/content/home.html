@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{% static 'css/nd/home.css' %}">
 {% endblock %}
 
-{% block title %}{% if home_blocks.hero.seo_title %}{{ home_blocks.hero.seo_title }}{% elif home_blocks.hero %}{% cms home_blocks.hero.title "hero_title" %}{% else %}Gestia Home{% endif %}{% endblock %}
+{% block title %}{% if home_blocks.hero.seo_title %}{{ home_blocks.hero.seo_title }}{% elif home_blocks.hero %}{% cms home_blocks.hero.title "hero_title" %}{% else %}{{ site_settings.site_name }}{% endif %}{% endblock %}
 {% block description %}{% if home_blocks.hero.seo_description %}{{ home_blocks.hero.seo_description }}{% elif home_blocks.hero %}{{ home_blocks.hero.text|striptags }}{% endif %}{% endblock %}
 
 {% block content %}
@@ -20,7 +20,7 @@
     <p class="visually-hidden" role="alert">{{ home_form.non_field_errors|striptags }}</p>
   {% endif %}
   {% if not home_blocks.hero %}
-    <h1 class="visually-hidden">Gestia Home</h1>
+    <h1 class="visually-hidden">{{ site_settings.site_name }}</h1>
   {% endif %}
   {% if home_blocks.hero %}
     {% include "partials/home/hero.html" with block=home_blocks.hero %}

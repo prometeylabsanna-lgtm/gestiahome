@@ -31,7 +31,10 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v2"
+    cache_key = "site_settings_v3"
+    site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
+    site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
+    site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
     phone = models.CharField("Телефон", max_length=40, default="+380000000000")
     email = models.EmailField("Електронна пошта", blank=True)
     address_uk = models.CharField("Адреса", max_length=255, blank=True)
@@ -124,6 +127,10 @@ class SiteSettings(SingletonModel):
             )
         except (OperationalError, ProgrammingError):
             return
+
+    @property
+    def site_name(self):
+        return localized(self, "site_name")
 
     @property
     def address(self):

@@ -53,18 +53,22 @@
 
     <address class="nd-footer__address">
       <ul>
-        <li>
-          <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
-            {% include "partials/nd/icons/instagram.html" %}
-            <span>Instagram</span>
-          </a>
-        </li>
-        <li>
-          <a href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}" target="_blank" rel="noopener noreferrer">
-            {% include "partials/nd/icons/pinterest.html" %}
-            <span>Pinterest</span>
-          </a>
-        </li>
+        {% if site_settings.instagram_url %}
+          <li>
+            <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer">
+              {% include "partials/nd/icons/instagram.html" %}
+              <span>Instagram</span>
+            </a>
+          </li>
+        {% endif %}
+        {% if site_settings.pinterest_url %}
+          <li>
+            <a href="{{ site_settings.pinterest_url }}" target="_blank" rel="noopener noreferrer">
+              {% include "partials/nd/icons/pinterest.html" %}
+              <span>Pinterest</span>
+            </a>
+          </li>
+        {% endif %}
         {% if site_settings.telegram_url %}
           <li>
             <a href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener noreferrer">

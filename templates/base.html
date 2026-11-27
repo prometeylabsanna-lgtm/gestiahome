@@ -7,7 +7,7 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <meta name="theme-color" content="#ffffff">
   {% block extra_head %}{% endblock %}
-  {% block_text "title" "Gestia" as seo_title %}
+  {% block_text "title" site_settings.site_name as seo_title %}
   {% block_text "description" "" as seo_description %}
   <title>{{ seo_title|clip_title }}</title>
   <meta name="description" content="{{ seo_description|clip_description }}">
@@ -17,7 +17,7 @@
   <meta property="og:title" content="{{ seo_title|clip_title }}">
   <meta property="og:description" content="{{ seo_description|clip_description }}">
   <meta property="og:url" content="{{ seo.canonical }}">
-  <meta property="og:site_name" content="Gestia Home">
+  <meta property="og:site_name" content="{{ site_settings.site_name }}">
   <meta property="og:locale" content="{{ seo.og_locale }}">
   {% og_image_meta as social %}
   {% if social.url %}

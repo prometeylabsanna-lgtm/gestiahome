@@ -56,7 +56,7 @@ def llms_text(request) -> str:
 
 def _md_label(value: str) -> str:
     text = " ".join((value or "").replace("[", "(").replace("]", ")").split())
-    return text or BRAND
+    return text or BRAND()
 
 
 def _abs(request, viewname: str, *, lang: str, kwargs=None, suffix: str = "") -> str:

@@ -1,8 +1,8 @@
-{% load i18n static ui_tags %}
+{% load ui_tags %}
 <a class="brand brand--{{ kind }}" href="{% url 'home' %}" aria-label="{% ui "brand_home" %}">
   {% if site_settings.logo %}
     <img class="brand__img" src="{{ site_settings.logo.url }}" alt="{{ site_settings.logo_alt }}" width="136" height="56">
   {% else %}
-    <img class="brand__img" src="{% static 'nd/logo.png' %}" alt="{{ site_settings.logo_alt }}" width="136" height="56">
+    {{ site_settings.site_name }}
   {% endif %}
 </a>

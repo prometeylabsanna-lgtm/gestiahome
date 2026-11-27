@@ -1,0 +1,17 @@
+{% load i18n unfold unfold_list %}
+
+{% with horizontal_filters=cl|unfold_horizontal_filters %}
+    {% if horizontal_filters|length > 0 %}
+        <form method="get" class="flex flex-col flex-wrap gap-3 grow *:mb-0 [&_.form-field]:min-w-[260px] lg:flex-row lg:items-end" oninput="this.submit()">
+            {% preserve_filters "horizontal" %}
+
+            {% for spec in horizontal_filters %}
+                {% unfold_admin_list_filter cl spec True %}
+            {% endfor %}
+
+            {% component "unfold/components/button.html" with href=cl.clear_all_filters_qs class="clearall shrink-0" variant="default" %}
+                {% trans "Reset filters" %}
+            {% endcomponent %}
+        </form>
+    {% endif %}
+{% endwith %}

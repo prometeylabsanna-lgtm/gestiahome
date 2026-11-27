@@ -82,3 +82,35 @@ class AdminUkrainianLabelsTests(TestCase):
         category_page = pages[0][1]
         self.assertContains(category_page, "SEO-заголовок")
         self.assertContains(category_page, "SEO-опис")
+
+
+
+class AdminIndexAxesAndTitleTests(TestCase):
+    def setUp(self):
+        translation.activate("uk")
+        self.user = User.objects.create_superuser("editor", "editor@example.com", "pass-word-9")
+        self.client.force_login(self.user)
+
+    def test_index_title_is_site_genitive(self):
+        page = self.client.get(reverse("admin:index"))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Адміністрування сайту")
+        self.assertNotContains(page, "Адміністрування сайта")
+
+    def test_index_hides_english_axes_labels(self):
+        page = self.client.get(reverse("admin:index"))
+        self.assertEqual(page.status_code, 200)
+        body = page.content.decode("utf-8")
+        for label in ("Axes", "Access attempts", "Access failures", "Access logs"):
+            self.assertNotIn(label, body, label)
+        self.assertIn("Доступ", body)
+        self.assertIn("Спроби входу", body)
+        self.assertIn("Невдалі входи", body)
+        self.assertIn("Журнали доступу", body)
+
+    def test_product_changelist_shows_reset_filters(self):
+        page = self.client.get(reverse("admin:catalog_product_changelist"))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Скинути фільтри")
+        self.assertNotContains(page, "Reset filters")
+        self.assertNotContains(page, "Clear all filters")

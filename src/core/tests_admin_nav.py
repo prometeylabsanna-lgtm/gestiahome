@@ -106,7 +106,7 @@ class SidebarTreeTests(TestCase):
         self.client.cookies["django_language"] = "en"
         response = self.client.get(reverse("admin:index"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Gestia Home")
+        self.assertContains(response, "Адміністрування сайту")
         self.assertContains(response, "Головна")
         self.assertContains(response, "Текст банера")
         self.assertContains(response, reverse("admin:content_homebannertext_changelist"))

@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     "unfold.contrib.filters",
     "django.contrib.admin",
     "django.contrib.auth",
-    "axes",
+    "src.core.axes_config.AxesUkConfig",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -260,8 +260,8 @@ TINYMCE_SHORT_CONFIG = {
 }
 
 UNFOLD = {
-    "SITE_TITLE": "Gestia Home",
-    "SITE_HEADER": "Gestia Home",
+    "SITE_TITLE": "Адміністрування сайту",
+    "SITE_HEADER": "Адміністрування сайту",
     "SITE_URL": "/",
     "SITE_ICON": {
         "light": _admin_asset("images/favicon.png"),

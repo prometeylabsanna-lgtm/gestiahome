@@ -262,3 +262,33 @@ msgstr "Не можна створити вкладений об’єкт без
 
 msgid "You have been successfully logged out from the administration"
 msgstr "Ви вийшли з адмінки"
+
+msgid "Site administration"
+msgstr "Адміністрування сайту"
+
+msgid "Django administration"
+msgstr "Адміністрування сайту"
+
+msgid "Django site admin"
+msgstr "Адміністрування сайту"
+
+msgid "Clear all filters"
+msgstr "Скинути фільтри"
+
+msgid "access attempt"
+msgstr "спроба входу"
+
+msgid "access attempts"
+msgstr "Спроби входу"
+
+msgid "access failure"
+msgstr "невдалий вхід"
+
+msgid "access failures"
+msgstr "Невдалі входи"
+
+msgid "access log"
+msgstr "журнал доступу"
+
+msgid "access logs"
+msgstr "Журнали доступу"

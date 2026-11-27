@@ -48,12 +48,12 @@ class ErrorPageTests(TestCase):
         self.assertEqual(resp.status_code, 404)
         html = resp.content.decode()
         self.assertIn("images/favicon.ico", html)
-        alt = (getattr(SiteSettings.load(), "logo_alt", "") or "").strip()
-        if alt:
-            self.assertIn("util-page__logo", html)
-            return
+        self.assertIn("util-page__logo", html)
         self.assertIn("5493c.png", html)
-        self.assertIn('aria-label="Gestia', html)
+        # The header may still use SiteSettings.logo; the 404 mark must stay 5493c.
+        util = html.split("util-page__logo", 1)[1].split("</a>", 1)[0]
+        self.assertIn("5493c.png", util)
+        self.assertNotIn("gestia-logo-nd.png", util)
 
     def test_footer_nav_all_from_settings(self):
         from django.core.cache import cache

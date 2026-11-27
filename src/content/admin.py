@@ -8,6 +8,7 @@ from src.content.models import (
     SiteSettings,
 )
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
+from src.core.admin_slug import SlugAdminMixin
 from src.core.admin_hints import COLLECTION_HINTS, SITE_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
@@ -51,6 +52,7 @@ class SiteSettingsAdmin(SingletonAdmin):
             "pinterest_label",
             "telegram_label",
             "logo",
+            "logo_light",
             "favicon",
             "currency_uah",
             "currency_uah_sign",
@@ -149,7 +151,8 @@ class HomeCollectionImageInline(GestiaTabularInline):
 
 
 @admin.register(HomeCollection)
-class HomeCollectionAdmin(GestiaModelAdmin):
+class HomeCollectionAdmin(SlugAdminMixin, GestiaModelAdmin):
+    slug_source_field = "title_uk"
     list_display = ("title_uk", "slug", "is_active", "sort")
     list_filter = ("is_active",)
     search_fields = ("title_uk", "title_en", "label_uk", "slug")

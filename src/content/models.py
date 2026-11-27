@@ -5,6 +5,7 @@ from django.db.utils import OperationalError, ProgrammingError
 
 from src.content.media import MediaChoice
 from src.core.fields import WebPImageField
+from src.core.slug import ensure_new_slug
 from src.core.utils import localized
 
 IMAGE_VALIDATOR = FileExtensionValidator(["jpg", "jpeg", "png", "webp"])
@@ -63,6 +64,13 @@ class SiteSettings(SingletonModel):
         blank=True,
         validators=[IMAGE_VALIDATOR],
         help_text="Шапка близько 113×43, підвал 191×73. JPG або PNG.",
+    )
+    logo_light = models.ImageField(
+        "Логотип на темному тлі",
+        upload_to="site/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Hero на головній. Якщо порожнє — світлий SVG nd/logo-gestia-light.svg.",
     )
     favicon = models.FileField(
         "Favicon",
@@ -476,6 +484,12 @@ class HomeCollection(models.Model):
 
     def __str__(self):
         return self.title_uk
+
+    def save(self, *args, **kwargs):
+        slug_set = ensure_new_slug(self, source_field="title_uk")
+        if slug_set and kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"slug"}
+        super().save(*args, **kwargs)
 
     @property
     def label(self):

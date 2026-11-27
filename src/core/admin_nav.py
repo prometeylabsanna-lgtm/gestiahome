@@ -316,24 +316,6 @@ NAV_TREE = [
                 "icon": "inbox",
                 "url_name": "admin:commerce_inquiry_changelist",
             },
-            {
-                "key": "np_warehouses",
-                "title": "Відділення Нової пошти",
-                "icon": "local_shipping",
-                "url_name": "admin:commerce_novaposhtawarehouse_changelist",
-            },
-            {
-                "key": "np_cities",
-                "title": "Міста Нової пошти",
-                "icon": "location_city",
-                "url_name": "admin:commerce_novaposhtacity_changelist",
-            },
-            {
-                "key": "np_sync",
-                "title": "Синхронізація Нової пошти",
-                "icon": "sync",
-                "url_name": "admin:commerce_novaposhtasyncstate_changelist",
-            },
         ],
     },
     {

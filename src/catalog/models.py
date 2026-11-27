@@ -150,6 +150,12 @@ class ProductAttributeGroup(models.Model):
     def __str__(self):
         return self.name_uk
 
+    def save(self, *args, **kwargs):
+        slug_set = ensure_new_slug(self)
+        if slug_set and kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"slug"}
+        super().save(*args, **kwargs)
+
     @property
     def name(self):
         return localized(self, "name")

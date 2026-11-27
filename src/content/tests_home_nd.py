@@ -101,8 +101,30 @@ class HomeNdRenderTests(TestCase):
         self.assertContains(page, "Святкові бокси для самостійного декорування столу")
         self.assertContains(page, 'class="nd-hero')
         self.assertContains(page, 'class="nd-hero__logo"')
+        # Header/brand may use SiteSettings.logo; hero must not.
         self.assertContains(page, stored_name)
-        self.assertNotContains(page, "nd/logo-gestia-light.svg")
+        self.assertContains(page, "nd/logo-gestia-light.svg")
+        self.assertContains(page, 'class="nd-hero__logo"')
+        html = page.content.decode()
+        hero = html.split('class="nd-hero__logo"', 1)[1].split(">", 1)[0]
+        self.assertIn("logo-gestia-light.svg", hero)
+        self.assertNotIn(stored_name, hero)
+
+    def test_hero_logo_light_overrides_static_svg(self):
+        site = SiteSettings.load()
+        site.logo_light = SimpleUploadedFile(
+            "hero-light.svg",
+            b'<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+            content_type="image/svg+xml",
+        )
+        site.save()
+        cache.clear()
+        page = self.client.get("/")
+        stored = site.logo_light.name.rsplit("/", 1)[-1]
+        html = page.content.decode()
+        hero = html.split('class="nd-hero__logo"', 1)[1].split(">", 1)[0]
+        self.assertIn(stored, hero)
+        self.assertNotIn("nd/logo-gestia-light.svg", hero)
 
     def test_collections_render_from_cms(self):
         page = self.client.get("/")

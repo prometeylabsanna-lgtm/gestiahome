@@ -96,7 +96,6 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
 
 @admin.register(ProductAttributeGroup)
 class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
-    auto_slug = False
     list_display = ("slug", "name_uk")
     search_fields = ("name_uk", "slug")
     fieldsets = language_tabs(
@@ -109,11 +108,6 @@ class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         return apply_hints(formfield, db_field.name, GROUP_HINTS)
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        set_form_help(form, "slug", GROUP_HINTS["slug"])
-        return form
 
     @admin.display(description="Значення")
     def value_links(self, obj):
@@ -278,7 +272,7 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
                     },
                 ),
             )
-        return self.fieldsets + extra
+        return super().get_fieldsets(request, obj) + extra
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:

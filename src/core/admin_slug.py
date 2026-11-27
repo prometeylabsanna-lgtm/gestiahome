@@ -1,56 +1,38 @@
-from src.core.admin_hints import SLUG_AUTO
+from django.contrib import admin
 
 
 class SlugAdminMixin:
-    """Новий запис: слаг можна лишити порожнім. Існуючий слаг лише для перегляду."""
+    """Слаг не редагується в формі: новий запис генерує модель, існуючий лише показуємо."""
 
     auto_slug = True
     slug_source_field = "name_uk"
 
+    @admin.display(description="Адреса сторінки")
+    def slug_address(self, obj):
+        return getattr(obj, "slug", None) or "—"
+
+    def get_exclude(self, request, obj=None):
+        exclude = list(super().get_exclude(request, obj) or [])
+        if "slug" not in exclude:
+            exclude.append("slug")
+        return exclude
+
     def get_readonly_fields(self, request, obj=None):
-        readonly = list(super().get_readonly_fields(request, obj))
-        if obj and getattr(obj, "pk", None) and _has_slug(obj) and "slug" not in readonly:
-            readonly.append("slug")
+        readonly = [name for name in super().get_readonly_fields(request, obj) if name != "slug"]
+        if obj and getattr(obj, "pk", None) and _has_slug(obj) and "slug_address" not in readonly:
+            readonly.append("slug_address")
         return readonly
 
     def get_prepopulated_fields(self, request, obj=None):
         return {}
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        if self.auto_slug and db_field.name == "slug" and formfield is not None:
-            formfield.required = False
-            if not formfield.help_text:
-                formfield.help_text = SLUG_AUTO
-        return formfield
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        return _rewrite_slug_fieldsets(fieldsets, obj)
 
-    def get_form(self, request, obj=None, **kwargs):
-        form_class = super().get_form(request, obj, **kwargs)
-        if not self.auto_slug:
-            return form_class
-        source_field = self.slug_source_field
-
-        class AutoSlugForm(form_class):
-            def clean_slug(self):
-                slug = (self.cleaned_data.get("slug") or "").strip()
-                if slug or self.instance.pk:
-                    return slug or self.instance.slug
-                source = (self.data.get(source_field) or "").strip()
-                if not source:
-                    return slug
-                from src.core.slug import unique_slug
-
-                group = self.data.get("group")
-                extra = {"group_id": group} if group else None
-                return unique_slug(
-                    self._meta.model,
-                    source,
-                    instance=self.instance,
-                    extra_filter=extra,
-                )
-
-        set_form_help(AutoSlugForm, "slug", SLUG_AUTO)
-        return AutoSlugForm
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        return _rewrite_slug_fields(fields, obj)
 
 
 def set_form_help(form_class, name: str, text: str) -> None:
@@ -62,3 +44,25 @@ def set_form_help(form_class, name: str, text: str) -> None:
 
 def _has_slug(obj) -> bool:
     return any(field.name == "slug" for field in obj._meta.concrete_fields)
+
+
+def _rewrite_slug_fields(fields, obj):
+    show_address = bool(obj and getattr(obj, "pk", None))
+    out = []
+    for name in fields:
+        if name == "slug":
+            if show_address:
+                out.append("slug_address")
+            continue
+        out.append(name)
+    return type(fields)(out) if isinstance(fields, tuple) else out
+
+
+def _rewrite_slug_fieldsets(fieldsets, obj):
+    rewritten = []
+    for title, opts in fieldsets:
+        new_opts = dict(opts)
+        if "fields" in new_opts:
+            new_opts["fields"] = _rewrite_slug_fields(new_opts["fields"], obj)
+        rewritten.append((title, new_opts))
+    return tuple(rewritten)

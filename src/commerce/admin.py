@@ -99,6 +99,9 @@ class OrderAdmin(GestiaModelAdmin):
 
 
 class _ReadOnlyCatalogAdmin(GestiaModelAdmin):
+    def has_module_permission(self, request):
+        return False
+
     def has_add_permission(self, request):
         return False
 

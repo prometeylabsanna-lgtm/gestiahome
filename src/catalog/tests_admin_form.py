@@ -101,3 +101,42 @@ class CatalogLanguageTabTests(TestCase):
         self.assertContains(add, 'name="sort"')
         self.assertContains(add, "gestia-sort")
         self.assertContains(add, 'maxlength="3"')
+
+    def test_admin_creates_product_without_slug(self):
+        url = reverse("admin:catalog_product_add")
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertNotContains(page, 'name="slug"')
+        payload = {
+            "category": self.category.pk,
+            "sku": "NEW-BOX",
+            "name_uk": "Бокс «Різдвяний»",
+            "price_uah": "1980",
+            "price_eur": "45",
+            "stock_status": Product.Stock.IN_STOCK,
+            "stock_qty": 1,
+            "is_active": "on",
+            "card_crop": "cover",
+            "name_width": 127,
+            "sort": 0,
+            "_save": "1",
+            "images-TOTAL_FORMS": "2",
+            "images-INITIAL_FORMS": "0",
+            "images-MIN_NUM_FORMS": "0",
+            "images-MAX_NUM_FORMS": "1000",
+            "images-0-sort": 0,
+            "images-1-sort": 1,
+        }
+        resp = self.client.post(url, payload, follow=False)
+        if Product.objects.filter(sku="NEW-BOX").count() != 1:
+            body = resp.content.decode(errors="replace")
+            # keep the failure short: list errorlist texts
+            import re
+            errs = re.findall(r'class="[^"]*errorlist[^"]*"[^>]*>.*?</ul>', body, re.S)
+            msgs = "; ".join(" ".join(re.sub("<[^>]+>", " ", e).split()) for e in errs[:8])
+            self.fail(f"product not created status={resp.status_code} errors={msgs or body[:500]}")
+        product = Product.objects.get(sku="NEW-BOX")
+        self.assertEqual(product.slug, "boks-rizdvianyi")
+        # existing slugs stay
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.slug, "box")

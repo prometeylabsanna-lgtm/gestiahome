@@ -11,7 +11,7 @@ ATTR_PREFIX = "attr_group_"
 class ProductAdminForm(forms.ModelForm):
     class Meta:
         model = Product
-        exclude = ("filter_attrs",)
+        exclude = ("filter_attrs", "slug")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

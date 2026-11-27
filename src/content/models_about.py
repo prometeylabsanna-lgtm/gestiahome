@@ -1,5 +1,7 @@
 from django.db import models
 
+from src.core.slug import ensure_new_slug
+
 from src.content.media import IMAGE_VALIDATOR, VIDEO_VALIDATOR, MediaChoice
 from src.core.fields import WebPImageField
 
@@ -122,6 +124,12 @@ class AboutPick(models.Model):
 
     def __str__(self):
         return self.title_uk
+
+    def save(self, *args, **kwargs):
+        slug_set = ensure_new_slug(self, source_field="title_uk")
+        if slug_set and kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"slug"}
+        super().save(*args, **kwargs)
 
     @property
     def title(self):

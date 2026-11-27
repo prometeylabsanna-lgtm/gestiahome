@@ -63,6 +63,9 @@ class SidebarTreeTests(TestCase):
         self.assertIn("chrome_menu", keys)
         self.assertNotIn("home_video", keys)
         self.assertNotIn("home_video_2", keys)
+        self.assertNotIn("np_warehouses", keys)
+        self.assertNotIn("np_cities", keys)
+        self.assertNotIn("np_sync", keys)
 
     def test_navigation_skips_missing_urls(self):
         groups = build_navigation(None)

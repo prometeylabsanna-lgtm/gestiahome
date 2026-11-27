@@ -11,6 +11,7 @@ from src.commerce.models import (
     OrderItem,
 )
 from src.commerce.stock_hold import rehold_stock
+from src.core.admin_actions import ORDER_STATUS_ACTIONS
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
 
 
@@ -48,7 +49,7 @@ class OrderAdmin(GestiaModelAdmin):
     )
     inlines = [OrderItemInline]
     date_hierarchy = "created_at"
-    actions = ("confirm_payment_manually",)
+    actions = ("confirm_payment_manually",) + ORDER_STATUS_ACTIONS
 
     def get_readonly_fields(self, request, obj=None):
         fields = list(super().get_readonly_fields(request, obj))

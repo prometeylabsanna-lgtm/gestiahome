@@ -7,6 +7,7 @@ from src.content.models import (
     HomeCollectionImage,
     SiteSettings,
 )
+from src.core.admin_actions import COLLECTION_ACTIONS
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
 from src.core.admin_slug import SlugAdminMixin
 from src.core.admin_hints import COLLECTION_HINTS, SITE_HINTS, apply_hints
@@ -155,6 +156,7 @@ class HomeCollectionAdmin(SlugAdminMixin, GestiaModelAdmin):
     slug_source_field = "title_uk"
     list_display = ("title_uk", "slug", "is_active", "sort")
     list_filter = ("is_active",)
+    actions = COLLECTION_ACTIONS
     search_fields = ("title_uk", "title_en", "label_uk", "slug")
     ordering = ("sort", "id")
     autocomplete_fields = ("category", "product", "addons")

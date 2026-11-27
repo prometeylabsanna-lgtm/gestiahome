@@ -25,8 +25,20 @@ def _site_name() -> str:
         return ""
 
 
+def _site_name_short() -> str:
+    try:
+        from src.content.models import SiteSettings
+
+        short = (SiteSettings.load().site_name_short or "").strip()
+    except (OperationalError, ProgrammingError):
+        return ""
+    if not short:
+        return _site_name()
+    return short
+
+
 def META_BRAND() -> str:
-    return _site_name()
+    return _site_name_short()
 
 
 _COPY_FIELDS = ("seo_description", "short_description", "description")
@@ -163,8 +175,9 @@ def collection_meta_title(collection) -> str:
     title = plain_text(localized(collection, "title"))
     if not title:
         return BRAND()
-    return gettext("Колекція «%(title)s» — Gestia Home") % {
+    return gettext("Колекція «%(title)s» — %(brand)s") % {
         "title": title.replace("%", "%%"),
+        "brand": BRAND(),
     }
 
 

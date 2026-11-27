@@ -31,10 +31,18 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v6"
+    cache_key = "site_settings_v7"
     site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
     site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
     site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
+    site_name_short_uk = models.CharField(
+        "Коротка назва",
+        max_length=40,
+        default="Gestia",
+        help_text="У title каталогу та короткому бренді, зараз «Gestia».",
+    )
+    site_name_short_en = models.CharField("Коротка назва (EN)", max_length=40, default="Gestia")
+    site_name_short_fr = models.CharField("Коротка назва (FR)", max_length=40, default="Gestia")
     phone = models.CharField("Телефон", max_length=40, default="+380000000000")
     email = models.EmailField("Email", blank=True)
     address_uk = models.CharField("Адреса", max_length=255, blank=True)
@@ -146,6 +154,12 @@ class SiteSettings(SingletonModel):
     color_ink = models.CharField("Колір тексту", max_length=7, default="#241c16")
     color_paper = models.CharField("Колір тла", max_length=7, default="#f3eee6")
     color_accent = models.CharField("Акцент", max_length=7, default="#8d3b2a")
+    theme_color = models.CharField(
+        "Колір вкладки (theme-color)",
+        max_length=7,
+        default="#ffffff",
+        help_text="Мета theme-color у браузері. За замовчуванням #ffffff.",
+    )
     footer_note_uk = models.CharField("Підпис у підвалі", max_length=255, blank=True)
     footer_note_en = models.CharField("Підпис у підвалі (EN)", max_length=255, blank=True)
     footer_note_fr = models.CharField("Підпис у підвалі (FR)", max_length=255, blank=True)
@@ -177,6 +191,10 @@ class SiteSettings(SingletonModel):
     @property
     def site_name(self):
         return localized(self, "site_name")
+
+    @property
+    def site_name_short(self):
+        return localized(self, "site_name_short")
 
     @property
     def address(self):

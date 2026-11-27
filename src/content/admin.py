@@ -38,6 +38,8 @@ class SiteSettingsAdmin(SingletonAdmin):
     fieldsets = language_tabs(
         uk_fields=(
             "site_name_uk",
+            "site_name_short_uk",
+            "theme_color",
             "phone",
             "email",
             "address_uk",
@@ -65,6 +67,7 @@ class SiteSettingsAdmin(SingletonAdmin):
         ),
         en_fields=(
             "site_name_en",
+            "site_name_short_en",
             "address_en",
             "logo_alt_en",
             "og_image_alt_en",

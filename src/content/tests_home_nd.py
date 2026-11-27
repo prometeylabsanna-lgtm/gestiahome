@@ -1,10 +1,11 @@
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import translation
 
 from src.catalog.models import Category, Product
-from src.content.models import HomeBlock, HomeCollection
+from src.content.models import HomeBlock, HomeCollection, SiteSettings
 from src.content.models_home_slots import HomePopularSlot
 
 
@@ -79,11 +80,29 @@ class HomeNdRenderTests(TestCase):
         )
 
     def test_hero_shows_cms_slogan(self):
+        logo_name = "hero-cms-logo.png"
+        site = SiteSettings.load()
+        site.logo = SimpleUploadedFile(
+            logo_name,
+            (
+                b"\x89PNG\r\n\x1a\n"
+                b"\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
+                b"\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4"
+                b"\x00\x00\x00\x00IEND\xaeB`\x82"
+            ),
+            content_type="image/png",
+        )
+        site.save()
+        site.refresh_from_db()
+        cache.clear()
+        stored_name = site.logo.name.rsplit("/", 1)[-1]
         page = self.client.get("/")
         self.assertContains(page, "Art of modern hospitality")
         self.assertContains(page, "Святкові бокси для самостійного декорування столу")
-        self.assertContains(page, "nd/logo-gestia-light.svg")
         self.assertContains(page, 'class="nd-hero')
+        self.assertContains(page, 'class="nd-hero__logo"')
+        self.assertContains(page, stored_name)
+        self.assertNotContains(page, "nd/logo-gestia-light.svg")
 
     def test_collections_render_from_cms(self):
         page = self.client.get("/")

@@ -97,12 +97,19 @@ class HeaderFooterRenderTests(TestCase):
         self.site.credit_uk = ""
         self.site.credit_en = ""
         self.site.logo = ""
+        self.site.site_name_uk = "БрендТестUK"
+        self.site.site_name_en = "BrandTestEN"
         self.site.save()
+        cache.clear()
         page = self.client.get("/")
         self.assertNotContains(page, "Зроблено")
-        self.assertContains(page, "nd/logo.png")
+        self.assertContains(page, "БрендТестUK")
+        self.assertNotContains(page, "nd/logo.png")
+        self.assertNotContains(page, 'class="brand__img"')
         english = self.client.get("/en/")
         self.assertNotContains(english, "Made by")
+        self.assertContains(english, "BrandTestEN")
+        self.assertNotContains(english, "nd/logo.png")
 
     def test_telegram_url_in_footer_contacts(self):
         self.site.telegram_url = "https://t.me/gestia_home"

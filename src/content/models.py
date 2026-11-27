@@ -31,7 +31,7 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v3"
+    cache_key = "site_settings_v4"
     site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
     site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
     site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
@@ -52,6 +52,12 @@ class SiteSettings(SingletonModel):
         blank=True,
         validators=[IMAGE_VALIDATOR],
         help_text="Шапка близько 113×43, підвал 191×73. JPG або PNG.",
+    )
+    favicon = models.FileField(
+        "Favicon",
+        upload_to="site/",
+        blank=True,
+        help_text="Іконка вкладки браузера. PNG або ICO.",
     )
     logo_alt_uk = models.CharField("Підпис логотипа", max_length=80, blank=True)
     logo_alt_en = models.CharField("Підпис логотипа (EN)", max_length=80, blank=True)

@@ -45,6 +45,7 @@ class SiteSettingsAdmin(SingletonAdmin):
             "pinterest_url",
             "telegram_url",
             "logo",
+            "favicon",
             "logo_alt_uk",
             "mark_light",
             "mark_dark",

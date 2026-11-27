@@ -31,7 +31,7 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v5"
+    cache_key = "site_settings_v6"
     site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
     site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
     site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
@@ -76,6 +76,28 @@ class SiteSettings(SingletonModel):
         max_length=8,
         default="€",
         help_text="Знак євро, зараз «€».",
+    )
+    og_image = models.ImageField(
+        "OG-картинка за замовчуванням",
+        upload_to="site/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Якщо порожня — лишається поточний static og-default.",
+    )
+    og_image_alt_uk = models.CharField(
+        "Підпис OG-картинки",
+        max_length=160,
+        default="Святковий стіл Gestia Home",
+    )
+    og_image_alt_en = models.CharField(
+        "Підпис OG-картинки (EN)",
+        max_length=160,
+        default="A festive table by Gestia Home",
+    )
+    og_image_alt_fr = models.CharField(
+        "Підпис OG-картинки (FR)",
+        max_length=160,
+        default="Une table de fête Gestia Home",
     )
     logo_alt_uk = models.CharField("Підпис логотипа", max_length=80, blank=True)
     logo_alt_en = models.CharField("Підпис логотипа (EN)", max_length=80, blank=True)
@@ -163,6 +185,10 @@ class SiteSettings(SingletonModel):
     @property
     def logo_alt(self):
         return localized(self, "logo_alt")
+
+    @property
+    def og_image_alt(self):
+        return localized(self, "og_image_alt")
 
     @property
     def nav_about(self):

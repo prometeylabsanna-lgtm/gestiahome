@@ -6,6 +6,7 @@ from django.urls import reverse
 from src.content.models_faq import FaqItem
 from src.content.proxies import FaqContact, FaqHeader, FaqSeo
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_hints import FAQ_HEADER_HINTS, FAQ_ITEM_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -43,13 +44,14 @@ class FaqHeaderAdmin(_OpenSingleton):
             "crumb_en",
             "image_alt_en",
         ),
-        uk_description="У заголовку можна <br> для переносу рядка, як у макеті.",
+        uk_description="Щоб розбити заголовок на два рядки, у редакторі натисніть Shift і Enter.",
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=True)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, FAQ_HEADER_HINTS)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
@@ -73,7 +75,8 @@ class FaqItemAdmin(GestiaModelAdmin):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, FAQ_ITEM_HINTS)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
@@ -114,3 +117,7 @@ class FaqSeoAdmin(_OpenSingleton):
         uk_fields=("seo_title_uk", "seo_description_uk"),
         en_fields=("seo_title_en", "seo_description_en"),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, seo=True)

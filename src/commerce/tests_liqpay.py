@@ -1034,51 +1034,6 @@ class LiqPayAdminManualConfirmTests(TestCase):
         )
 
 
-class LiqPayVercelDemoDisabledTests(TestCase):
-    def test_vercel_settings_force_liqpay_disabled(self):
-        env = {
-            "HOME": os.environ.get("HOME", ""),
-            "PATH": os.environ.get("PATH", ""),
-            "LANG": os.environ.get("LANG", "C.UTF-8"),
-            "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
-            "DJANGO_SETTINGS_MODULE": "config.settings.vercel",
-            "VERCEL": "1",
-            "SECRET_KEY": "",
-            "ALLOWED_HOSTS": "",
-            "CSRF_TRUSTED_ORIGINS": "",
-            "SITE_URL": "",
-            "DATABASE_URL": "",
-            "ADMIN_URL": "",
-            "SECURE_SSL_REDIRECT": "False",
-            "LIQPAY_PUBLIC_KEY": "dummy_pub",
-            "LIQPAY_PRIVATE_KEY": "dummy_priv",
-            "LIQPAY_SANDBOX": "1",
-        }
-        code = (
-            "import django\n"
-            "django.setup()\n"
-            "from django.conf import settings\n"
-            "from src.commerce.payments.liqpay import enabled\n"
-            "print('enabled', enabled())\n"
-            "print('public_empty', settings.LIQPAY_PUBLIC_KEY == '')\n"
-            "print('private_empty', settings.LIQPAY_PRIVATE_KEY == '')\n"
-            "print('sandbox', settings.LIQPAY_SANDBOX)\n"
-        )
-        result = subprocess.run(
-            [sys.executable, "-c", code],
-            cwd=str(_PROJECT_ROOT),
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("enabled False", result.stdout)
-        self.assertIn("public_empty True", result.stdout)
-        self.assertIn("private_empty True", result.stdout)
-        self.assertIn("sandbox False", result.stdout)
-
-
 class LiqPayProductionSandboxGuardTests(TestCase):
     def _run_production_import(self, sandbox_value: str) -> subprocess.CompletedProcess:
         env = os.environ.copy()
@@ -1098,7 +1053,11 @@ class LiqPayProductionSandboxGuardTests(TestCase):
                 "CSP_REPORT_ONLY": "1",
                 "TRUST_X_FORWARDED_FOR": "0",
                 "SITE_URL": "https://example.com",
-                "ADMIN_URL": "admin/",
+                "ADMIN_URL": "gestia-staff/",
+                "USE_HTTPS": "0",
+                "EMAIL_HOST": "",
+                "SESSION_COOKIE_SECURE": "0",
+                "CSRF_COOKIE_SECURE": "0",
                 "DEFAULT_FROM_EMAIL": "shop@example.com",
                 "ORDER_NOTIFY_EMAIL": "",
                 "TELEGRAM_BOT_TOKEN": "",

@@ -5,8 +5,8 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Підкласи (develop / production / vercel) задають або перевіряють ключ.
-# Порожній default — щоб імпорт base не падав на Vercel build без .env.
+# Підкласи (develop / production) задають або перевіряють ключ.
+# Порожній default — імпорт base не вимагає .env, доки модуль середовища не перевірить ключ.
 SECRET_KEY = config("SECRET_KEY", default="")
 
 DEBUG = False
@@ -86,6 +86,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Django 5.2: PBKDF2PasswordHasher робить 1_000_000 ітерацій. Перший хешер — для нових паролів.
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
+
 LANGUAGE_CODE = "uk"
 LANGUAGES = [
     ("uk", "Українська"),
@@ -118,6 +126,8 @@ LIQPAY_ALLOW_SHA1_FALLBACK = config("LIQPAY_ALLOW_SHA1_FALLBACK", default=True, 
 
 # Тимчасовий залишок активних товарів, доки адміністратор не виставить реальні кількості.
 STOCK_PLACEHOLDER_QTY = 10
+# Карткове замовлення тримає залишок, доки LiqPay не підтвердить оплату або не мине цей термін.
+CARD_STOCK_HOLD_HOURS = 24
 
 CACHES = {
     "default": {
@@ -130,7 +140,7 @@ CACHES = {
 # Кошик і Нова пошта мають вищі стелі: 5/600 зупинило б набір міста і кількість у кошику.
 RATE_LIMITS = {
     "default": {"limit": 5, "window": 600},
-    "np": {"limit": 30, "window": 600},
+    "np": {"limit": 120, "window": 600},
     "cart": {"limit": 60, "window": 600},
     "wishlist": {"limit": 60, "window": 600},
 }
@@ -140,7 +150,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = timedelta(minutes=5)
+AXES_COOLOFF_TIME = timedelta(minutes=60)
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_PARAMETERS = [["ip_address"], ["username"]]
 TRUST_X_FORWARDED_FOR = config("TRUST_X_FORWARDED_FOR", default=False, cast=bool)
@@ -159,6 +169,7 @@ ADMIN_URL = _normalize_admin_url(config("ADMIN_URL", default="admin/"))
 SITE_URL = str(config("SITE_URL", default="") or "").strip().rstrip("/")
 
 # Public pages load Google Fonts and have no inline scripts or map iframes.
+# Develop лишає report-only. Production вимикає його для вітрини.
 CSP_REPORT_ONLY = config("CSP_REPORT_ONLY", default=True, cast=bool)
 CSP_POLICY = "; ".join(
     [
@@ -171,6 +182,20 @@ CSP_POLICY = "; ".join(
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: https:",
         "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
+    ]
+)
+# Unfold і TinyMCE потребують інлайн-скриптів. Політика завжди enforcing, окремо від вітрини.
+CSP_POLICY_ADMIN = "; ".join(
+    [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https:",
+        "connect-src 'self'",
     ]
 )
 

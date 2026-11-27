@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.db.models import Prefetch
 
 from src.catalog.models import Product, ProductImage
+from src.catalog.storefront import prefetch_public_collections
 from src.core.utils import format_money
 
 SESSION_KEY = "cart"
@@ -66,7 +67,8 @@ def lines(request, currency: str):
         request._cart_removed = 0
         return [], Decimal("0")
     products = Product.objects.filter(sku__in=list(data.keys())).prefetch_related(
-        Prefetch("images", queryset=ProductImage.objects.order_by("sort", "id"))
+        Prefetch("images", queryset=ProductImage.objects.order_by("sort", "id")),
+        prefetch_public_collections(),
     )
     by_sku = {product.sku: product for product in products}
     rows = []

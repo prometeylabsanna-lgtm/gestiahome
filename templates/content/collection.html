@@ -112,7 +112,7 @@
             <ul class="nd-colp-addons__list">
               {% for addon in addons %}
                 <li class="nd-colp-addons__item">
-                  <a class="nd-colp-addons__link" href="{{ addon.get_absolute_url }}">
+                  <a class="nd-colp-addons__link" href="{{ addon.storefront_url }}">
                     {% if addon.card_photo_url %}
                       <img
                         class="nd-colp-addons__img"

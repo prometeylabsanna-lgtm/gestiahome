@@ -1,6 +1,7 @@
 """Читання та синхронізація слотів головної з legacy-полями каталогу."""
 
 from src.catalog.models import Category, Product
+from src.catalog.storefront import prefetch_public_collections
 from src.content.models import HomeBlock
 from src.content.models_home_slots import HomeCategorySlot, HomePopularSlot
 
@@ -37,14 +38,14 @@ def home_popular():
     slots = list(
         HomePopularSlot.objects.filter(block__key=HomeBlock.Key.POPULAR, product__is_active=True)
         .select_related("product")
-        .prefetch_related("product__images")
+        .prefetch_related("product__images", prefetch_public_collections("product__home_collections_as_main"))
         .order_by("sort", "id")
     )
     if slots:
         return [slot.product for slot in slots]
     return list(
         Product.objects.filter(is_active=True, is_popular=True)
-        .prefetch_related("images")
+        .prefetch_related("images", prefetch_public_collections())
         .order_by("sort", "id")
     )
 
@@ -72,7 +73,7 @@ def about_popular():
     slots = list(
         AboutPopularSlot.objects.filter(page=page, product__is_active=True)
         .select_related("product")
-        .prefetch_related("product__images")
+        .prefetch_related("product__images", prefetch_public_collections("product__home_collections_as_main"))
         .order_by("sort", "id")
     )
     products = [slot.product for slot in slots]

@@ -179,7 +179,7 @@
           <ul class="mega__products nd-mega__products">
             {% for product in menu_cards %}
               <li>
-                <a class="mega-card nd-mega-card" href="{{ product.get_absolute_url }}">
+                <a class="mega-card nd-mega-card" href="{{ product.storefront_url }}">
                   <span class="mega-card__media nd-mega-card__media">
                     {% with media=product.card_media %}
                       {% if media %}{% include "partials/smart_media.html" with media=media width=200 height=226 %}{% endif %}

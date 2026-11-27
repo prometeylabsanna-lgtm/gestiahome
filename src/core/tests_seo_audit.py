@@ -130,6 +130,7 @@ class ContactSeoTests(SeoFixture):
             email=_EMAIL,
             address_uk=_ADDRESS_UK,
             address_en=_ADDRESS_EN,
+            address_fr="Kyiv, atelier Gestia",
             instagram_url=_INSTAGRAM,
             pinterest_url=_PINTEREST,
         )
@@ -140,6 +141,7 @@ class ContactSeoTests(SeoFixture):
         self.assertIn(f"- Email: {_EMAIL}", llms)
         self.assertIn(f"- Адреса: {_ADDRESS_UK}", llms)
         self.assertIn(f"- Адреса: {_ADDRESS_EN}", llms)
+        self.assertIn("- Адреса: Kyiv, atelier Gestia", llms)
         self.assertIn(f"- {_INSTAGRAM}", llms)
         self.assertIn(f"- {_PINTEREST}", llms)
         self.assertEqual(uk["telephone"], _PHONE)

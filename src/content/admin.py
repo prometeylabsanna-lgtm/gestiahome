@@ -8,6 +8,7 @@ from src.content.models import (
     SiteSettings,
 )
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
+from src.core.admin_hints import COLLECTION_HINTS, SITE_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -66,6 +67,10 @@ class SiteSettingsAdmin(SingletonAdmin):
             "credit_en",
         ),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, SITE_HINTS)
 
 
 @admin.register(HomeBlock)
@@ -172,7 +177,8 @@ class HomeCollectionAdmin(GestiaModelAdmin):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=True)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, COLLECTION_HINTS, seo=True)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)

@@ -374,6 +374,12 @@ class Product(MediaChoice, TimeStampedModel):
         return reverse("product", kwargs={"slug": self.slug})
 
     @property
+    def storefront_url(self):
+        from src.catalog.storefront import storefront_url
+
+        return storefront_url(self)
+
+    @property
     def cover(self):
         cached = getattr(self, "_prefetched_objects_cache", {})
         if "images" in cached:

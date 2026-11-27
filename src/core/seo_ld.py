@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -79,13 +80,27 @@ def _organization(request, site, image: str) -> dict:
     return node
 
 
+_LANGUAGE_TAGS = {"uk": "uk-UA", "en": "en-US", "fr": "fr-FR"}
+
+
+def _in_language() -> list[str]:
+    from src.core.middleware import language_enabled
+
+    tags = [
+        _LANGUAGE_TAGS.get(code, code)
+        for code, _label in settings.LANGUAGES
+        if language_enabled(code)
+    ]
+    return tags or ["uk-UA"]
+
+
 def _website(base: str) -> dict:
     return {
         "@type": "WebSite",
         "@id": f"{base}/#website",
         "name": BRAND,
         "url": f"{base}/",
-        "inLanguage": ["uk-UA", "en-US"],
+        "inLanguage": _in_language(),
         "publisher": {"@id": f"{base}/#organization"},
     }
 
@@ -118,6 +133,8 @@ def _breadcrumbs(context, request):
         return _crumb_list(items)
     if url_name == "catalog":
         return _crumb_list([_home_crumb(request), _catalog_crumb(request)])
+    if url_name == "collection" and context.get("collection") is not None:
+        return _collection_crumbs(context, request)
     if url_name in CONTENT_URL_NAMES:
         title = _content_title(context, url_name)
         if not title:
@@ -132,6 +149,33 @@ def _breadcrumbs(context, request):
 def _category_chain(category, request) -> list[tuple[str, str]]:
     base = public_base(request)
     return [(node.name, base + node.get_absolute_url()) for node in category.chain()]
+
+
+def _absolute_path(request, path: str) -> str:
+    value = str(path or "").strip()
+    if not value:
+        return ""
+    if value.startswith(("http://", "https://")):
+        return value
+    if not value.startswith("/"):
+        value = "/" + value
+    return public_base(request) + value
+
+
+def _collection_crumbs(context, request) -> dict:
+    collection = context["collection"]
+    items = [_home_crumb(request), _catalog_crumb(request)]
+    group = context.get("menu_group")
+    group_url = _absolute_path(request, context.get("crumb_group_url") or "")
+    group_name = " ".join(str(getattr(group, "title", "") or "").split()) if group else ""
+    if group_name and group_url:
+        items.append((group_name, group_url))
+    title = " ".join(str(collection.title or "").split()) or BRAND
+    canonical = (context.get("seo") or {}).get("canonical") or _absolute_path(
+        request, collection.get_absolute_url()
+    )
+    items.append((title, canonical))
+    return _crumb_list(items)
 
 
 def _product_crumbs(product, request) -> dict:
@@ -208,48 +252,82 @@ def _faq_node(context, request):
     return {"@type": "FAQPage", "mainEntity": entities}
 
 
-def _product_node(context, request):
-    if _url_name(request) != "product":
-        return None
-    product = context.get("product")
-    if product is None:
-        return None
-    canonical = public_base(request) + product.get_absolute_url()
+def _offer(canonical: str, product) -> dict:
+    return {
+        "@type": "Offer",
+        "url": canonical,
+        "priceCurrency": "UAH",
+        "price": f"{Decimal(product.price_uah).quantize(Decimal('0.01'))}",
+        "availability": (
+            "https://schema.org/InStock"
+            if int(product.stock_qty or 0) > 0
+            else "https://schema.org/OutOfStock"
+        ),
+    }
+
+
+def _media_urls(request, urls) -> list[str]:
     images = []
-    for shot in product.images.all():
-        image = getattr(shot, "image", None)
-        if not image:
-            continue
+    for raw in urls:
         try:
-            url = absolute_media(request, image.url)
+            url = absolute_media(request, raw)
         except ValueError:
             continue
-        if url:
+        if url and url not in images:
             images.append(url)
+    return images
+
+
+def _product_images(product, request) -> list[str]:
+    urls = []
+    for shot in product.images.all():
+        image = getattr(shot, "image", None)
+        if image:
+            urls.append(image.url)
+    return _media_urls(request, urls)
+
+
+def _collection_images(collection, request) -> list[str]:
+    return _media_urls(request, [photo.get("url") or "" for photo in collection.gallery_photos()])
+
+
+def _product_node(context, request):
+    url_name = _url_name(request)
+    if url_name == "product":
+        product = context.get("product")
+        if product is None:
+            return None
+        canonical = public_base(request) + product.get_absolute_url()
+        name = product.name
+        images = _product_images(product, request)
+        description = " ".join(str(product.seo_description or "").split())
+    elif url_name == "collection":
+        collection = context.get("collection")
+        product = getattr(collection, "product", None) if collection is not None else None
+        if product is None or not product.is_active:
+            return None
+        canonical = (context.get("seo") or {}).get("canonical") or (
+            public_base(request) + collection.get_absolute_url()
+        )
+        name = " ".join(str(collection.title or "").split()) or product.name
+        images = _collection_images(collection, request) or _product_images(product, request)
+        description = " ".join(str(collection.seo_description or "").split())
+    else:
+        return None
     if not images:
         fallback = (context.get("seo") or {}).get("image") or ""
         if fallback:
             images.append(fallback)
     node = {
         "@type": "Product",
-        "name": product.name,
+        "name": name,
         "url": canonical,
-        "offers": {
-            "@type": "Offer",
-            "url": canonical,
-            "priceCurrency": "UAH",
-            "price": f"{Decimal(product.price_uah).quantize(Decimal('0.01'))}",
-            "availability": (
-                "https://schema.org/InStock"
-                if product.stock_qty > 0
-                else "https://schema.org/OutOfStock"
-            ),
-        },
+        "brand": {"@type": "Brand", "name": BRAND},
+        "offers": _offer(canonical, product),
     }
     sku = str(product.sku or "").strip()
     if sku:
         node["sku"] = sku
-    description = " ".join(str(product.seo_description or "").split())
     if description:
         node["description"] = description
     if images:

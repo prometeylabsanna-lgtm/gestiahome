@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="{% static 'css/nd/checkout.css' %}">
 {% endblock %}
 {% block extra_js %}
+  <script src="{% static 'js/pages/checkout-suggest.js' %}" defer></script>
   <script src="{% static 'js/pages/checkout.js' %}" defer></script>
   <script src="{% static 'js/nd/checkout-label.js' %}" defer></script>
 {% endblock %}
@@ -109,6 +110,8 @@
             data-hint-pick-city="{% ui "hint_pick_city" %}"
             data-hint-street-format="{% ui "hint_street_format" %}"
           >
+            <input type="hidden" name="city_ref" value="{{ form.city_ref.value|default_if_none:'' }}" data-np-city-ref>
+            <input type="hidden" name="warehouse_ref" value="{{ form.warehouse_ref.value|default_if_none:'' }}" data-np-warehouse-ref>
             <div class="nd-co-ship-pair">
               <div class="co-suggest">
                 <label class="nd-co-field{% if form.city.errors %} is-invalid{% endif %}" data-field-wrap>
@@ -163,6 +166,9 @@
                       <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                   </label>
+                  <button type="button" class="nd-co-field__clear" data-np-clear hidden aria-label="{% translate 'Очистити' %}">
+                    <span aria-hidden="true">×</span>
+                  </button>
                   <ul id="np-branch-listbox" class="co-suggest__list" role="listbox" hidden></ul>
                 </div>
                 <label class="nd-co-field nd-co-field--house" data-np-house hidden>

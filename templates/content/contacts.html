@@ -24,9 +24,11 @@
       <div class="nd-contacts__aside">
         <h1 class="nd-contacts__title">{{ contacts_page.title }}</h1>
         <ul class="nd-contacts__nap">
-          <li>
-            <a class="nd-contacts__link" href="{{ nap.phone_href }}">{{ nap.phone }}</a>
-          </li>
+          {% if nap.phone %}
+            <li>
+              <a class="nd-contacts__link" href="{{ nap.phone_href }}">{{ nap.phone }}</a>
+            </li>
+          {% endif %}
           {% for item in nap.socials %}
             <li>
               <a class="nd-contacts__link" href="{{ item.href }}" target="_blank" rel="noopener noreferrer">{{ item.label }}</a>

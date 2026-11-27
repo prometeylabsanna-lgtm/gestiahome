@@ -13,6 +13,7 @@ from src.content.proxies import (
     HomePopularBlock,
 )
 from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline, GestiaTabularInline
+from src.core.admin_hints import COLLECTIONS_BLOCK_HINTS, COLLECTION_HINTS, POPULAR_BLOCK_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -60,7 +61,8 @@ class HomeCollectionInline(GestiaStackedInline):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=True)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, COLLECTION_HINTS)
 
 
 @admin.register(HomeCollectionsBlock)
@@ -77,6 +79,7 @@ class HomeCollectionsAdmin(KeyedBlockAdmin):
         "cta_en": 40,
     }
     tiny_fields = ()
+    field_hints = COLLECTIONS_BLOCK_HINTS
     fieldsets = language_tabs(
         uk_fields=("title_uk", "link_uk", "cta_uk"),
         en_fields=("title_en", "link_en", "cta_en"),
@@ -89,6 +92,7 @@ class HomePopularAdmin(KeyedBlockAdmin):
     default_sort = 4
     inlines = (HomePopularSlotInline,)
     text_limits = {"title_uk": 24, "title_en": 24, "cta_uk": 28, "cta_en": 28}
+    field_hints = POPULAR_BLOCK_HINTS
     tiny_fields = ()
     fieldsets = language_tabs(
         uk_fields=("title_uk", "cta_uk"),
@@ -102,23 +106,23 @@ class HomePopularAdmin(KeyedBlockAdmin):
 
 LOCALE_FIELD_META = {
     "title_uk": ("Заголовок діалогу", "Крок «Підтвердити»: «Країна та мова»."),
-    "title_en": ("Dialog title", "Confirm step heading."),
-    "title_fr": ("Titre du dialogue", "Titre de l’étape Confirmer."),
+    "title_en": ("Dialog title", "Заголовок кроку «Підтвердити»."),
+    "title_fr": ("Titre du dialogue", "Заголовок кроку «Підтвердити»."),
     "text_uk": ("Поточний регіон", "Рядок під заголовком, напр. «Україна/Гривня»."),
-    "text_en": ("Current region", "Line under the title, e.g. «Ukraine/Hryvnia»."),
-    "text_fr": ("Région actuelle", "Ligne sous le titre, p. ex. «Ukraine/Hryvnia»."),
+    "text_en": ("Current region", "Рядок під заголовком, наприклад «Ukraine/Hryvnia»."),
+    "text_fr": ("Région actuelle", "Рядок під заголовком, наприклад «Ukraine/Hryvnia»."),
     "cta_uk": ("Кнопка підтвердження", "Текст кнопки «Підтвердити»."),
-    "cta_en": ("Confirm button", "Confirm button label."),
-    "cta_fr": ("Bouton confirmer", "Libellé du bouton Confirmer."),
+    "cta_en": ("Confirm button", "Текст кнопки «Підтвердити»."),
+    "cta_fr": ("Bouton confirmer", "Текст кнопки «Підтвердити»."),
     "link_uk": ("Посилання «Змінити»", "Відкриває крок вибору регіону."),
-    "link_en": ("Change link", "Opens the region step."),
-    "link_fr": ("Lien modifier", "Ouvre l’étape de la région."),
+    "link_en": ("Change link", "Відкриває крок вибору регіону."),
+    "link_fr": ("Lien modifier", "Відкриває крок вибору регіону."),
     "note_uk": (
         "Опис кроку регіону",
         "Текст під «Місце доставки» про ціни й доставку.",
     ),
-    "note_en": ("Region step description", "Copy under the delivery place heading."),
-    "note_fr": ("Description de l’étape région", "Texte sous le titre du lieu de livraison."),
+    "note_en": ("Region step description", "Текст під заголовком місця доставки про ціни й доставку."),
+    "note_fr": ("Description de l’étape région", "Текст під заголовком місця доставки про ціни й доставку."),
     "lines_uk": (
         "Рядки діалогу (по одному в рядку)",
         "1) Місце доставки 2) Україна 3) Міжнародна доставка "
@@ -126,12 +130,12 @@ LOCALE_FIELD_META = {
     ),
     "lines_en": (
         "Dialog lines (one per row)",
-        "1) Delivery place 2) Ukraine 3) International delivery "
+        "По одному рядку: 1) Delivery place 2) Ukraine 3) International delivery "
         "4) Site language 5) Choose language 6) Українська 7) English 8) Français",
     ),
     "lines_fr": (
         "Lignes du dialogue (une par ligne)",
-        "1) Lieu de livraison 2) Ukraine 3) Livraison internationale "
+        "По одному рядку: 1) Lieu de livraison 2) Ukraine 3) Livraison internationale "
         "4) Langue du site 5) Choisissez la langue 6) Українська 7) English 8) Français",
     ),
 }

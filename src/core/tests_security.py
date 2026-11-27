@@ -70,6 +70,18 @@ class RateLimitHelperTests(SimpleTestCase):
             self.assertFalse(is_rate_limited(other, "callback"))
             self.assertTrue(is_rate_limited(same, "callback"))
 
+    def test_vercel_forwarded_for_is_ignored(self):
+        request = RequestFactory().post(
+            "/",
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_FORWARDED_FOR="203.0.113.8, 10.0.0.1",
+            HTTP_X_VERCEL_FORWARDED_FOR="198.51.100.20, 10.0.0.8",
+        )
+        with override_settings(TRUST_X_FORWARDED_FOR=True):
+            self.assertEqual(client_ip(request), "203.0.113.8")
+        with override_settings(TRUST_X_FORWARDED_FOR=False):
+            self.assertEqual(client_ip(request), "192.0.2.10")
+
     def test_honeypot_ignores_blank(self):
         factory = RequestFactory()
         self.assertFalse(honeypot_filled(factory.post("/", {})))
@@ -99,7 +111,18 @@ class CspHeaderTests(TestCase):
     @override_settings(CSP_REPORT_ONLY=False)
     def test_enforced_header_when_report_only_disabled(self):
         response = self.client.get("/healthz/")
-        self.assertEqual(response["Content-Security-Policy"].split(";")[0], "default-src 'self'")
+        policy = response["Content-Security-Policy"]
+        self.assertEqual(policy.split(";")[0], "default-src 'self'")
+        self.assertIn("script-src 'self'", policy)
+        self.assertNotIn("script-src 'self' 'unsafe-inline'", policy)
+        self.assertNotIn("Content-Security-Policy-Report-Only", response)
+
+    def test_admin_csp_allows_inline_scripts(self):
+        response = self.client.get("/admin/login/")
+        policy = response["Content-Security-Policy"]
+        self.assertIn("script-src 'self' 'unsafe-inline' 'unsafe-eval'", policy)
+        self.assertIn("form-action 'self'", policy)
+        self.assertNotIn("https://www.liqpay.ua", policy)
         self.assertNotIn("Content-Security-Policy-Report-Only", response)
 
 

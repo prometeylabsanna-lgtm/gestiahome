@@ -1,0 +1,10 @@
+services:
+  nginx:
+    ports:
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN}
+    volumes:
+      - ./deploy/nginx/docker.prod.conf.template:/nginx-ssl.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    entrypoint: ["/ssl-entrypoint.sh"]

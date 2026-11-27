@@ -125,6 +125,40 @@ def _demo_streets(city_ref: str, query: str, *, limit: int = 20) -> list[dict[st
     return rows[:limit]
 
 
+class NovaPoshtaError(Exception):
+    """Помилка API Нової пошти. Повідомлення безпечне для команди й логів."""
+
+
+def post_rows(model: str, method: str, props: dict[str, Any]) -> list[dict[str, Any]]:
+    """Як _post, але помилка мережі або success=false перериває синхронізацію."""
+    key = _api_key()
+    if not key:
+        raise NovaPoshtaError("NOVA_POSHTA_API_KEY is empty")
+    try:
+        response = requests.post(
+            API_URL,
+            json={
+                "apiKey": key,
+                "modelName": model,
+                "calledMethod": method,
+                "methodProperties": props,
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except (requests.RequestException, ValueError) as exc:
+        logger.warning("novaposhta %s/%s failed: %s", model, method, exc)
+        raise NovaPoshtaError("Нова пошта недоступна") from exc
+    if not payload.get("success"):
+        logger.warning("novaposhta %s/%s errors: %s", model, method, payload.get("errors"))
+        raise NovaPoshtaError("Нова пошта не прийняла запит")
+    data = payload.get("data") or []
+    if not isinstance(data, list):
+        raise NovaPoshtaError("Нова пошта повернула неочікувану відповідь")
+    return data
+
+
 def _post(model: str, method: str, props: dict[str, Any]) -> list[dict[str, Any]]:
     key = _api_key()
     if not key:

@@ -7,7 +7,7 @@
       {% include "partials/wishlist_btn.html" with product=product in_wishlist=False variant="nd" %}
     {% endif %}
   </div>
-  <a class="nd-card__link" href="{{ product.get_absolute_url }}">
+  <a class="nd-card__link" href="{{ product.storefront_url }}">
     <span class="nd-card__media">
       {% with media=product.card_media %}
         {% if media %}

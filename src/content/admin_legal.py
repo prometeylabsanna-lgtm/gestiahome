@@ -5,11 +5,9 @@ from django.urls import reverse
 from src.content.models_legal import LegalPage
 from src.content.proxies import CookiePolicyPage, OfferPage, PrivacyPolicyPage, ShippingPage
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_hints import LEGAL_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
-
-_BODY_HINT = "Розділи оформлюйте заголовком 2."
-_EN_HINT = "Якщо порожньо — на сайті лишається український текст."
 
 
 class LegalPageAdmin(GestiaModelAdmin):
@@ -48,13 +46,7 @@ class LegalPageAdmin(GestiaModelAdmin):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        if formfield is None:
-            return formfield
-        if db_field.name == "body_uk":
-            formfield.help_text = _BODY_HINT
-        elif db_field.name in {"body_en", "title_en"}:
-            formfield.help_text = _EN_HINT
-        return formfield
+        return apply_hints(formfield, db_field.name, LEGAL_HINTS, seo=True)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)

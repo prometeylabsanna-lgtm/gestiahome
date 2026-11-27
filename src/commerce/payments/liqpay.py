@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from src.commerce.models import Order
+from src.commerce.stock_hold import rehold_stock, release_held_stock
 
 logger = logging.getLogger(__name__)
 
@@ -106,9 +107,11 @@ def _sync_payment_fields(order: Order, locked: Order) -> None:
 
 
 def ensure_payment_ref(order: Order) -> str:
-    """Reuse payment_ref while awaiting/unpaid; after failed — new suffix + awaiting.
+    """Reuse payment_ref while awaiting. After failed, a new suffix and awaiting.
 
-    Runs under select_for_update. If paid after lock — leave unchanged (caller → thanks).
+    If the stock hold was already released, reserve the items again first.
+    No stock: stay failed and return an empty ref.
+    Runs under select_for_update. If paid after lock — leave unchanged.
     """
     with transaction.atomic():
         locked = Order.objects.select_for_update().get(pk=order.pk)
@@ -116,6 +119,11 @@ def ensure_payment_ref(order: Order) -> str:
             _sync_payment_fields(order, locked)
             return locked.payment_ref or ""
         if locked.payment_status == Order.PayStatus.FAILED:
+            if locked.stock_released and not locked.stock_held:
+                if not rehold_stock(locked):
+                    _sync_payment_fields(order, locked)
+                    return ""
+                locked.refresh_from_db()
             locked.payment_ref = _new_payment_ref(locked)
             locked.payment_status = Order.PayStatus.AWAITING
             locked.payment_raw_status = ""
@@ -140,6 +148,14 @@ def build_checkout(order: Order, request) -> dict:
             "data": "",
             "signature": "",
             "order": order,
+        }
+    if order.payment_status == Order.PayStatus.FAILED or not payment_ref:
+        return {
+            "checkout_url": CHECKOUT_URL,
+            "data": "",
+            "signature": "",
+            "order": order,
+            "stock_blocked": order.payment_status == Order.PayStatus.FAILED,
         }
     thanks_path = f"{reverse('thanks')}?kind=order&number={order.number}"
     callback_path = reverse("liqpay_callback")
@@ -277,6 +293,10 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
 
         # success / wait_compensation / sandbox: any attempt for this order number → paid
         if status in PAID_STATUSES or (status == "sandbox" and settings.LIQPAY_SANDBOX):
+            if order.stock_released and not order.stock_held:
+                if not rehold_stock(order):
+                    order.stock_short = True
+                    fields.append("stock_short")
             order.payment_status = Order.PayStatus.PAID
             order.paid_at = timezone.now()
             fields.extend(["payment_status", "paid_at"])
@@ -294,6 +314,7 @@ def handle_callback(data: str, signature: str) -> tuple[int, str]:
                 if txn:
                     order.payment_txn = txn[:64]
                     fields.append("payment_txn")
+                release_held_stock(order)
             order.save(update_fields=fields)
             return 200, "OK"
 

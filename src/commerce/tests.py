@@ -250,18 +250,13 @@ class CheckoutTests(TestCase):
         mocked.assert_called_once_with("ки", limit=12)
 
     @override_settings(NOVA_POSHTA_API_KEY="test-key")
-    @patch("src.commerce.novaposhta.warehouses_for_city")
-    def test_np_warehouses_by_city_ref(self, mocked):
-        mocked.return_value = [
-            {"ref": "w1", "label": "Відділення №1: вул. Хрещатик", "number": "1"}
-        ]
+    def test_np_warehouses_needs_query(self):
         response = self.client.get(
             "/zamovlennia/np/warehouses/",
             {"city_ref": "city-ref", "kind": "branch"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["items"]), 1)
-        mocked.assert_called_once_with("city-ref", kind="branch")
+        self.assertEqual(response.json()["items"], [])
 
     @override_settings(NOVA_POSHTA_API_KEY="", DEBUG=True)
     def test_np_streets_demo_mode(self):

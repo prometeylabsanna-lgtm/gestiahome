@@ -113,6 +113,9 @@ class SeoHeadTests(SeoFixture):
         self.assertContains(home, 'hreflang="x-default" href="http://testserver/"')
         self.assertNotContains(home, 'hreflang="ru"')
         self.assertContains(home, 'property="og:locale" content="uk_UA"')
+        french = self.client.get("/fr/")
+        self.assertContains(french, 'property="og:locale" content="fr_FR"')
+        self.assertContains(french, '"inLanguage":["uk-UA","en-US","fr-FR"]')
         self.assertContains(home, 'property="og:type" content="website"')
         self.assertContains(home, 'name="twitter:card" content="summary_large_image"')
         self.assertContains(home, 'property="og:image" content="http://testserver/')
@@ -341,10 +344,29 @@ class SeoCrawlTests(SeoFixture):
         self.assertContains(sitemap, "http://testserver/fr/tovar/seo-box/")
         self.assertContains(sitemap, "http://testserver/katalog/seo-cat/")
         self.assertNotContains(sitemap, "/katalog/seo-empty/")
+        empty = self.client.get("/katalog/seo-empty/")
+        self.assertContains(empty, 'name="robots" content="noindex,follow"')
 
     def test_llms_lists_active_categories_and_legacy_path_redirects(self):
-        Category.objects.create(slug="llms-boxes", name_uk="Бокси для столу", name_en="Table boxes", is_active=True)
+        boxes = Category.objects.create(
+            slug="llms-boxes",
+            name_uk="Бокси для столу",
+            name_en="Table boxes",
+            is_active=True,
+        )
+        Category.objects.create(slug="llms-empty", name_uk="Порожня полиця", is_active=True)
         Category.objects.create(slug="llms-hidden", name_uk="Прихована категорія", is_active=False)
+        Product.objects.create(
+            category=boxes,
+            sku="LLMS-1",
+            slug="llms-standalone",
+            name_uk="Окремий бокс",
+            name_en="Standalone box",
+            price_uah=Decimal("10.00"),
+            price_eur=Decimal("1.00"),
+            is_active=True,
+            stock_qty=1,
+        )
         page = self.client.get("/llms.txt")
         self.assertEqual(page.status_code, 200)
         self.assertIn("charset=utf-8", page["Content-Type"])
@@ -356,6 +378,10 @@ class SeoCrawlTests(SeoFixture):
         self.assertIn("http://testserver/fr/katalog/llms-boxes/", body)
         self.assertIn("Бокси для столу", body)
         self.assertIn("Table boxes", body)
+        self.assertIn("http://testserver/tovar/llms-standalone/", body)
+        self.assertIn("/fr/koshik/", body)
+        self.assertIn("http://testserver/fr/katalog/", body)
+        self.assertNotIn("llms-empty", body)
         self.assertNotIn("llms-hidden", body)
         self.assertNotIn("Прихована категорія", body)
         self.assertIn("http://testserver/dostavka-ta-oplata/", body)
@@ -364,10 +390,22 @@ class SeoCrawlTests(SeoFixture):
         self.assertIn("http://testserver/aktualni-pytannia/", body)
         self.assertIn("http://testserver/en/aktualni-pytannia/", body)
         self.assertIn("http://testserver/fr/aktualni-pytannia/", body)
+        linked = Product.objects.create(
+            category=boxes,
+            sku="LLMS-2",
+            slug="llms-linked",
+            name_uk="Прив’язаний бокс",
+            price_uah=Decimal("12.00"),
+            price_eur=Decimal("1.00"),
+            is_active=True,
+            stock_qty=1,
+        )
         HomeCollection.objects.create(
             slug="llms-col",
             title_uk="Квітка",
             title_en="Flower",
+            title_fr="Fleur",
+            product=linked,
             is_active=True,
         )
         HomeCollection.objects.create(slug="llms-hidden-col", title_uk="Прихована колекція", is_active=False)
@@ -378,6 +416,7 @@ class SeoCrawlTests(SeoFixture):
         self.assertIn("Квітка", listed)
         self.assertIn("Flower", listed)
         self.assertNotIn("llms-hidden-col", listed)
+        self.assertNotIn("/tovar/llms-linked/", listed)
         sitemap = self.client.get("/sitemap.xml").content.decode()
         self.assertIn("http://testserver/kolektsiia/llms-col/", sitemap)
         self.assertRegex(
@@ -429,6 +468,7 @@ class SeoStructuredDataTests(SeoFixture):
         self.assertIn("Organization", kinds)
         self.assertIn("WebSite", kinds)
         self.assertIn("https://schema.org/InStock", raw)
+        self.assertIn('"brand":{"@type":"Brand","name":"Gestia Home"}', raw)
         self.assertIn('"priceCurrency":"UAH"', raw)
         self.assertIn('"sku":"SEO-1"', raw)
         self.assertIn("http://testserver/tovar/seo-box/", raw)
@@ -437,3 +477,48 @@ class SeoStructuredDataTests(SeoFixture):
         sold_raw = sold.content.decode()
         self.assertIn("https://schema.org/OutOfStock", sold_raw)
         self.assertNotIn("https://schema.org/InStock", sold_raw)
+
+    def test_collection_landing_is_the_product_url(self):
+        HomeCollection.objects.create(
+            slug="seo-col",
+            title_uk="Квітка",
+            title_en="Flower",
+            title_fr="Fleur",
+            product=self.product,
+            is_active=True,
+        )
+        sitemap = self.client.get("/sitemap.xml").content.decode()
+        self.assertNotIn("/tovar/seo-box/", sitemap)
+        self.assertIn("http://testserver/kolektsiia/seo-col/", sitemap)
+        self.assertIn("/tovar/seo-out/", sitemap)
+        gone = self.client.get(self.product.get_absolute_url())
+        self.assertEqual(gone.status_code, 301)
+        self.assertEqual(gone["Location"], "/kolektsiia/seo-col/")
+
+        page = self.client.get("/kolektsiia/seo-col/")
+        self.assertContains(page, 'property="og:type" content="product"')
+        raw = page.content.decode()
+        self.assertNotIn("/tovar/seo-box/", raw)
+        payloads = _ld(page)
+        self.assertIn("Product", _types(payloads[0]))
+        self.assertIn("Offer", _types(payloads[0]))
+        self.assertIn("BreadcrumbList", _types(payloads[0]))
+        product = next(
+            node
+            for node in payloads[0]["@graph"]
+            if node.get("@type") == "Product"
+        )
+        self.assertEqual(product["url"], "http://testserver/kolektsiia/seo-col/")
+        self.assertEqual(product["name"], "Квітка")
+        self.assertEqual(product["offers"]["url"], "http://testserver/kolektsiia/seo-col/")
+        self.assertEqual(product["brand"]["name"], "Gestia Home")
+
+        self.assertContains(
+            self.client.get("/en/kolektsiia/seo-col/"),
+            "<title>Collection «Flower» — Gestia Home</title>",
+        )
+        self.assertContains(
+            self.client.get("/fr/kolektsiia/seo-col/"),
+            "<title>Collection «Fleur» — Gestia Home</title>",
+        )
+        self.assertContains(page, "<title>Колекція «Квітка» — Gestia Home</title>")

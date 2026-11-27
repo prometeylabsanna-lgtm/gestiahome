@@ -111,6 +111,9 @@ msgstr "«%(name)s» est actuellement indisponible. Retirez-le du panier."
 msgid "Товару «%(name)s» залишилось лише %(left)s шт."
 msgstr "Il ne reste que %(left)s pce de «%(name)s»."
 
+msgid "Цього товару вже немає в наявності, тож оплатити замовлення не вийде."
+msgstr "Cet article n’est plus en stock, le paiement de la commande est impossible."
+
 msgid "Поле обов'язкове для заповнення"
 msgstr "Ce champ est obligatoire"
 
@@ -943,6 +946,12 @@ msgstr "Ajouté : %(name)s"
 
 msgid "Додати %(name)s"
 msgstr "Ajouter %(name)s"
+
+msgid "Колекція «%(title)s» — Gestia Home"
+msgstr "Collection «%(title)s» — Gestia Home"
+
+msgid "Колекція «%(title)s». %(brand)s"
+msgstr "Collection «%(title)s». %(brand)s"
 
 #~ msgid "Знайти"
 #~ msgstr "Trouver"

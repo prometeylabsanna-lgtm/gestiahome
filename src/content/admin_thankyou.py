@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from src.content.proxies import ThankYouContact, ThankYouOrder
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_hints import THANKS_ORDER_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -56,7 +57,8 @@ class ThankYouOrderAdmin(_OpenSingleton):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=True)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, THANKS_ORDER_HINTS)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)

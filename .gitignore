@@ -8,6 +8,10 @@ __pycache__/
 /public/
 .env
 .env.local
+/backups/
+/deploy/data/*.json
+/deploy/data/*.tar.gz
+/deploy/data/*.sql.gz
 .DS_Store
 *.log
 /db.sqlite3.bak-*

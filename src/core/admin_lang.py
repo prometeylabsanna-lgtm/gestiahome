@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from src.core.admin_hints import EMPTY_LOCALE_HINT
+
 UK_TAB = "Українська"
 EN_TAB = "English"
 FR_TAB = "Français"
@@ -24,10 +26,14 @@ def language_tabs(*, uk_fields, en_fields, uk_description="", en_description="",
     if uk_description:
         uk["description"] = uk_description
     en = {"classes": ("tab",), "fields": tuple(en_fields)}
+    if not en_description and en_fields:
+        en_description = EMPTY_LOCALE_HINT
     if en_description:
         en["description"] = en_description
     fr_fields = tuple(_fr_name(name) for name in en_fields)
     fr = {"classes": ("tab",), "fields": fr_fields}
+    if not fr_description and fr_fields:
+        fr_description = EMPTY_LOCALE_HINT
     if fr_description:
         fr["description"] = fr_description
     return ((UK_TAB, uk), (EN_TAB, en), (FR_TAB, fr))

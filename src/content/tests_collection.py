@@ -137,6 +137,7 @@ class CollectionPageTests(TestCase):
         self.assertRedirects(
             page,
             reverse("collection", kwargs={"slug": "page-kvitka-dusha"}),
+            status_code=301,
         )
 
     def test_absolute_url_and_menu_point_to_collection(self):

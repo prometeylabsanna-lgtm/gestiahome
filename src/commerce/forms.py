@@ -1,6 +1,8 @@
+import re
 import secrets
 
 from django import forms
+from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 
 from src.commerce.models import Order
@@ -47,6 +49,12 @@ class ContactForm(NamePhoneMixin, ConsentForm):
         widget=forms.Textarea(attrs={"rows": 4}),
     )
 
+    def clean_message(self):
+        raw = self.cleaned_data.get("message") or ""
+        text = strip_tags(raw)
+        text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+        return text.strip()
+
 
 class CallbackForm(NamePhoneMixin, ConsentForm):
     name = forms.CharField(label=_("Ім'я"), max_length=120, error_messages=NAME_ERRORS.copy())
@@ -74,7 +82,11 @@ class BuyNowForm(NamePhoneMixin, ConsentForm):
 class CheckoutForm(NamePhoneMixin, ConsentForm):
     name = forms.CharField(label=_("Ім’я"), max_length=120, error_messages=NAME_ERRORS.copy())
     phone = forms.CharField(label=_("Номер телефону"), max_length=32, error_messages=PHONE_ERRORS.copy())
-    email = forms.EmailField(label=_("Email"), error_messages=EMAIL_ERRORS.copy())
+    email = forms.EmailField(
+        label=_("Email"),
+        max_length=254,
+        error_messages=EMAIL_ERRORS.copy(),
+    )
     delivery_method = forms.ChoiceField(
         label=_("Доставка"),
         choices=[
@@ -86,6 +98,8 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
     )
     city = forms.CharField(label=_("Місто"), max_length=120, required=False)
     branch = forms.CharField(label=_("Відділення"), max_length=255, required=False)
+    city_ref = forms.CharField(required=False, max_length=64, widget=forms.HiddenInput)
+    warehouse_ref = forms.CharField(required=False, max_length=64, widget=forms.HiddenInput)
     house = forms.CharField(label=_("Будинок"), max_length=24, required=False)
     apartment = forms.CharField(label=_("Квартира"), max_length=16, required=False)
     address = forms.CharField(label=_("Адреса доставки"), max_length=255, required=False)
@@ -138,6 +152,23 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
         branch = (cleaned.get("branch") or "").strip()
         house = (cleaned.get("house") or "").strip()
         apartment = (cleaned.get("apartment") or "").strip()
+        city_ref = (cleaned.get("city_ref") or "").strip()[:64]
+        warehouse_ref = (cleaned.get("warehouse_ref") or "").strip()[:64]
+        if method == Order.Delivery.COURIER:
+            warehouse_ref = ""
+        elif warehouse_ref:
+            from src.commerce.np_catalog import resolve_warehouse
+
+            kind = "locker" if method == Order.Delivery.LOCKER else "branch"
+            found = resolve_warehouse(warehouse_ref, kind=kind, city_ref=city_ref)
+            if found is None:
+                self.add_error("branch", _("Оберіть відділення зі списку"))
+            else:
+                warehouse_ref = found["ref"]
+                city_ref = found["city_ref"]
+                branch = found["label"][:255]
+                if found["city_name"]:
+                    city = found["city_name"][:120]
         if not address:
             if method == Order.Delivery.COURIER:
                 from src.content.ui_text import text
@@ -166,7 +197,11 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
             from src.content.ui_text import text
 
             self.add_error("city", text("msg_required"))
-        cleaned["address"] = address
+        cleaned["city"] = city
+        cleaned["branch"] = branch
+        cleaned["city_ref"] = city_ref
+        cleaned["warehouse_ref"] = warehouse_ref
+        cleaned["address"] = address[:255]
         return cleaned
 
 
@@ -202,6 +237,7 @@ def style_form(form):
                     "autocomplete": "name",
                     "autocapitalize": "words",
                     "spellcheck": "false",
+                    "maxlength": "120",
                     "pattern": NAME_PATTERN,
                 }
             )

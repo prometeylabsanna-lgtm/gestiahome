@@ -430,11 +430,9 @@ class HomeCollection(models.Model):
 
     @property
     def seo_title(self):
-        value = localized(self, "seo_title")
-        if value:
-            return value
-        title = " ".join((self.title or "").split())
-        return f"Колекція «{title}» — Gestia Home"
+        from src.core.seo import collection_meta_title
+
+        return collection_meta_title(self)
 
     @property
     def seo_description(self):

@@ -1,3 +1,6 @@
+from src.core.admin_hints import SLUG_AUTO
+
+
 class SlugAdminMixin:
     """Новий запис: слаг можна лишити порожнім. Існуючий слаг лише для перегляду."""
 
@@ -18,7 +21,7 @@ class SlugAdminMixin:
         if self.auto_slug and db_field.name == "slug" and formfield is not None:
             formfield.required = False
             if not formfield.help_text:
-                formfield.help_text = "Якщо порожньо — створиться з назви."
+                formfield.help_text = SLUG_AUTO
         return formfield
 
     def get_form(self, request, obj=None, **kwargs):
@@ -46,7 +49,15 @@ class SlugAdminMixin:
                     extra_filter=extra,
                 )
 
+        set_form_help(AutoSlugForm, "slug", SLUG_AUTO)
         return AutoSlugForm
+
+
+def set_form_help(form_class, name: str, text: str) -> None:
+    """Readonly fields read help from the form meta, not from the widget."""
+    help_texts = dict(form_class._meta.help_texts or {})
+    help_texts[name] = text
+    form_class._meta.help_texts = help_texts
 
 
 def _has_slug(obj) -> bool:

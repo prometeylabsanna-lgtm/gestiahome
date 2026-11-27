@@ -6,6 +6,7 @@ from src.content.colors import TOKEN_ACCENT, TOKEN_CHROME, TOKEN_INK, TOKEN_PAPE
 from src.content.models_styles import FONT_INTER, GlobalPageStyle, PageStyle
 from src.core.admin_base import GestiaModelAdmin
 from src.core.admin_color import GestiaColorWidget
+from src.core.admin_hints import FONT_FAMILY, TEXT_COLOR
 
 _COLOR_DEFAULTS = {
     "background_color": TOKEN_PAPER,
@@ -63,10 +64,12 @@ class GlobalPageStyleAdmin(GestiaModelAdmin):
             formfield.help_text = "Тло сторінок сайту."
         elif db_field.name == "chrome_background_color":
             formfield.help_text = "Спільний фон шапки і підвалу."
+        elif db_field.name == "text_color":
+            formfield.help_text = TEXT_COLOR
         elif db_field.name == "hover_color":
             formfield.help_text = "Підсвітка посилань і кнопок."
         elif db_field.name == "font_family":
-            formfield.help_text = "Inter — як у макеті; System UI — системний; Georgia — із зарубками."
+            formfield.help_text = FONT_FAMILY
         return formfield
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):

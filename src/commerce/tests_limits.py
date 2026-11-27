@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.test import TestCase, override_settings
 
 from src.catalog.models import Category, Product
-from src.commerce.forms import CallbackForm, ContactForm, style_form
+from src.commerce.forms import CallbackForm, CheckoutForm, ContactForm, style_form
 from src.commerce.models import Inquiry
 from src.commerce.services import create_inquiry
 
@@ -47,6 +47,22 @@ class FieldLimitTests(TestCase):
     def test_message_field_renders_maxlength(self):
         form = style_form(ContactForm())
         self.assertEqual(form.fields["message"].widget.attrs["maxlength"], "2000")
+        self.assertEqual(form.fields["name"].widget.attrs["maxlength"], "120")
+
+    def test_message_strips_html_and_controls(self):
+        form = ContactForm(
+            data={
+                "name": "Оля",
+                "phone": "+380671112233",
+                "message": "  Привіт <b>світ</b>\x07<script>alert(1)</script>\n",
+                "consent": "on",
+            }
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["message"], "Привіт світalert(1)")
+
+    def test_email_max_length_is_254(self):
+        self.assertEqual(CheckoutForm().fields["email"].max_length, 254)
 
     def test_callback_sku_over_64_is_rejected(self):
         form = CallbackForm(

@@ -1,6 +1,7 @@
 from django.db.models import Prefetch
 
 from src.catalog.models import Product, ProductImage
+from src.catalog.storefront import prefetch_public_collections
 
 SESSION_KEY = "wishlist"
 MAX_ITEMS = 99
@@ -67,7 +68,10 @@ def products(request):
         return []
     found = (
         Product.objects.filter(sku__in=skus, is_active=True)
-        .prefetch_related(Prefetch("images", queryset=ProductImage.objects.order_by("sort", "id")))
+        .prefetch_related(
+            Prefetch("images", queryset=ProductImage.objects.order_by("sort", "id")),
+            prefetch_public_collections(),
+        )
     )
     by_sku = {product.sku: product for product in found}
     return [by_sku[sku] for sku in skus if sku in by_sku]

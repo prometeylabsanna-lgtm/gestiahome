@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from src.catalog.models import Product
+from src.catalog.storefront import storefront_url
 from src.commerce.cart import add, clear, lines, set_qty, signature
 from src.commerce.cart_panel import cart_body_context, currency_of, render_panel
 from src.commerce import payments
@@ -23,6 +24,7 @@ from src.commerce.forms import (
 )
 from src.commerce.models import Inquiry, Order
 from src.commerce import novaposhta
+from src.commerce import np_catalog
 from src.commerce.services import (
     OrderValidationError,
     create_inquiry,
@@ -32,6 +34,7 @@ from src.commerce.services import (
     row_from_product,
     unavailable_message,
 )
+from src.commerce.stock_hold import release_expired_holds
 from src.content.form_labels import label_form
 from src.core.i18n import safe_next
 from src.core.ratelimit import honeypot_filled, is_rate_limited, reject_if_limited
@@ -138,6 +141,8 @@ def _customer(form):
         "delivery_method": form.cleaned_data["delivery_method"],
         "address": form.cleaned_data["address"],
         "payment_method": form.cleaned_data["payment_method"],
+        "np_city_ref": form.cleaned_data.get("city_ref") or "",
+        "np_warehouse_ref": form.cleaned_data.get("warehouse_ref") or "",
     }
 
 
@@ -218,6 +223,7 @@ def _checkout_render(request, form, rows, total, currency, notice=""):
 
 @never_cache
 def cart_page(request):
+    release_expired_holds()
     currency = _currency(request)
     rows, total = lines(request, currency)
     notice = _joined_notice(_take_cart_flash(request), _cart_notice(request, rows))
@@ -228,6 +234,7 @@ def cart_page(request):
 
 
 def checkout(request):
+    release_expired_holds()
     currency = _currency(request)
     card_ok = payments.card_enabled(currency)
     if request.method == "POST" and honeypot_filled(request):
@@ -286,9 +293,11 @@ def np_cities(request):
     query = (request.GET.get("q") or "").strip()
     if len(query) < 2:
         return JsonResponse({"items": []})
-    if not novaposhta.configured() and not novaposhta.demo_mode():
-        return JsonResponse({"items": [], "error": "not_configured"}, status=503)
-    return JsonResponse({"items": novaposhta.search_cities(query, limit=12)})
+    if np_catalog.has_cities():
+        items = np_catalog.search_cities(query, limit=12)
+    else:
+        items = novaposhta.search_cities(query, limit=12)
+    return JsonResponse({"items": items})
 
 
 @require_GET
@@ -299,18 +308,10 @@ def np_warehouses(request):
     query = (request.GET.get("q") or "").strip()
     city_ref = (request.GET.get("city_ref") or "").strip()
     kind = "locker" if request.GET.get("kind") == "locker" else "branch"
-    if not novaposhta.configured() and not novaposhta.demo_mode():
-        return JsonResponse(
-            {"city": "", "city_ref": "", "items": [], "cities": [], "error": "not_configured"},
-            status=503,
-        )
-    if city_ref:
-        items = novaposhta.warehouses_for_city(city_ref, kind=kind)
-        return JsonResponse({"city": "", "city_ref": city_ref, "items": items, "cities": []})
     if len(query) < 2:
-        return JsonResponse({"city": "", "city_ref": "", "items": [], "cities": []})
-    payload = novaposhta.find_warehouses(query, kind=kind)
-    return JsonResponse(payload)
+        return JsonResponse({"items": []})
+    items = np_catalog.search_warehouses(query, city_ref=city_ref, kind=kind, limit=30)
+    return JsonResponse({"items": items})
 
 
 @require_GET
@@ -370,7 +371,7 @@ def thanks(request):
 @never_cache
 @require_GET
 def order_pay(request, number):
-    # Session-gated retry link (GET). Failed → awaiting + new payment_ref via ensure_payment_ref.
+    # Session-gated retry. Failed with stock → new payment_ref. Without stock → no LiqPay form.
     done = request.session.get("orders_done")
     if not isinstance(done, list) or number not in done:
         return HttpResponseRedirect(f"{reverse('thanks')}?kind=order")
@@ -382,6 +383,7 @@ def order_pay(request, number):
     payload = payments.build_checkout(order, request)
     if order.payment_status == Order.PayStatus.PAID:
         return HttpResponseRedirect(f"{reverse('thanks')}?kind=order&number={order.number}")
+    blocked = bool(payload.get("stock_blocked"))
     return render(
         request,
         "commerce/pay.html",
@@ -390,6 +392,12 @@ def order_pay(request, number):
             "checkout_url": payload["checkout_url"],
             "data": payload["data"],
             "signature": payload["signature"],
+            "pay_blocked": blocked,
+            "pay_error": (
+                _("Цього товару вже немає в наявності, тож оплатити замовлення не вийде.")
+                if blocked
+                else ""
+            ),
         },
     )
 
@@ -447,7 +455,7 @@ def wishlist_toggle(request):
                 "wishlist_count": wish.item_count(request),
             },
         )
-    next_url = safe_next(request.POST.get("next") or product.get_absolute_url())
+    next_url = safe_next(request.POST.get("next") or storefront_url(product))
     return HttpResponseRedirect(next_url)
 
 
@@ -482,6 +490,7 @@ def wishlist_remove(request):
 @never_cache
 @require_POST
 def cart_add(request):
+    release_expired_holds()
     if is_rate_limited(request, "cart"):
         return HttpResponse(status=429)
     product = get_object_or_404(Product, sku=request.POST.get("sku", ""), is_active=True)
@@ -504,7 +513,7 @@ def cart_add(request):
         )
         response["HX-Trigger"] = json.dumps({"nd:cart-added": {"sku": product.sku}})
         return response
-    return HttpResponseRedirect(product.get_absolute_url())
+    return HttpResponseRedirect(storefront_url(product))
 
 
 def sum_count(request):
@@ -523,6 +532,7 @@ def cart_panel(request):
 @never_cache
 @require_POST
 def cart_update(request):
+    release_expired_holds()
     if is_rate_limited(request, "cart"):
         return HttpResponse(status=429)
     sku = request.POST.get("sku", "")
@@ -572,6 +582,7 @@ def callback(request):
 
 @require_POST
 def buy_now(request):
+    release_expired_holds()
     if honeypot_filled(request):
         return _pretend_order_thanks(request)
     existing = _order_by_idem(request.POST.get("idem"))

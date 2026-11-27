@@ -5,6 +5,7 @@ from django.db.models import Func, Prefetch, Q, TextField
 from django.db.models.functions import Lower
 
 from src.catalog.models import CatalogCell, Category, Product, ProductAttributeGroup, ProductImage
+from src.catalog.storefront import prefetch_public_collections
 
 ATTRIBUTE_FILTER_KEYS = (
     ProductAttributeGroup.Slug.STYLE,
@@ -25,7 +26,7 @@ def base_products():
     return (
         Product.objects.filter(is_active=True)
         .select_related("category", "category__parent", "product_set")
-        .prefetch_related(_ordered_images(), "filter_attrs__group")
+        .prefetch_related(_ordered_images(), "filter_attrs__group", prefetch_public_collections())
     )
 
 
@@ -154,7 +155,7 @@ def _cells(surface):
     return (
         CatalogCell.objects.filter(surface=surface)
         .select_related("product", "product__category")
-        .prefetch_related("product__images")
+        .prefetch_related("product__images", prefetch_public_collections("product__home_collections_as_main"))
         .order_by("sort", "band", "id")
     )
 

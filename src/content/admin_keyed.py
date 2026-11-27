@@ -5,6 +5,7 @@ from django.urls import reverse
 from src.content.admin_limits import tighten
 from src.content.models import HomeBlock
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_hints import seo_hint
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
 VIDEO_HINT = "MP4 або WEBM."
@@ -16,6 +17,8 @@ class KeyedBlockAdmin(GestiaModelAdmin):
     default_sort = 0
     text_limits = {}
     image_hints = {}
+    field_hints = {}
+    seo_hints = False
     tiny_fields = _TINY
 
     def get_queryset(self, request):
@@ -41,19 +44,28 @@ class KeyedBlockAdmin(GestiaModelAdmin):
         obj.key = self.block_key
         super().save_model(request, obj, form, change)
 
+    def _hint_for(self, name):
+        if name == "video":
+            return VIDEO_HINT
+        hint = self.image_hints.get(name) or self.field_hints.get(name) or ""
+        if not hint and self.seo_hints:
+            return seo_hint(name)
+        return hint
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=True)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        hint = self.image_hints.get(db_field.name, "")
-        if db_field.name == "video":
-            hint = VIDEO_HINT
-        return tighten(formfield, self.text_limits.get(db_field.name), hint)
+        return tighten(formfield, self.text_limits.get(db_field.name), self._hint_for(db_field.name))
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
         force_tinymce(form, self.tiny_fields, short=True)
         for name, limit in self.text_limits.items():
             if name in form.base_fields:
-                tighten(form.base_fields[name], limit)
+                tighten(form.base_fields[name], limit, self._hint_for(name))
+        for name, field in form.base_fields.items():
+            hint = self._hint_for(name)
+            if hint:
+                field.help_text = hint
         return form

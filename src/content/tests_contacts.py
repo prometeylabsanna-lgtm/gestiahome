@@ -47,7 +47,8 @@ class ContactsPageTests(TestCase):
         self.assertIn("hello@gestia-shop.com.ua", main)
         self.assertIn("Київ, майстерня Gestia", main)
         self.assertIn("https://www.pinterest.com/gestia/", main)
-        self.assertIn("https://www.instagram.com/", main)
+        self.assertNotIn("https://www.instagram.com/", main)
+        self.assertNotIn("https://t.me/", main)
         self.assertNotIn("форма для питань", main)
         self.assertNotIn("https://www.instagram.com/", html.split('application/ld+json">', 1)[1].split("</script>", 1)[0])
         self.assertIn("Зв'язатись з нами", html.replace("&#x27;", "'"))
@@ -59,8 +60,8 @@ class ContactsPageTests(TestCase):
         _save_site(phone="+380000000000", email="editor@example.com", address_uk="", instagram_url="")
         page = self.client.get("/kontakty/")
         main = page.content.decode().split("<main", 1)[1].split("</main>", 1)[0]
-        self.assertIn("+380000000000", main)
-        self.assertIn("editor@example.com", main)
+        self.assertNotIn("+380000000000", main)
+        self.assertNotIn("editor@example.com", main)
         self.assertNotIn(">Адреса<", main)
 
     def test_sitemap_robots_and_llms_include_the_page(self):

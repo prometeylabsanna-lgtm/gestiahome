@@ -19,8 +19,9 @@ from src.catalog.models import (
     ProductImage,
 )
 from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline
+from src.core.admin_hints import ATTRIBUTE_HINTS, CATEGORY_HINTS, GROUP_HINTS, PRODUCT_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
-from src.core.admin_slug import SlugAdminMixin
+from src.core.admin_slug import SlugAdminMixin, set_form_help
 
 HIDDEN_CATEGORY_SLUGS = ("kolektsiini-dodatky",)
 GALLERY_HINT = "1272×1540 px. JPG або PNG."
@@ -85,6 +86,10 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         en_fields=("name_en", "seo_title_en", "seo_description_en"),
     )
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, CATEGORY_HINTS)
+
     def get_queryset(self, request):
         return super().get_queryset(request).exclude(slug__in=HIDDEN_CATEGORY_SLUGS)
 
@@ -100,6 +105,15 @@ class ProductAttributeGroupAdmin(SlugAdminMixin, GestiaModelAdmin):
         uk_description="Нова група (наприклад «Розмір») з’явиться окремим полем у вкладці «Фільтри» товару.",
     )
     readonly_fields = ("value_links",)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, GROUP_HINTS)
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        set_form_help(form, "slug", GROUP_HINTS["slug"])
+        return form
 
     @admin.display(description="Значення")
     def value_links(self, obj):
@@ -149,7 +163,7 @@ class ProductAttributeAdmin(SlugAdminMixin, GestiaModelAdmin):
             formfield.widget.attrs["max"] = "999"
             classes = formfield.widget.attrs.get("class", "")
             formfield.widget.attrs["class"] = f"{classes} gestia-sort".strip()
-        return formfield
+        return apply_hints(formfield, db_field.name, ATTRIBUTE_HINTS)
 
     def response_add(self, request, obj, post_url_continue=None):
         redirect = self._group_redirect(request, obj)
@@ -269,7 +283,8 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, PRODUCT_HINTS)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         fields = kwargs.get("fields")

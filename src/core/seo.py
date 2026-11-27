@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 
 from django.conf import settings
 from django.templatetags.static import static
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext
 
 from src.core.utils import localized
 
@@ -55,6 +55,7 @@ _RASTER = {
     ".webp": "image/webp",
 }
 BRAND = "Gestia Home"
+_OG_LOCALES = {"uk": "uk_UA", "en": "en_US", "fr": "fr_FR"}
 _RESERVED_EMAIL_DOMAINS = ("example.com", "example.org", "example.net")
 _FAKE_EMAIL_SUFFIXES = (".local", ".example", ".test")
 _EMPTY_CONTACTS = {
@@ -133,9 +134,22 @@ def collection_meta_description(collection) -> str:
     title = plain_text(localized(collection, "title"))
     if not title:
         return BRAND
-    if _language() == "en":
-        return f"Collection «{title}». {BRAND}"
-    return f"Колекція «{title}». {BRAND}"
+    return gettext("Колекція «%(title)s». %(brand)s") % {
+        "title": title.replace("%", "%%"),
+        "brand": BRAND,
+    }
+
+
+def collection_meta_title(collection) -> str:
+    custom = plain_text(localized(collection, "seo_title"))
+    if custom:
+        return custom
+    title = plain_text(localized(collection, "title"))
+    if not title:
+        return BRAND
+    return gettext("Колекція «%(title)s» — Gestia Home") % {
+        "title": title.replace("%", "%%"),
+    }
 
 
 def configured_origin() -> tuple[str, str] | None:
@@ -241,8 +255,9 @@ def build_head(request, site=None) -> dict:
         "canonical": canonical,
         "robots": robots,
         "alternates": _alternates(request, query) if indexable else [],
-        "og_type": "product" if url_name == "product" else "website",
-        "og_locale": "en_US" if _language() == "en" else "uk_UA",
+        "og_type": getattr(request, "seo_og_type", "")
+        or ("product" if url_name == "product" else "website"),
+        "og_locale": _OG_LOCALES.get(_language(), "uk_UA"),
         "image": _default_image(request, site),
         "indexable": indexable,
     }
@@ -466,7 +481,7 @@ def public_contacts() -> dict:
         email = ""
     address = " ".join(str(getattr(site, "address", "") or "").split())
     addresses = []
-    for code in ("uk", "en"):
+    for code in ("uk", "en", "fr"):
         text = " ".join(str(getattr(site, f"address_{code}", "") or "").split())
         if text and text not in addresses:
             addresses.append(text)

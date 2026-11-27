@@ -9,6 +9,7 @@ from django.utils.translation import get_language, gettext as _
 from src.catalog.models import Product
 from src.commerce.models import Inquiry, Order, OrderItem
 from src.commerce.notify import notify_inquiry, notify_order
+from src.commerce.stock_hold import apply_new_hold
 
 NUMBER_ATTEMPTS = 5
 
@@ -116,6 +117,8 @@ def _insert_order(*, source, customer, currency, language, total, idempotency_ke
                     currency=currency,
                     delivery_method=customer["delivery_method"],
                     delivery_address=customer["address"],
+                    np_city_ref=customer.get("np_city_ref") or "",
+                    np_warehouse_ref=customer.get("np_warehouse_ref") or "",
                     payment_method=customer["payment_method"],
                     payment_status=_pay_status(customer["payment_method"]),
                     total=total,
@@ -163,6 +166,7 @@ def create_order(*, source, customer, rows, currency, language, idempotency_key=
         ]
     )
     _take_stock(priced)
+    apply_new_hold(order, customer["payment_method"])
     order_id = order.pk
     transaction.on_commit(lambda oid=order_id: notify_order(oid))
     return order

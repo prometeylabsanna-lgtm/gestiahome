@@ -100,9 +100,13 @@ def _collection_addons(collection):
         .order_by("id")
         .values_list("product_id", flat=True)
     )
+    from src.catalog.storefront import prefetch_public_collections
+
     products = {
         product.pk: product
-        for product in collection.addons.filter(is_active=True, pk__in=ordered_ids)
+        for product in collection.addons.filter(is_active=True, pk__in=ordered_ids).prefetch_related(
+            prefetch_public_collections()
+        )
     }
     return [products[pk] for pk in ordered_ids if pk in products]
 
@@ -138,6 +142,8 @@ def collection_detail(request, slug):
         .order_by("group__sort", "sort", "id")
         .first()
     )
+    if collection.product_id and collection.product.is_active:
+        request.seo_og_type = "product"
     return render(
         request,
         "content/collection.html",
@@ -189,6 +195,7 @@ def _tel_href(phone: str) -> str:
 
 def _contacts_nap():
     from src.content.models import SiteSettings
+    from src.core.seo import is_placeholder_contact, public_profile_url
     from src.core.utils import localized
 
     site = SiteSettings.load()
@@ -198,14 +205,19 @@ def _contacts_nap():
         ("Pinterest", "pinterest_url"),
         ("Telegram", "telegram_url"),
     ):
-        href = " ".join(str(getattr(site, attr, "") or "").split())
+        href = public_profile_url(getattr(site, attr, ""))
         if href:
             socials.append({"label": label, "href": href})
-    phone = " ".join(str(site.phone or "").split()) or "+380 00 000 00 00"
+    phone = " ".join(str(site.phone or "").split())
+    if is_placeholder_contact(phone, "phone"):
+        phone = ""
+    email = " ".join(str(site.email or "").split())
+    if is_placeholder_contact(email, "email"):
+        email = ""
     return {
         "phone": phone,
-        "phone_href": _tel_href(phone),
-        "email": " ".join(str(site.email or "").split()),
+        "phone_href": _tel_href(phone) if phone else "",
+        "email": email,
         "address": " ".join(str(localized(site, "address") or "").split()),
         "socials": socials,
     }

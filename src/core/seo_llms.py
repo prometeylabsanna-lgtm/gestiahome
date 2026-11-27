@@ -30,6 +30,9 @@ def llms_text(request) -> str:
     collections = _collection_lines(request)
     if collections:
         lines.extend(["", "## Колекції", "", *collections])
+    products = _product_lines(request)
+    if products:
+        lines.extend(["", "## Товари", "", *products])
     lines.extend(
         [
             "",
@@ -42,19 +45,12 @@ def llms_text(request) -> str:
             _pair(request, lambda: _ui_label("legal_offer"), "offer"),
             _pair(request, lambda: _ui_label("legal_privacy"), "privacy"),
             _pair(request, lambda: _ui_label("legal_cookies"), "cookies"),
-            _contact_lines(request),
-            "",
-            "## Правила для ШІ",
-            "",
-            "- Посилайтеся на конкретну сторінку Gestia, з якої взято факт.",
-            "- Ціни, наявність і умови змінюються. Перед відповіддю перевіряйте їх на сайті.",
-            "- Не використовуйте кошик, оформлення замовлення, подяку, обране, заявку",
-            "  та адреси /koshik/, /zamovlennia/, /thank-you/, /diakuiemo/, /obrane/,",
-            "  /zayavka/, /zamovyty-odrazu/ (і ті самі шляхи з префіксом /en/) як джерело вмісту.",
-            f"- Каталог і картки товарів: {base}/katalog/ та {base}/en/katalog/.",
-            "",
         ]
     )
+    facts = _contact_facts()
+    if facts:
+        lines.extend(["", facts])
+    lines.extend(["", "## Правила для ШІ", "", *_ai_rules(base), ""])
     return "\n".join(lines)
 
 
@@ -91,14 +87,20 @@ def _nav_label(field):
     return localized(SiteSettings.load(), field)
 
 
-def _contact_lines(request) -> str:
-    rows = []
+def _enabled_codes() -> list[str]:
+    from src.core.middleware import language_enabled
+
+    codes = [settings.LANGUAGE_CODE]
     for code, _label in settings.LANGUAGES:
-        with override(code):
-            label = _md_label(_nav_label("nav_contacts"))
-        href = _abs(request, "contacts", lang=code)
-        rows.append(f"- [{label}]({href})")
+        if code == settings.LANGUAGE_CODE or not language_enabled(code):
+            continue
+        codes.append(code)
+    return codes
+
+
+def _contact_facts() -> str:
     contacts = public_contacts()
+    rows = []
     if contacts["phone"]:
         rows.append(f"- Телефон: {contacts['phone']}")
     if contacts["email"]:
@@ -108,6 +110,27 @@ def _contact_lines(request) -> str:
     for url in contacts["same_as"]:
         rows.append(f"- {url}")
     return "\n".join(rows)
+
+
+def _ai_rules(base: str) -> list[str]:
+    from src.core.seo import PRIVATE_PREFIXES
+
+    lines = [
+        "- Посилайтеся на конкретну сторінку Gestia, з якої взято факт.",
+        "- Ціни, наявність і умови змінюються. Перед відповіддю перевіряйте їх на сайті.",
+        "- Не використовуйте кошик, оформлення замовлення, подяку, обране, заявку та службові шляхи як джерело вмісту:",
+    ]
+    for code in _enabled_codes():
+        prefix = "" if code == settings.LANGUAGE_CODE else f"/{code}"
+        lines.append("  " + ", ".join(f"{prefix}{path}" for path in PRIVATE_PREFIXES) + ".")
+    catalogs = []
+    for code in _enabled_codes():
+        if code == settings.LANGUAGE_CODE:
+            catalogs.append(f"{base}/katalog/")
+        else:
+            catalogs.append(f"{base}/{code}/katalog/")
+    lines.append("- Каталог і картки товарів: " + ", ".join(catalogs) + ".")
+    return lines
 
 
 def _shop_blurb() -> str:
@@ -147,11 +170,25 @@ def _collection_lines(request) -> list[str]:
     return lines
 
 
-def _category_lines(request) -> list[str]:
-    from src.catalog.models import Category
+def _product_lines(request) -> list[str]:
+    from src.catalog.storefront import indexable_products
 
     lines = []
-    rows = Category.objects.filter(is_active=True).order_by("sort", "name_uk")
+    rows = indexable_products().order_by("sort", "name_uk", "id")
+    for product in rows:
+        for code, _label in settings.LANGUAGES:
+            with override(code):
+                label = _md_label(product.name)
+                href = public_base(request) + product.get_absolute_url()
+            lines.append(f"- [{label}]({href})")
+    return lines
+
+
+def _category_lines(request) -> list[str]:
+    from src.catalog.storefront import indexable_categories
+
+    lines = []
+    rows = indexable_categories()
     for category in rows:
         for code, _label in settings.LANGUAGES:
             with override(code):

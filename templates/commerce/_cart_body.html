@@ -27,7 +27,7 @@
             <div class="nd-cart__item-body">
               <div class="nd-cart__item-top">
                 <h2 class="nd-cart__name">
-                  <a href="{{ row.product.get_absolute_url }}">{{ row.product.name }}</a>
+                  <a href="{{ row.product.storefront_url }}">{{ row.product.name }}</a>
                 </h2>
                 <span class="nd-cart__line">{% line_uah row.line_total %}</span>
               </div>

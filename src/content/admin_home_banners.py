@@ -5,6 +5,7 @@ from django.contrib import admin
 from src.content.admin_keyed import KeyedBlockAdmin
 from src.content.models import HomeBlock
 from src.content.proxies import HomeBannerMedia, HomeBannerText
+from src.core.admin_hints import BANNER_TEXT_HINTS
 from src.core.admin_lang import language_tabs
 
 PHOTO_DESK = "1442×871 px. Одна картинка для десктопу і мобільного. JPG або PNG."
@@ -34,6 +35,8 @@ class HomeBannerTextAdmin(KeyedBlockAdmin):
     block_key = HomeBlock.Key.HERO
     default_sort = 1
     tiny_fields = ("text_uk", "text_en", "text_fr")
+    field_hints = BANNER_TEXT_HINTS
+    seo_hints = True
     text_limits = {
         "title_uk": 64,
         "title_en": 64,

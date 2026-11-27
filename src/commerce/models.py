@@ -2,6 +2,16 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from src.catalog.models import Product
+from src.commerce.np_models import NovaPoshtaCity, NovaPoshtaSyncState, NovaPoshtaWarehouse
+
+__all__ = [
+    "Inquiry",
+    "NovaPoshtaCity",
+    "NovaPoshtaSyncState",
+    "NovaPoshtaWarehouse",
+    "Order",
+    "OrderItem",
+]
 
 
 class Order(models.Model):
@@ -40,6 +50,8 @@ class Order(models.Model):
     currency = models.CharField("Валюта", max_length=8, default="uah")
     delivery_method = models.CharField("Доставка", max_length=16, choices=Delivery.choices)
     delivery_address = models.CharField("Адреса", max_length=255)
+    np_city_ref = models.CharField("Місто НП", max_length=64, blank=True, default="")
+    np_warehouse_ref = models.CharField("Відділення НП", max_length=64, blank=True, default="")
     payment_method = models.CharField("Оплата", max_length=16, choices=Payment.choices)
     payment_status = models.CharField(
         "Стан оплати",
@@ -57,6 +69,10 @@ class Order(models.Model):
     payment_txn = models.CharField("LiqPay payment_id", max_length=64, blank=True, default="")
     payment_raw_status = models.CharField("LiqPay status", max_length=64, blank=True, default="")
     paid_at = models.DateTimeField("Оплачено о", null=True, blank=True)
+    stock_held = models.BooleanField("Залишок у резерві", default=False)
+    stock_released = models.BooleanField("Резерв знято", default=False)
+    hold_until = models.DateTimeField("Резерв до", null=True, blank=True)
+    stock_short = models.BooleanField("Оплачено без залишку", default=False)
     total = models.DecimalField("Сума", max_digits=12, decimal_places=2)
     consent = models.BooleanField("Згода", default=False)
     created_at = models.DateTimeField("Створено", auto_now_add=True)
@@ -67,6 +83,9 @@ class Order(models.Model):
         verbose_name_plural = "Замовлення"
         permissions = [
             ("confirm_payment_manually", "Підтвердити оплату вручну"),
+        ]
+        indexes = [
+            models.Index(fields=["payment_status", "hold_until"]),
         ]
 
     def __str__(self):

@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = (
         "Створює або оновлює суперкористувача з "
         "DJANGO_SUPERUSER_USERNAME / EMAIL / PASSWORD. "
-        "На Vercel demo викликається на cold start, якщо змінні задані."
+        "Лише для локальної демо-бази. На Droplet суперкористувача створюй через createsuperuser."
     )
 
     def handle(self, *args, **options):

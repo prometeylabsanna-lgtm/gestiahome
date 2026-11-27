@@ -25,8 +25,13 @@
       {% endif %}
       <h1 class="nd-thanks__title" id="pay-title">{% ui "pay_title" %}</h1>
       <div class="nd-thanks__text">
-        <p>{% ui "pay_lead" number=order.number %}</p>
+        {% if pay_blocked %}
+          <p role="alert">{{ pay_error }}</p>
+        {% else %}
+          <p>{% ui "pay_lead" number=order.number %}</p>
+        {% endif %}
       </div>
+      {% if not pay_blocked %}
       <form
         class="nd-thanks__pay-form"
         method="post"
@@ -38,6 +43,7 @@
         <input type="hidden" name="signature" value="{{ signature }}">
         <button class="nd-thanks__link" type="submit">{% ui "pay_go" %}</button>
       </form>
+      {% endif %}
     </section>
   </div>
 {% endblock %}

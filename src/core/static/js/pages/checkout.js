@@ -27,25 +27,17 @@ function isCourier() {
   return deliveryMethodValue() === "np_courier";
 }
 
-function splitStreetQuery(query) {
-  const raw = (query || "").trim();
-  const match = raw.match(
-    /^(.+?)(?:,|\s)+(\d+[А-Яа-яA-Za-z]?(?:[/\-]\d+[А-Яа-яA-Za-z]?)?)\s*$/u
-  );
-  if (!match) {
-    return { street: raw, house: "" };
-  }
-  return { street: match[1].trim(), house: match[2].trim() };
-}
-
 function initNpShip() {
   const root = document.querySelector("[data-np-ship]");
-  if (!root) {
+  if (!root || !window.gestiaSuggest) {
     return;
   }
 
   const cityInput = root.querySelector("[data-np-city]");
   const branchInput = root.querySelector("[data-np-branch]");
+  const cityRefInput = root.querySelector("[data-np-city-ref]");
+  const warehouseRefInput = root.querySelector("[data-np-warehouse-ref]");
+  const clearButton = root.querySelector("[data-np-clear]");
   const houseWrap = root.querySelector("[data-np-house]");
   const houseInput = root.querySelector("[data-np-house-input]");
   const aptWrap = root.querySelector("[data-np-apt]");
@@ -79,13 +71,45 @@ function initNpShip() {
     streetFormat: root.dataset.hintStreetFormat || "",
   };
   let cityTimer = 0;
+  let branchTimer = 0;
   let streetTimer = 0;
   let cityRequest = 0;
   let branchRequest = 0;
   let streetRequest = 0;
-  let cityRef = "";
-  let warehouses = [];
+  let cityRef = cityRefInput ? cityRefInput.value.trim() : "";
   let manualMode = false;
+
+  const citySuggest = window.gestiaSuggest.bind(cityList, cityInput);
+  const branchSuggest = window.gestiaSuggest.bind(branchList, branchInput, {
+    onEscape: function () {
+      setWarehouseRef("");
+    },
+  });
+
+  function setCityRef(value) {
+    cityRef = value || "";
+    if (cityRefInput) {
+      cityRefInput.value = cityRef;
+    }
+  }
+
+  function setWarehouseRef(value) {
+    if (warehouseRefInput) {
+      warehouseRefInput.value = value || "";
+    }
+  }
+
+  function syncClear() {
+    if (!clearButton) {
+      return;
+    }
+    const show = branchInput.value.trim().length > 0;
+    clearButton.hidden = !show;
+    const field = branchInput.closest(".nd-co-field");
+    if (field) {
+      field.classList.toggle("has-value", show);
+    }
+  }
 
   function syncSecondField() {
     const courier = isCourier();
@@ -96,8 +120,7 @@ function initNpShip() {
     branchInput.setAttribute("aria-autocomplete", "list");
     branchInput.setAttribute("aria-expanded", "false");
     branchInput.setAttribute("aria-controls", "np-branch-listbox");
-    closeList(branchList, branchInput);
-    warehouses = [];
+    branchSuggest.close();
     setHint("");
     if (arrow) {
       arrow.hidden = false;
@@ -120,12 +143,13 @@ function initNpShip() {
     if (aptInput && !courier) {
       aptInput.value = "";
     }
+    syncClear();
   }
 
   function enterManualMode(message) {
     manualMode = true;
-    closeList(cityList, cityInput);
-    closeList(branchList, branchInput);
+    citySuggest.close();
+    branchSuggest.close();
     setHint(message || hints.npOff);
   }
 
@@ -142,43 +166,13 @@ function initNpShip() {
     hint.textContent = text;
   }
 
-  function closeList(list, input) {
-    list.hidden = true;
-    list.replaceChildren();
-    if (input) {
-      input.setAttribute("aria-expanded", "false");
-    }
-  }
-
-  function openList(list, input, rows, onPick) {
-    list.replaceChildren();
-    if (!rows.length) {
-      closeList(list, input);
-      return;
-    }
-    rows.forEach((row, index) => {
-      const option = document.createElement("li");
-      option.className = "co-suggest__item";
-      option.setAttribute("role", "option");
-      option.id = `${list.id}-opt-${index}`;
-      option.textContent = row.label;
-      option.addEventListener("mousedown", (event) => {
-        event.preventDefault();
-        onPick(row);
-      });
-      list.appendChild(option);
-    });
-    list.hidden = false;
-    input.setAttribute("aria-expanded", "true");
-  }
-
   async function loadCities() {
     const query = cityInput.value.trim();
-    cityRef = "";
-    warehouses = [];
-    closeList(branchList, branchInput);
+    setCityRef("");
+    setWarehouseRef("");
+    branchSuggest.close();
     if (!citiesUrl || query.length < minChars) {
-      closeList(cityList, cityInput);
+      citySuggest.close();
       setHint("");
       return;
     }
@@ -206,21 +200,17 @@ function initNpShip() {
       manualMode = false;
       setHint("");
       const items = Array.isArray(payload.items) ? payload.items : [];
-      openList(
-        cityList,
-        cityInput,
+      citySuggest.open(
         items.map((item) => ({ label: item.name, ref: item.ref, name: item.name })),
         (row) => {
           cityInput.value = row.name;
-          cityRef = row.ref;
-          closeList(cityList, cityInput);
+          setCityRef(row.ref);
+          citySuggest.close();
           branchInput.value = "";
-          if (isCourier()) {
-            branchInput.focus();
-          } else {
-            loadWarehouses();
-            branchInput.focus();
-          }
+          setWarehouseRef("");
+          syncClear();
+          branchSuggest.close();
+          branchInput.focus();
         }
       );
     } catch (_error) {
@@ -231,17 +221,20 @@ function initNpShip() {
     }
   }
 
-  async function loadWarehouses() {
-    if (isCourier() || !warehousesUrl || !cityRef || manualMode) {
-      warehouses = [];
-      closeList(branchList, branchInput);
+  async function searchWarehouses() {
+    const query = branchInput.value.trim();
+    if (isCourier() || !warehousesUrl || manualMode || query.length < minChars) {
+      branchSuggest.close();
       return;
     }
 
     const current = ++branchRequest;
     const url = new URL(warehousesUrl, window.location.origin);
-    url.searchParams.set("city_ref", cityRef);
+    url.searchParams.set("q", query);
     url.searchParams.set("kind", deliveryKind());
+    if (cityRef) {
+      url.searchParams.set("city_ref", cityRef);
+    }
 
     try {
       const response = await fetch(url.toString(), {
@@ -255,19 +248,27 @@ function initNpShip() {
       if (!response.ok) {
         throw new Error(`warehouses ${response.status}`);
       }
-      warehouses = Array.isArray(payload.items) ? payload.items : [];
-      renderBranches(branchInput.value);
-      if (!warehouses.length) {
-        setHint(hints.noBranches);
-      } else {
+      const items = Array.isArray(payload.items) ? payload.items : [];
+      const hadCity = Boolean(cityRef);
+      branchSuggest.open(items, (row) => {
+        branchInput.value = row.label || "";
+        setWarehouseRef(row.ref || "");
+        if (!hadCity && row.city_name) {
+          cityInput.value = row.city_name;
+        }
+        if (row.city_ref) {
+          setCityRef(row.city_ref);
+        }
+        branchSuggest.close();
+        syncClear();
         setHint("");
-      }
+      });
+      setHint(items.length ? "" : hints.noBranches);
     } catch (_error) {
       if (current !== branchRequest) {
         return;
       }
-      warehouses = [];
-      closeList(branchList, branchInput);
+      branchSuggest.close();
       setHint(hints.branchesFail);
     }
   }
@@ -276,12 +277,12 @@ function initNpShip() {
     const street = (branchInput.value || "").trim();
     if (!isCourier() || !streetsUrl || street.length < minChars) {
       if (isCourier()) {
-        closeList(branchList, branchInput);
+        branchSuggest.close();
       }
       return;
     }
     if (manualMode || !cityRef) {
-      closeList(branchList, branchInput);
+      branchSuggest.close();
       if (!cityRef && !manualMode) {
         setHint(hints.pickCity);
       }
@@ -311,13 +312,12 @@ function initNpShip() {
       }
       setHint("");
       const items = Array.isArray(payload.items) ? payload.items : [];
-      openList(
-        branchList,
-        branchInput,
+      branchSuggest.open(
         items.map((item) => ({ label: item.label, ref: item.ref })),
         (row) => {
           branchInput.value = row.label;
-          closeList(branchList, branchInput);
+          branchSuggest.close();
+          syncClear();
           if (houseInput) {
             houseInput.focus();
           } else if (aptInput) {
@@ -336,23 +336,14 @@ function initNpShip() {
     }
   }
 
-  function renderBranches(filterText) {
-    if (isCourier()) {
-      return;
-    }
-    const needle = (filterText || "").trim().toLocaleLowerCase("uk");
-    const rows = warehouses
-      .filter((item) => !needle || item.label.toLocaleLowerCase("uk").includes(needle))
-      .map((item) => ({ label: item.label, ref: item.ref }));
-    openList(branchList, branchInput, rows, (row) => {
-      branchInput.value = row.label;
-      closeList(branchList, branchInput);
-    });
-  }
-
   function scheduleCities() {
     window.clearTimeout(cityTimer);
     cityTimer = window.setTimeout(loadCities, 280);
+  }
+
+  function scheduleWarehouses() {
+    window.clearTimeout(branchTimer);
+    branchTimer = window.setTimeout(searchWarehouses, 280);
   }
 
   function scheduleStreets() {
@@ -361,7 +352,8 @@ function initNpShip() {
   }
 
   cityInput.addEventListener("input", () => {
-    cityRef = "";
+    setCityRef("");
+    setWarehouseRef("");
     scheduleCities();
   });
   cityInput.addEventListener("focus", () => {
@@ -373,15 +365,17 @@ function initNpShip() {
     }
   });
   cityInput.addEventListener("blur", () => {
-    window.setTimeout(() => closeList(cityList, cityInput), 140);
+    window.setTimeout(() => citySuggest.close(), 140);
   });
 
   branchInput.addEventListener("input", () => {
+    setWarehouseRef("");
+    syncClear();
     if (isCourier()) {
       scheduleStreets();
       return;
     }
-    renderBranches(branchInput.value);
+    scheduleWarehouses();
   });
   branchInput.addEventListener("focus", () => {
     if (isCourier()) {
@@ -405,34 +399,44 @@ function initNpShip() {
       setHint(hints.npOff);
       return;
     }
-    if (warehouses.length) {
-      renderBranches(branchInput.value);
-    } else if (cityRef) {
-      loadWarehouses();
-    } else if (cityInput.value.trim().length >= minChars) {
+    const query = branchInput.value.trim();
+    if (query.length >= minChars) {
+      scheduleWarehouses();
+      return;
+    }
+    if (!cityRef && cityInput.value.trim().length >= minChars) {
       setHint(hints.pickCity);
     }
   });
   branchInput.addEventListener("blur", () => {
-    window.setTimeout(() => closeList(branchList, branchInput), 140);
+    window.setTimeout(() => branchSuggest.close(), 140);
   });
+
+  if (clearButton) {
+    clearButton.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      branchInput.value = "";
+      setWarehouseRef("");
+      branchSuggest.close();
+      setHint("");
+      syncClear();
+      branchInput.focus();
+    });
+  }
 
   document.addEventListener("change", (event) => {
     const input = event.target;
     if (input && input.name === "delivery_method") {
       branchInput.value = "";
+      setWarehouseRef("");
       if (houseInput) {
         houseInput.value = "";
       }
       if (aptInput) {
         aptInput.value = "";
       }
-      warehouses = [];
-      closeList(branchList, branchInput);
+      branchSuggest.close();
       syncSecondField();
-      if (!isCourier() && cityRef && !manualMode) {
-        loadWarehouses();
-      }
     }
   });
 

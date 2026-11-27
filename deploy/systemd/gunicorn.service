@@ -1,3 +1,4 @@
+# Не вмикати на Droplet. Канон: Docker Compose (див. deploy/droplet/README.md).
 [Unit]
 Description=Gestia gunicorn
 After=network.target postgresql.service

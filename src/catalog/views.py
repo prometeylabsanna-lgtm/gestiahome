@@ -19,10 +19,12 @@ from src.catalog.selectors import (
     pdp_related,
     pdp_set_products,
 )
+from src.catalog.storefront import storefront_url
 from src.commerce.forms import BuyNowForm, CallbackForm, style_form
+from src.commerce.stock_hold import release_expired_holds
 from src.commerce.wishlist import sku_set
 from src.content.form_labels import apply_labels
-from src.content.models import ContactForms, HomeBlock, HomeCollection
+from src.content.models import ContactForms, HomeBlock
 from src.core.seo import _page_number
 
 
@@ -138,6 +140,8 @@ def catalog(request, slug=None):
     category = None
     if slug:
         category = get_object_or_404(Category, slug=slug, is_active=True)
+        if not category.has_public_products:
+            request.seo_noindex = True
     context = _catalog_context(request, category)
     past_end = context.pop("page_past_end", False)
     if past_end:
@@ -152,17 +156,15 @@ def catalog(request, slug=None):
 
 
 def product_detail(request, slug):
+    release_expired_holds()
     product = get_object_or_404(base_products(), slug=slug)
     if not product.is_active:
         raise Http404
-    collection = (
-        HomeCollection.objects.filter(product=product, is_active=True)
-        .exclude(slug="")
-        .order_by("sort", "id")
-        .first()
-    )
+    from src.catalog.storefront import collection_for_product
+
+    collection = collection_for_product(product)
     if collection is not None:
-        return redirect(collection.get_absolute_url())
+        return redirect(collection.get_absolute_url(), permanent=True)
     order = {"style": 0, "color": 1}
     attrs = sorted(
         (attr for attr in product.filter_attrs.all() if attr.show_on_pdp),
@@ -216,13 +218,6 @@ def _suggest_image(product):
 
 def catalog_suggest(request):
     products = suggest_products(request.GET.get("q") or "")
-    collections = {
-        row.product_id: row.get_absolute_url()
-        for row in HomeCollection.objects.filter(
-            product_id__in=[product.pk for product in products],
-            is_active=True,
-        ).exclude(slug="")
-    }
     currency = request.session.get("currency", "uah")
     if currency not in {"uah", "eur"}:
         currency = "uah"
@@ -231,7 +226,7 @@ def catalog_suggest(request):
         items.append(
             {
                 "name": product.name,
-                "url": collections.get(product.pk) or product.get_absolute_url(),
+                "url": storefront_url(product),
                 "price": _suggest_price(product, currency),
                 "image": _suggest_image(product),
             }

@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from src.content.models_menu import MenuGroup, MenuGroupItem
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
+from src.core.admin_hints import MENU_ITEM_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 
 
@@ -22,6 +23,10 @@ class MenuGroupItemInline(GestiaTabularInline):
         "collection",
         "category",
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, MENU_ITEM_HINTS)
 
 
 @admin.register(MenuGroup)

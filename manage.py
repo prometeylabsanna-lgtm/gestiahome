@@ -9,8 +9,6 @@ from decouple import config
 def _default_settings_module() -> str:
     if os.environ.get("DJANGO_SETTINGS_MODULE"):
         return os.environ["DJANGO_SETTINGS_MODULE"]
-    if os.environ.get("VERCEL"):
-        return "config.settings.vercel"
     return config("DJANGO_SETTINGS_MODULE", default="config.settings.develop")
 
 

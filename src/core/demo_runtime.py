@@ -1,4 +1,4 @@
-"""Cold-start helpers for the Vercel demo SQLite deploy."""
+"""Локальна демо-база. На Droplet не викликається: там PostgreSQL і createsuperuser."""
 
 from __future__ import annotations
 

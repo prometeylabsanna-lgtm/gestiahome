@@ -9,6 +9,7 @@ _FALLBACK = {"limit": 5, "window": 600}
 
 
 def client_ip(request) -> str:
+    # X-Forwarded-For читаємо лише коли проксі його перезаписує (TRUST_X_FORWARDED_FOR).
     raw = ""
     if getattr(settings, "TRUST_X_FORWARDED_FOR", False):
         forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")

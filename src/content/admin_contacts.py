@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from src.content.models_contacts import ContactsPage
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_hints import CONTACTS_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
 
 
@@ -14,6 +15,10 @@ class ContactsPageAdmin(GestiaModelAdmin):
         uk_fields=("title_uk", "seo_title_uk", "seo_description_uk", "form_title_uk"),
         en_fields=("title_en", "seo_title_en", "seo_description_en", "form_title_en"),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, CONTACTS_HINTS, seo=True)
 
     def has_add_permission(self, request):
         return False

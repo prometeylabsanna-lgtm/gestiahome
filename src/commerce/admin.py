@@ -2,7 +2,15 @@ from django.contrib import admin, messages
 from django.db import transaction
 from django.utils import timezone
 
-from src.commerce.models import Inquiry, Order, OrderItem
+from src.commerce.models import (
+    Inquiry,
+    NovaPoshtaCity,
+    NovaPoshtaSyncState,
+    NovaPoshtaWarehouse,
+    Order,
+    OrderItem,
+)
+from src.commerce.stock_hold import rehold_stock
 from src.core.admin_base import GestiaModelAdmin, GestiaTabularInline
 
 
@@ -23,6 +31,7 @@ class OrderAdmin(GestiaModelAdmin):
         "total",
         "currency",
         "payment_status",
+        "stock_short",
         "created_at",
     )
     list_filter = ("source", "payment_status", "payment_method", "delivery_method", "currency")
@@ -35,6 +44,7 @@ class OrderAdmin(GestiaModelAdmin):
         "payment_txn",
         "payment_raw_status",
         "paid_at",
+        "stock_short",
     )
     inlines = [OrderItemInline]
     date_hierarchy = "created_at"
@@ -58,6 +68,7 @@ class OrderAdmin(GestiaModelAdmin):
     def confirm_payment_manually(self, request, queryset):
         confirmed = 0
         skipped = 0
+        short = 0
         for order in queryset:
             with transaction.atomic():
                 locked = Order.objects.select_for_update().get(pk=order.pk)
@@ -67,6 +78,12 @@ class OrderAdmin(GestiaModelAdmin):
                 ):
                     skipped += 1
                     continue
+                if locked.stock_released and not locked.stock_held:
+                    if not rehold_stock(locked):
+                        short += 1
+                        skipped += 1
+                        continue
+                    locked.refresh_from_db()
                 locked.payment_status = Order.PayStatus.PAID
                 locked.paid_at = timezone.now()
                 locked.payment_raw_status = "manual"
@@ -75,11 +92,49 @@ class OrderAdmin(GestiaModelAdmin):
                 )
                 self.log_change(request, locked, "Оплату підтверджено вручну")
                 confirmed += 1
-        self.message_user(
-            request,
-            f"Підтверджено: {confirmed}, пропущено: {skipped}",
-            messages.INFO,
-        )
+        text = f"Підтверджено: {confirmed}, пропущено: {skipped}"
+        if short:
+            text = f"{text}. Немає залишку: {short}"
+        self.message_user(request, text, messages.INFO)
+
+
+class _ReadOnlyCatalogAdmin(GestiaModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(NovaPoshtaWarehouse)
+class NovaPoshtaWarehouseAdmin(_ReadOnlyCatalogAdmin):
+    list_display = ("number", "label", "city_name", "kind", "is_active")
+    list_filter = ("kind", "is_active")
+    search_fields = ("number", "label", "address", "city_name", "ref")
+    readonly_fields = (
+        "ref",
+        "number",
+        "label",
+        "city_ref",
+        "city_name",
+        "address",
+        "kind",
+        "is_active",
+        "search_text",
+    )
+
+
+@admin.register(NovaPoshtaCity)
+class NovaPoshtaCityAdmin(_ReadOnlyCatalogAdmin):
+    list_display = ("name", "area", "ref")
+    search_fields = ("name", "area", "ref")
+    readonly_fields = ("ref", "name", "area", "search_text")
+
+
+@admin.register(NovaPoshtaSyncState)
+class NovaPoshtaSyncStateAdmin(_ReadOnlyCatalogAdmin):
+    list_display = ("last_synced_at", "warehouse_count", "city_count")
+    readonly_fields = ("last_synced_at", "warehouse_count", "city_count")
 
 
 @admin.register(Inquiry)

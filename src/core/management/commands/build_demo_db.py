@@ -1,4 +1,4 @@
-"""Build committed demo SQLite + copy referenced media for Vercel CDN."""
+"""Локальна demo/gestia_demo.sqlite3 і копія media. На Droplet ця база не використовується."""
 
 from __future__ import annotations
 
@@ -140,7 +140,7 @@ class Command(BaseCommand):
             conn.close()
 
     def _seed_demo_superuser(self, db_path: Path) -> None:
-        """Vercel demo login: admin / admin (baked into committed SQLite)."""
+        """Локальний демо-вхід admin / admin у committed SQLite. Не для продакшену."""
         from datetime import datetime, timezone
 
         from django.contrib.auth.hashers import make_password

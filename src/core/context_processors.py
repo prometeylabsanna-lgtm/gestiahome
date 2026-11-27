@@ -72,9 +72,14 @@ def shop(request):
             "velykodnii-hnizdo",
             "velykodnii-ukrainskyi",
         )
+        from src.catalog.storefront import prefetch_public_collections
+
         featured = {
             product.slug: product
-            for product in Product.objects.filter(slug__in=card_slugs, is_active=True).prefetch_related("images")
+            for product in Product.objects.filter(slug__in=card_slugs, is_active=True).prefetch_related(
+                "images",
+                prefetch_public_collections(),
+            )
         }
         menu_cards = [featured[slug] for slug in card_slugs if slug in featured]
         footer_columns = build_footer_columns()

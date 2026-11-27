@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
-from django.db.models import Exists, Max, OuterRef
+from django.db.models import Max
 from django.db.utils import OperationalError, ProgrammingError
 from django.urls import reverse
 
@@ -91,13 +91,9 @@ class StaticSitemap(LocalizedSitemap):
 
 class CategorySitemap(LocalizedSitemap):
     def items(self):
-        own = Product.objects.filter(category=OuterRef("pk"), is_active=True)
-        nested = Product.objects.filter(
-            category__parent=OuterRef("pk"),
-            category__is_active=True,
-            is_active=True,
-        )
-        return Category.objects.filter(is_active=True).filter(Exists(own) | Exists(nested))
+        from src.catalog.storefront import indexable_categories
+
+        return indexable_categories()
 
     def lastmod(self, item):
         return item.updated_at
@@ -115,7 +111,9 @@ class CollectionSitemap(LocalizedSitemap):
 
 class ProductSitemap(LocalizedSitemap):
     def items(self):
-        return Product.objects.filter(is_active=True)
+        from src.catalog.storefront import indexable_products
+
+        return indexable_products()
 
     def lastmod(self, item):
         return item.updated_at

@@ -25,7 +25,7 @@
             {% include "partials/nd/icons/heart.html" with size=20 filled=True %}
           </button>
         </form>
-        <a class="nd-wish__link" href="{{ row.product.get_absolute_url }}">
+        <a class="nd-wish__link" href="{{ row.product.storefront_url }}">
           <span class="nd-wish__media">
             {% with media=row.product.card_media %}
               {% if media %}

@@ -13,6 +13,14 @@ from src.content.proxies import (
     FooterChrome,
 )
 from src.core.admin_base import GestiaModelAdmin
+from src.core.admin_hints import (
+    ABOUT_APPROACH_HINTS,
+    ABOUT_CTA_HINTS,
+    ABOUT_INTRO_HINTS,
+    ABOUT_QUOTE_HINTS,
+    FOOTER_HINTS,
+    apply_hints,
+)
 from src.core.admin_lang import language_tabs
 from src.core.admin_tinymce import force_tinymce, tinymce_widget
 
@@ -64,7 +72,8 @@ class AboutIntroAdmin(_OpenSingleton):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        return tighten(formfield, self.text_limits.get(db_field.name))
+        formfield = tighten(formfield, self.text_limits.get(db_field.name))
+        return apply_hints(formfield, db_field.name, ABOUT_INTRO_HINTS, seo=True)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
@@ -95,7 +104,8 @@ class AboutGestiaAdmin(_OpenSingleton):
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, ABOUT_QUOTE_HINTS)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
@@ -109,6 +119,10 @@ class AboutApproachAdmin(_OpenSingleton):
         uk_fields=("approach_text_uk",),
         en_fields=("approach_text_en",),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, ABOUT_APPROACH_HINTS)
 
 
 @admin.register(AboutTogether)
@@ -143,7 +157,8 @@ class AboutClosingAdmin(_OpenSingleton):
         if db_field.name in self.tiny_fields:
             kwargs["widget"] = tinymce_widget(short=False)
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        return tighten(formfield, self.text_limits.get(db_field.name))
+        formfield = tighten(formfield, self.text_limits.get(db_field.name))
+        return apply_hints(formfield, db_field.name, ABOUT_CTA_HINTS)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change=change, **kwargs)
@@ -157,3 +172,7 @@ class FooterChromeAdmin(_OpenSingleton):
         uk_fields=("footer_note_uk", "credit_uk"),
         en_fields=("footer_note_en", "credit_en"),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return apply_hints(formfield, db_field.name, FOOTER_HINTS)

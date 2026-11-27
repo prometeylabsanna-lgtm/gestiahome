@@ -5,8 +5,11 @@ venv
 __pycache__
 *.pyc
 staticfiles
-media
+/media
 .env
 .cursor
 docs
 db.sqlite3
+demo/*.sqlite3
+!demo/media
+!demo/media/**

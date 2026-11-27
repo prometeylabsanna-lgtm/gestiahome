@@ -49,6 +49,11 @@ class ContentSecurityPolicyMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
+        if _is_staff_ui(request.path):
+            policy = getattr(settings, "CSP_POLICY_ADMIN", "") or ""
+            if policy:
+                response["Content-Security-Policy"] = policy
+            return response
         policy = getattr(settings, "CSP_POLICY", "") or ""
         if not policy:
             return response

@@ -133,6 +133,17 @@ NAV_TREE = [
         ],
     },
     {
+        "title": "Сторінка помилки 500",
+        "items": [
+            {
+                "key": "error_page",
+                "title": "Сторінка",
+                "icon": "error",
+                "url_name": "admin:content_errorpage_changelist",
+            },
+        ],
+    },
+    {
         "title": "Каталог",
         "items": [
             {

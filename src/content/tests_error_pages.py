@@ -7,6 +7,18 @@ from django.utils import translation
 
 
 class ErrorPageTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        from django.core.cache import cache
+
+        cache.clear()
+
+    def tearDown(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        super().tearDown()
+
     def test_500_static_copy(self):
         from src.core.views import server_error
 

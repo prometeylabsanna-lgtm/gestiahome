@@ -46,9 +46,17 @@ def server_error(request):
         "button": "На головну · Home",
     }
     try:
-        from src.content.models import SiteSettings
+        from src.content.models_errors import ErrorPage
 
-        site = SiteSettings.load()
+        p = ErrorPage.load()
+        if p.title:
+            copy["title"] = p.title
+        if p.text:
+            copy["text"] = p.text
+        if p.button:
+            copy["button"] = p.button
+        if p.note_en:
+            copy["note_en"] = p.note_en
     except Exception:
         pass
     try:

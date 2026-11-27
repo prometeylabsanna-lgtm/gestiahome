@@ -944,3 +944,4 @@ from src.content import models_contacts as _contacts_models  # noqa: E402,F401
 from src.content import models_thankyou as _thankyou_models  # noqa: E402,F401
 from src.content import models_ui as _ui_models  # noqa: E402,F401
 from src.content import proxies as _home_proxies  # noqa: E402,F401
+from src.content import models_errors as _error_models  # noqa: E402,F401

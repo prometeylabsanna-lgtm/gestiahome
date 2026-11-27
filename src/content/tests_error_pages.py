@@ -58,3 +58,48 @@ class ErrorPageTests(TestCase):
             cache.clear()
             cols = build_footer_columns()
             self.assertEqual(cols["category"][0].label, "Весь каталог")
+
+    def test_500_shows_error_page_title(self):
+        from django.core.cache import cache
+
+        from src.content.models_errors import ErrorPage
+        from src.core.views import server_error
+
+        cache.clear()
+        page = ErrorPage.load()
+        page.title_uk = "Тест збою"
+        page.save()
+        cache.clear()
+        with translation.override("uk"):
+            resp = server_error(RequestFactory().get("/"))
+        self.assertEqual(resp.status_code, 500)
+        self.assertIn("Тест збою", resp.content.decode())
+        cache.clear()
+
+    def test_error_page_admin_changelist(self):
+        from django.contrib.auth import get_user_model
+        from django.urls import reverse
+
+        user = get_user_model().objects.create_superuser(
+            "errpage",
+            "err@example.com",
+            "pass-word-9",
+        )
+        self.client.force_login(user)
+        resp = self.client.get(reverse("admin:content_errorpage_changelist"), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_footer_contacts_label_from_nav_contacts(self):
+        from django.core.cache import cache
+
+        from src.content.footer_nav import build_footer_columns
+        from src.content.models import FooterLink, SiteSettings
+
+        FooterLink.objects.filter(column="info").delete()
+        site = SiteSettings.load()
+        site.nav_contacts_uk = "Звʼязок"
+        site.save()
+        cache.clear()
+        with translation.override("uk"):
+            columns = build_footer_columns()
+        self.assertEqual(columns["info"][-1].label, "Звʼязок")

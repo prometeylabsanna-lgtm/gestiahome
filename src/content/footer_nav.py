@@ -95,7 +95,13 @@ def build_footer_columns():
         unique.append(item)
     info = unique
     if not seen_contacts:
-        info.append(SimpleNamespace(label=_("Контакти"), href=contacts_href, underlined=False))
+        info.append(
+            SimpleNamespace(
+                label=getattr(site, "nav_contacts", "") or _("Контакти"),
+                href=contacts_href,
+                underlined=False,
+            )
+        )
 
     return {
         "category": categories,

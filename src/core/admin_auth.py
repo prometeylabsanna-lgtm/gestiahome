@@ -7,6 +7,8 @@ from django.http import HttpRequest
 from unfold.admin import ModelAdmin
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
+from src.core.admin_filters import HorizontalFiltersMixin
+
 if admin.site.is_registered(User):
     admin.site.unregister(User)
 if admin.site.is_registered(Group):
@@ -14,7 +16,7 @@ if admin.site.is_registered(Group):
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin, ModelAdmin):
+class UserAdmin(HorizontalFiltersMixin, BaseUserAdmin, ModelAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     change_password_form = AdminPasswordChangeForm

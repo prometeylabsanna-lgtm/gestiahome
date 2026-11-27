@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from unfold.admin import ModelAdmin
 
+from src.core.admin_filters import HorizontalFiltersMixin
+
 
 @admin.register(LogEntry)
-class LogEntryAdmin(ModelAdmin):
+class LogEntryAdmin(HorizontalFiltersMixin, ModelAdmin):
     list_display = ("action_time", "user", "content_type", "object_repr", "action_flag")
     list_filter = ("action_flag", "content_type")
     search_fields = ("object_repr", "change_message", "user__username")

@@ -113,3 +113,28 @@ class ProductChangelistTests(TestCase):
         self.assertEqual(before, after)
         self.assertIn("Бокс", after)
         self.assertNotIn("is-sale", after)
+
+
+
+class CategoryChangelistFilterTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser("catfilters", "catfilters@example.com", "pass-word-9")
+        self.client.force_login(self.user)
+        Category.objects.create(slug="cat", name_uk="Каталог", is_active=True)
+        self.url = reverse("admin:catalog_category_changelist")
+
+    def test_filters_are_horizontal_dropdowns(self):
+        page = self.client.get(self.url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Активна")
+        self.assertContains(page, "Усі")
+        self.assertContains(page, "Так")
+        self.assertContains(page, "Ні")
+        self.assertContains(page, 'name="is_active__exact"')
+        self.assertContains(page, 'name="parent__id__exact"')
+        self.assertNotContains(page, "За Активн")
+        self.assertNotContains(page, "За Показувати")
+        body = page.content.decode()
+        active_choices = body.split('name="is_active__exact"', 1)[1].split("</select>", 1)[0]
+        self.assertLess(active_choices.find("Усі"), active_choices.find("Так"))
+        self.assertLess(active_choices.find("Так"), active_choices.find("Ні"))

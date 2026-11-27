@@ -4,6 +4,8 @@ from django.utils.html import format_html
 from unfold.admin import ModelAdmin, StackedInline, TabularInline
 from unfold.widgets import UnfoldAdminImageFieldWidget
 
+from src.core.admin_filters import HorizontalFiltersMixin
+
 IMAGE_HELP = "JPG або PNG, довша сторона до 2560 px."
 _PREVIEW_ORDER = ("image", "card_image", "logo")
 
@@ -27,7 +29,7 @@ class ImagePreviewMixin:
         return formfield
 
 
-class GestiaModelAdmin(ImagePreviewMixin, ModelAdmin):
+class GestiaModelAdmin(HorizontalFiltersMixin, ImagePreviewMixin, ModelAdmin):
     formfield_overrides = {
         models.ImageField: {"widget": AdminImagePreviewWidget},
     }

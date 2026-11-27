@@ -37,6 +37,7 @@ class SingletonAdmin(GestiaModelAdmin):
 class SiteSettingsAdmin(SingletonAdmin):
     fieldsets = language_tabs(
         uk_fields=(
+            "site_name_uk",
             "phone",
             "email",
             "address_uk",
@@ -57,6 +58,7 @@ class SiteSettingsAdmin(SingletonAdmin):
             "fr_enabled",
         ),
         en_fields=(
+            "site_name_en",
             "address_en",
             "logo_alt_en",
             "nav_about_en",

@@ -1,9 +1,10 @@
 {% load static %}
 <div class="social-row social-row--{{ tone }}">
 {% if site_settings %}
+  {% if site_settings.instagram_url %}
   <a
     class="social-row__item"
-    href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}"
+    href="{{ site_settings.instagram_url }}"
     target="_blank"
     rel="noopener noreferrer"
   >
@@ -14,9 +15,11 @@
     {% endif %}
     <span>Instagram</span>
   </a>
+  {% endif %}
+  {% if site_settings.pinterest_url %}
   <a
     class="social-row__item"
-    href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}"
+    href="{{ site_settings.pinterest_url }}"
     target="_blank"
     rel="noopener noreferrer"
   >
@@ -27,6 +30,7 @@
     {% endif %}
     <span>Pinterest</span>
   </a>
+  {% endif %}
   {% if site_settings.telegram_url %}
     <a
       class="social-row__item"

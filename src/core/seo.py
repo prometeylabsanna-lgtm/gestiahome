@@ -7,6 +7,7 @@ from html import unescape
 from urllib.parse import urlsplit
 
 from django.conf import settings
+from django.db.utils import OperationalError, ProgrammingError
 from django.templatetags.static import static
 from django.utils.translation import get_language, gettext
 
@@ -15,7 +16,19 @@ from src.core.utils import localized
 TITLE_MAX = 60
 DESCRIPTION_MAX = 160
 ELLIPSIS = "…"
-META_BRAND = "Gestia"
+def _site_name() -> str:
+    try:
+        from src.content.models import SiteSettings
+
+        return (SiteSettings.load().site_name or "").strip()
+    except (OperationalError, ProgrammingError):
+        return ""
+
+
+def META_BRAND() -> str:
+    return _site_name()
+
+
 _COPY_FIELDS = ("seo_description", "short_description", "description")
 _HIDDEN_BLOCK = re.compile(r"<(script|style)\b[^>]*>.*?</\1>", re.IGNORECASE | re.DOTALL)
 _TAG = re.compile(r"<[^>]+>")
@@ -54,7 +67,10 @@ _RASTER = {
     ".png": "image/png",
     ".webp": "image/webp",
 }
-BRAND = "Gestia Home"
+def BRAND() -> str:
+    return _site_name()
+
+
 _OG_LOCALES = {"uk": "uk_UA", "en": "en_US", "fr": "fr_FR"}
 _RESERVED_EMAIL_DOMAINS = ("example.com", "example.org", "example.net")
 _FAKE_EMAIL_SUFFIXES = (".local", ".example", ".test")
@@ -105,7 +121,7 @@ def product_meta_description(product) -> str:
     parts = [plain_text(getattr(product, "name", ""))]
     if getattr(product, "category_id", None):
         parts.append(plain_text(product.category.name))
-    parts.append(META_BRAND)
+    parts.append(META_BRAND())
     return ". ".join(part for part in parts if part)
 
 
@@ -118,8 +134,8 @@ def category_meta_description(category) -> str:
         label = plain_text(node.name)
         if label and label not in parts:
             parts.append(label)
-    if not parts or parts[-1] != META_BRAND:
-        parts.append(META_BRAND)
+    if not parts or parts[-1] != META_BRAND():
+        parts.append(META_BRAND())
     return ". ".join(parts)
 
 
@@ -133,10 +149,10 @@ def collection_meta_description(collection) -> str:
             return text
     title = plain_text(localized(collection, "title"))
     if not title:
-        return BRAND
+        return BRAND()
     return gettext("Колекція «%(title)s». %(brand)s") % {
         "title": title.replace("%", "%%"),
-        "brand": BRAND,
+        "brand": BRAND(),
     }
 
 
@@ -146,7 +162,7 @@ def collection_meta_title(collection) -> str:
         return custom
     title = plain_text(localized(collection, "title"))
     if not title:
-        return BRAND
+        return BRAND()
     return gettext("Колекція «%(title)s» — Gestia Home") % {
         "title": title.replace("%", "%%"),
     }
@@ -359,7 +375,7 @@ def og_image_bundle(context) -> dict:
             try:
                 return _bundle(
                     absolute_media(request, media_url),
-                    getattr(product, "name", "") or BRAND,
+                    getattr(product, "name", "") or BRAND(),
                     field=_product_picture(product),
                 )
             except ValueError:
@@ -370,7 +386,7 @@ def og_image_bundle(context) -> dict:
         try:
             return _bundle(
                 absolute_media(request, image.url),
-                getattr(collection, "title", "") or BRAND,
+                getattr(collection, "title", "") or BRAND(),
                 field=image,
             )
         except ValueError:
@@ -380,7 +396,7 @@ def og_image_bundle(context) -> dict:
     hero_image = getattr(hero, "image", None) if hero is not None else None
     if hero_image and not getattr(hero, "shows_video", False):
         try:
-            alt = plain_text(getattr(hero, "text", "") or "") or BRAND
+            alt = plain_text(getattr(hero, "text", "") or "") or BRAND()
             return _bundle(absolute_media(request, hero_image.url), alt, field=hero_image)
         except ValueError:
             pass

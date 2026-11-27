@@ -1,10 +1,10 @@
-{% load static content_tags richtext %}
+{% load content_tags richtext %}
 {% cms block.title "hero_title" as hero_title %}
 {% cms block.text "hero_text" as hero_text %}
 {% cms block.cta "hero_cta" as hero_cta %}
 <section
   class="nd-hero{% if block.shows_video %} nd-hero--video{% endif %}"
-  aria-label="Gestia Home"
+  aria-label="{% firstof site_settings.logo_alt site_settings.site_name %}"
   {% if block.shows_video and block.poster_src %}style="--nd-hero-poster: url('{{ block.poster_src }}')"{% endif %}
 >
   {% if block.shows_video %}
@@ -24,7 +24,7 @@
     <img
       class="nd-hero__media"
       src="{{ block.image.url }}"
-      alt="{% if hero_text %}{{ hero_text|striptags }}{% else %}Gestia Home{% endif %}"
+      alt="{% if hero_text %}{{ hero_text|striptags }}{% else %}{% firstof site_settings.logo_alt site_settings.site_name %}{% endif %}"
       width="1440"
       height="812"
       fetchpriority="high"
@@ -33,13 +33,15 @@
   {% endif %}
   <div class="nd-hero__copy">
     <h1 class="nd-hero__brand">
-      <img
-        class="nd-hero__logo"
-        src="{% static 'nd/logo-gestia-light.svg' %}"
-        width="460"
-        height="120"
-        alt="Gestia Home"
-      >
+      {% if site_settings.logo %}
+        <img
+          class="nd-hero__logo"
+          src="{{ site_settings.logo.url }}"
+          width="460"
+          height="120"
+          alt="{% firstof site_settings.logo_alt site_settings.site_name %}"
+        >
+      {% endif %}
     </h1>
     {% if hero_title %}
       <p class="nd-hero__slogan">{{ hero_title }}</p>

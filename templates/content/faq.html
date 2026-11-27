@@ -86,11 +86,13 @@
               {% if site_settings.email %}
                 <a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>
               {% endif %}
-              <a
-                href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >Instagram</a>
+              {% if site_settings.instagram_url %}
+                <a
+                  href="{{ site_settings.instagram_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >Instagram</a>
+              {% endif %}
             </div>
           </div>
         {% endif %}

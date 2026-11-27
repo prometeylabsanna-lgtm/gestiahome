@@ -63,7 +63,7 @@ def _organization(request, site, image: str) -> dict:
     node = {
         "@type": "Organization",
         "@id": f"{base}/#organization",
-        "name": BRAND,
+        "name": BRAND(),
         "url": f"{base}/",
     }
     if image:
@@ -98,7 +98,7 @@ def _website(base: str) -> dict:
     return {
         "@type": "WebSite",
         "@id": f"{base}/#website",
-        "name": BRAND,
+        "name": BRAND(),
         "url": f"{base}/",
         "inLanguage": _in_language(),
         "publisher": {"@id": f"{base}/#organization"},
@@ -170,7 +170,7 @@ def _collection_crumbs(context, request) -> dict:
     group_name = " ".join(str(getattr(group, "title", "") or "").split()) if group else ""
     if group_name and group_url:
         items.append((group_name, group_url))
-    title = " ".join(str(collection.title or "").split()) or BRAND
+    title = " ".join(str(collection.title or "").split()) or BRAND()
     canonical = (context.get("seo") or {}).get("canonical") or _absolute_path(
         request, collection.get_absolute_url()
     )
@@ -322,7 +322,7 @@ def _product_node(context, request):
         "@type": "Product",
         "name": name,
         "url": canonical,
-        "brand": {"@type": "Brand", "name": BRAND},
+        "brand": {"@type": "Brand", "name": BRAND()},
         "offers": _offer(canonical, product),
     }
     sku = str(product.sku or "").strip()

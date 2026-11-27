@@ -153,18 +153,22 @@
           </div>
           <a class="nd-mega__faq" href="{% url 'faq' %}">{{ site_settings.nav_faq }}</a>
           <ul class="nd-mega__social">
-            <li>
-              <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
-                {% include "partials/nd/icons/instagram.html" %}
-                <span>Instagram</span>
-              </a>
-            </li>
-            <li>
-              <a href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}" target="_blank" rel="noopener noreferrer">
-                {% include "partials/nd/icons/pinterest.html" %}
-                <span>Pinterest</span>
-              </a>
-            </li>
+            {% if site_settings.instagram_url %}
+              <li>
+                <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer">
+                  {% include "partials/nd/icons/instagram.html" %}
+                  <span>Instagram</span>
+                </a>
+              </li>
+            {% endif %}
+            {% if site_settings.pinterest_url %}
+              <li>
+                <a href="{{ site_settings.pinterest_url }}" target="_blank" rel="noopener noreferrer">
+                  {% include "partials/nd/icons/pinterest.html" %}
+                  <span>Pinterest</span>
+                </a>
+              </li>
+            {% endif %}
             {% if site_settings.phone %}
               <li>
                 <a href="tel:{{ site_settings.phone|cut:' ' }}">
@@ -363,18 +367,22 @@
       </div>
 
     <ul class="nd-burger__foot">
-      <li>
-        <a href="{% if site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/{% endif %}" target="_blank" rel="noopener noreferrer">
-          {% include "partials/nd/icons/instagram.html" with size=18 stroke="1.5" %}
-          <span>Instagram</span>
-        </a>
-      </li>
-      <li>
-        <a href="{% if site_settings.pinterest_url %}{{ site_settings.pinterest_url }}{% else %}https://www.pinterest.com/{% endif %}" target="_blank" rel="noopener noreferrer">
-          {% include "partials/nd/icons/pinterest.html" with size=18 %}
-          <span>Pinterest</span>
-        </a>
-      </li>
+      {% if site_settings.instagram_url %}
+        <li>
+          <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer">
+            {% include "partials/nd/icons/instagram.html" with size=18 stroke="1.5" %}
+            <span>Instagram</span>
+          </a>
+        </li>
+      {% endif %}
+      {% if site_settings.pinterest_url %}
+        <li>
+          <a href="{{ site_settings.pinterest_url }}" target="_blank" rel="noopener noreferrer">
+            {% include "partials/nd/icons/pinterest.html" with size=18 %}
+            <span>Pinterest</span>
+          </a>
+        </li>
+      {% endif %}
       <li class="nd-burger__meta">
         {% if site_settings.phone %}
           <a href="tel:{{ site_settings.phone|cut:' ' }}">

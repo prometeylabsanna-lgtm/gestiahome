@@ -31,7 +31,7 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v4"
+    cache_key = "site_settings_v5"
     site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
     site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
     site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
@@ -58,6 +58,24 @@ class SiteSettings(SingletonModel):
         upload_to="site/",
         blank=True,
         help_text="Іконка вкладки браузера. PNG або ICO.",
+    )
+    currency_uah = models.CharField(
+        "Суфікс гривні",
+        max_length=8,
+        default="UAH",
+        help_text="Після ціни в гривнях, зараз «UAH».",
+    )
+    currency_uah_sign = models.CharField(
+        "Знак гривні",
+        max_length=8,
+        default="₴",
+        help_text="Знак у format_money для гривні, зараз «₴».",
+    )
+    currency_eur = models.CharField(
+        "Знак євро",
+        max_length=8,
+        default="€",
+        help_text="Знак євро, зараз «€».",
     )
     logo_alt_uk = models.CharField("Підпис логотипа", max_length=80, blank=True)
     logo_alt_en = models.CharField("Підпис логотипа (EN)", max_length=80, blank=True)

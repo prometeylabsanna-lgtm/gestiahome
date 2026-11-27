@@ -51,8 +51,19 @@ def _legal_from_pages():
 def build_footer_columns():
     from src.catalog.models import Category
 
+    try:
+        from src.content.models import SiteSettings
+
+        site = SiteSettings.load()
+    except Exception:
+        site = None
+
     categories = [
-        SimpleNamespace(label=_("Усі товари"), href=reverse("catalog"), underlined=False),
+        SimpleNamespace(
+            label=getattr(site, "nav_all", "") or _("Усі товари"),
+            href=reverse("catalog"),
+            underlined=False,
+        ),
     ]
     qs = (
         Category.objects.filter(parent__isnull=True, is_active=True)

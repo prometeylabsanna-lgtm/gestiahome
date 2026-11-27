@@ -7,11 +7,13 @@
   <link rel="stylesheet" href="{% static 'css/pages/utility.css' %}">
 {% endblock %}
 
+{% block favicon %}{% if error_brand.favicon_url %}<link rel="icon" href="{{ error_brand.favicon_url }}"><link rel="apple-touch-icon" href="{{ error_brand.favicon_url }}">{% else %}{{ block.super }}{% endif %}{% endblock %}
+
 {% block content %}
   <section class="util-page util-page--error" data-qa="not-found-page">
     <div class="util-page__inner">
-      <a class="util-page__logo" href="{% url 'home' %}" aria-label="Gestia">
-        <img src="{% static 'figma/desktop/5493c.png' %}" width="113" height="43" alt="Gestia">
+      <a class="util-page__logo" href="{% url 'home' %}" aria-label="{{ error_brand.logo_alt|default:'Gestia' }}">
+        <img src="{% if error_brand.logo_url %}{{ error_brand.logo_url }}{% else %}{% static 'figma/desktop/5493c.png' %}{% endif %}" width="113" height="43" alt="{{ error_brand.logo_alt|default:'Gestia' }}">
       </a>
       <p class="util-page__code" aria-hidden="true">404</p>
       <h1>{% ui "not_found" %}</h1>

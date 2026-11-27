@@ -1,5 +1,10 @@
 from django.conf import settings
-from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
+from django.http import (
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+    HttpResponseServerError,
+)
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -17,7 +22,42 @@ def healthz(request):
 
 def page_not_found(request, exception):
     request.seo_noindex = True
-    return render(request, "404.html", status=404)
+    try:
+        from src.content.models import SiteSettings
+
+        site = SiteSettings.load()
+        logo = getattr(site, "logo", None)
+        favicon = getattr(site, "favicon", None)
+        brand = {
+            "logo_url": logo.url if logo else None,
+            "favicon_url": favicon.url if favicon else None,
+            "logo_alt": getattr(site, "logo_alt", "") or "",
+        }
+    except Exception:
+        brand = {}
+    return render(request, "404.html", context={"error_brand": brand}, status=404)
+
+
+def server_error(request):
+    copy = {
+        "title": "Щось пішло не так",
+        "text": "Спробуйте оновити сторінку або поверніться на головну.",
+        "note_en": "Something went wrong. Refresh the page or go back home.",
+        "button": "На головну · Home",
+    }
+    try:
+        from src.content.models import SiteSettings
+
+        site = SiteSettings.load()
+    except Exception:
+        pass
+    try:
+        import django.template.loader
+
+        html = django.template.loader.get_template("500.html").render({"error": copy})
+        return HttpResponseServerError(html)
+    except Exception:
+        return HttpResponseServerError("<h1>500</h1>")
 
 
 def robots_txt(request):

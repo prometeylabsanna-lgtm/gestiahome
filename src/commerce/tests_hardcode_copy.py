@@ -2,15 +2,21 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django import forms
-from django.test import TestCase, override_settings
+from django.core.cache import cache
+from django.test import RequestFactory, TestCase, override_settings
+from django.urls import reverse
 from django.utils import translation
 
+from src.catalog.models import Category, Product
+from src.commerce.cart_panel import panel_context
+from src.commerce.forms import CheckoutForm
 from src.commerce.models import Order
 from src.commerce.notify import notify_order
 from src.commerce.services import unavailable_message
 from src.content.models_thankyou import EMAIL_BODY_DEFAULTS, EMAIL_SUBJECT_DEFAULTS, ThankYouPage
 from src.content.models_ui import InterfaceCopy
 from src.content.ui_defaults import UI_FIELDS
+from src.content.ui_fr import UI_FR
 from src.core.ratelimit import reject_if_limited
 
 
@@ -125,3 +131,83 @@ class HardcodeCopyTests(TestCase):
         self.assertEqual(copy.checkout_pick_branch_en, defaults["checkout_pick_branch"][3])
         self.assertEqual(page.email_subject_uk, "Лише тема")
         self.assertEqual(page.email_body_fr, EMAIL_BODY_DEFAULTS["fr"])
+
+    def test_checkout_clear_comes_from_interface_copy(self):
+        cache.clear()
+        copy = InterfaceCopy.load()
+        copy.clear_uk = "Прибрати поле"
+        copy.save()
+        category = Category.objects.create(slug="clr-cat", name_uk="Каталог")
+        Product.objects.create(
+            category=category,
+            sku="CLR-1",
+            slug="clr-1",
+            name_uk="Бокс",
+            price_uah=Decimal("100"),
+            price_eur=Decimal("3"),
+            stock_qty=5,
+        )
+        session = self.client.session
+        session["cart"] = {"CLR-1": 1}
+        session["currency"] = "uah"
+        session.save()
+        with translation.override("uk"):
+            response = self.client.get(reverse("checkout"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-np-clear')
+        self.assertContains(response, 'aria-label="Прибрати поле"')
+
+    def test_courier_address_uses_key_defaults_when_empty(self):
+        cache.clear()
+        copy = InterfaceCopy.load()
+        for lang in ("uk", "en", "fr"):
+            setattr(copy, f"house_ph_{lang}", "")
+            setattr(copy, f"apt_ph_{lang}", "")
+        copy.save()
+        base = {
+            "name": "Оля",
+            "phone": "+380671112233",
+            "email": "olya@example.com",
+            "delivery_method": Order.Delivery.COURIER,
+            "city": "Lyon",
+            "branch": "Rue",
+            "house": "10",
+            "apartment": "4",
+            "payment_method": Order.Payment.ON_DELIVERY,
+            "consent": "on",
+        }
+        house = UI_FR["house_ph"]
+        apt = UI_FR["apt_ph"]
+        with translation.override("fr"):
+            built = CheckoutForm(base, card_enabled=False)
+            self.assertTrue(built.is_valid(), built.errors)
+            given = CheckoutForm({**base, "address": "Lyon, Rue"}, card_enabled=False)
+            self.assertTrue(given.is_valid(), given.errors)
+        self.assertEqual(built.cleaned_data["address"], f"Lyon, Rue, {house} 10, {apt} 4")
+        self.assertEqual(given.cleaned_data["address"], f"Lyon, Rue, {house} 10, {apt} 4")
+        self.assertNotIn("буд.", built.cleaned_data["address"])
+        self.assertNotIn("кв.", given.cleaned_data["address"])
+
+    def test_choice_labels_and_cart_aria_come_from_interface_copy(self):
+        cache.clear()
+        copy = InterfaceCopy.load()
+        copy.ship_branch_uk = "Відділення з адмінки"
+        copy.ship_locker_uk = "Поштомат з адмінки"
+        copy.ship_courier_uk = "Кур’єр з адмінки"
+        copy.pay_card_uk = "Картка з адмінки"
+        copy.pay_delivery_uk = "При отриманні з адмінки"
+        copy.cart_uk = "Мій кошик"
+        copy.save()
+        with translation.override("uk"):
+            form = CheckoutForm(card_enabled=True)
+            request = RequestFactory().get("/koshik/panel/")
+            request.session = {}
+            aria = panel_context(request, "")["aria_cart"]
+        delivery = dict(form.fields["delivery_method"].choices)
+        payment = dict(form.fields["payment_method"].choices)
+        self.assertEqual(delivery[Order.Delivery.BRANCH], "Відділення з адмінки")
+        self.assertEqual(delivery[Order.Delivery.LOCKER], "Поштомат з адмінки")
+        self.assertEqual(delivery[Order.Delivery.COURIER], "Кур’єр з адмінки")
+        self.assertEqual(payment[Order.Payment.CARD], "Картка з адмінки")
+        self.assertEqual(payment[Order.Payment.ON_DELIVERY], "При отриманні з адмінки")
+        self.assertEqual(aria, "Мій кошик")

@@ -123,6 +123,7 @@ UI_FIELDS = (
     ("email_ph", "Email", "Email", "Email", 40, False, "checkout"),
     ("city_ph", "Місто", "Місто", "City", 40, False, "checkout"),
     ("branch_ph", "Відділення", "Відділення", "Branch", 40, False, "checkout"),
+    ("clear", "Очистити", "Очистити", "Clear", 40, True, "checkout"),
     ("locker_ph", "Поштомат", "Поштомат", "Parcel locker", 40, False, "checkout"),
     ("street_ph", "Вулиця", "Вулиця", "Street", 40, False, "checkout"),
     ("house", "Будинок", "Будинок", "House", 40, True, "checkout"),

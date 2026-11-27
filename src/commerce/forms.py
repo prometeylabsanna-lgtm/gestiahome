@@ -129,19 +129,19 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
         self._apply_choice_labels()
 
     def _apply_choice_labels(self):
-        from src.content.ui_text import text
+        from src.content.ui_text import text_or_default
 
         labels = {
-            Order.Delivery.BRANCH: text("ship_branch"),
-            Order.Delivery.LOCKER: text("ship_locker"),
-            Order.Delivery.COURIER: text("ship_courier"),
-            Order.Payment.CARD: text("pay_card"),
-            Order.Payment.ON_DELIVERY: text("pay_delivery"),
+            Order.Delivery.BRANCH: text_or_default("ship_branch"),
+            Order.Delivery.LOCKER: text_or_default("ship_locker"),
+            Order.Delivery.COURIER: text_or_default("ship_courier"),
+            Order.Payment.CARD: text_or_default("pay_card"),
+            Order.Payment.ON_DELIVERY: text_or_default("pay_delivery"),
         }
         for name in ("delivery_method", "payment_method"):
             self.fields[name].choices = [
-                (value, labels[value] or label)
-                for value, label in self.fields[name].choices
+                (value, labels[value])
+                for value, _label in self.fields[name].choices
             ]
 
     def clean(self):
@@ -173,21 +173,21 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
                     city = found["city_name"][:120]
         if not address:
             if method == Order.Delivery.COURIER:
-                from src.content.ui_text import text
+                from src.content.ui_text import text_or_default
 
                 parts = [city, branch]
                 if house:
-                    parts.append(f"{text('house_ph') or 'буд.'} {house}")
+                    parts.append(f"{text_or_default('house_ph')} {house}")
                 if apartment:
-                    parts.append(f"{text('apt_ph') or 'кв.'} {apartment}")
+                    parts.append(f"{text_or_default('apt_ph')} {apartment}")
                 address = ", ".join(part for part in parts if part)
             else:
                 address = ", ".join(part for part in (city, branch) if part)
         elif method == Order.Delivery.COURIER:
-            from src.content.ui_text import text
+            from src.content.ui_text import text_or_default
 
-            house_label = text("house_ph") or "буд."
-            apt_label = text("apt_ph") or "кв."
+            house_label = text_or_default("house_ph")
+            apt_label = text_or_default("apt_ph")
             extras = []
             if house and f"{house_label} {house}" not in address:
                 extras.append(f"{house_label} {house}")

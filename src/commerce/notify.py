@@ -4,8 +4,6 @@ import logging
 import requests
 from django.conf import settings
 from django.core.mail import send_mail
-from django.utils import translation
-from django.utils.translation import gettext as _
 
 logger = logging.getLogger("src.commerce")
 REQUEST_TIMEOUT = 5
@@ -32,6 +30,39 @@ def send_telegram_message(text: str) -> bool:
 
 def _esc(value) -> str:
     return html.escape(str(value or ""))
+
+
+def _mail_lang(order) -> str:
+    from src.content.models_thankyou import EMAIL_SUBJECT_DEFAULTS
+
+    lang = str(getattr(order, "language", "") or "uk").split("-")[0]
+    if lang not in EMAIL_SUBJECT_DEFAULTS:
+        return "uk"
+    return lang
+
+
+def _with_number(template: str, number) -> str:
+    return str(template or "").replace("{number}", "" if number is None else str(number))
+
+
+def customer_order_mail(order):
+    from src.content.models_thankyou import (
+        EMAIL_BODY_DEFAULTS,
+        EMAIL_SUBJECT_DEFAULTS,
+        ThankYouPage,
+    )
+    from src.core.utils import localized
+
+    lang = _mail_lang(order)
+    page = ThankYouPage.load()
+    subject = (localized(page, "email_subject", lang) or "").strip()
+    body = (localized(page, "email_body", lang) or "").strip()
+    if not subject:
+        subject = EMAIL_SUBJECT_DEFAULTS[lang]
+    if not body:
+        body = EMAIL_BODY_DEFAULTS[lang]
+    number = order.number
+    return _with_number(subject, number), _with_number(body, number)
 
 
 def notify_order(order_id: int):
@@ -73,17 +104,14 @@ def notify_order(order_id: int):
             fail_silently=True,
         )
     if order.email:
-        with translation.override(order.language or "uk"):
-            send_mail(
-                subject=_("Замовлення %(number)s") % {"number": order.number},
-                message=_(
-                    "Дякуємо за замовлення, найближчим часом наш консультант зв'яжеться з вами. Номер: %(number)s"
-                )
-                % {"number": order.number},
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[order.email],
-                fail_silently=True,
-            )
+        subject, message = customer_order_mail(order)
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[order.email],
+            fail_silently=True,
+        )
 
 
 def notify_inquiry(inquiry_id: int):

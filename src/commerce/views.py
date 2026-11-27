@@ -4,7 +4,6 @@ import secrets
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -36,6 +35,7 @@ from src.commerce.services import (
 )
 from src.commerce.stock_hold import release_expired_holds
 from src.content.form_labels import label_form
+from src.content.ui_text import text_or_default
 from src.core.i18n import safe_next
 from src.core.ratelimit import honeypot_filled, is_rate_limited, reject_if_limited
 from src.core.utils import format_money
@@ -88,7 +88,7 @@ def _no_stock(product):
 def _cart_notice(request, rows=None):
     parts = []
     if int(getattr(request, "_cart_removed", 0) or 0) > 0:
-        parts.append(_("Деякі товари стали недоступні й прибрані з кошика."))
+        parts.append(text_or_default("cart_unavailable_removed"))
     for row in rows or []:
         if not row.get("over_stock"):
             continue
@@ -171,7 +171,7 @@ def _checkout_post_ok(form, request, rows):
     if submitted != signature(rows):
         form.add_error(
             None,
-            _("Кошик або ціни змінилися. Перевірте суму та підтвердіть замовлення ще раз."),
+            text_or_default("checkout_changed"),
         )
         ok = False
     return ok
@@ -394,7 +394,7 @@ def order_pay(request, number):
             "signature": payload["signature"],
             "pay_blocked": blocked,
             "pay_error": (
-                _("Цього товару вже немає в наявності, тож оплатити замовлення не вийде.")
+                text_or_default("checkout_pay_unavailable")
                 if blocked
                 else ""
             ),
@@ -594,7 +594,7 @@ def buy_now(request):
     product = Product.objects.filter(sku=request.POST.get("sku", ""), is_active=True).first()
     valid = form.is_valid()
     if product is None or product.stock_status == Product.Stock.OUT:
-        form.add_error(None, _("Цей товар зараз не можна замовити."))
+        form.add_error(None, text_or_default("checkout_cannot_order"))
         valid = False
     if valid and product is not None:
         currency = _currency(request)

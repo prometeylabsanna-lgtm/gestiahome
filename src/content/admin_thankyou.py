@@ -44,12 +44,16 @@ class ThankYouOrderAdmin(_OpenSingleton):
             "order_text_uk",
             "order_text_nonum_uk",
             "link_uk",
+            "email_subject_uk",
+            "email_body_uk",
         ),
         en_fields=(
             "order_title_en",
             "order_text_en",
             "order_text_nonum_en",
             "link_en",
+            "email_subject_en",
+            "email_body_en",
         ),
         uk_description="У тексті з номером використовуйте плейсхолдер {number}.",
     )

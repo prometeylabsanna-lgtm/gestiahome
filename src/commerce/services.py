@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db import IntegrityError, transaction
 from django.db.models import Case, CharField, F, Value, When
 from django.utils import timezone
-from django.utils.translation import get_language, gettext as _
+from django.utils.translation import get_language
 
 from src.catalog.models import Product
 from src.commerce.models import Inquiry, Order, OrderItem
@@ -21,13 +21,17 @@ class OrderValidationError(Exception):
 
 
 def unavailable_message(name) -> str:
+    from src.content.ui_text import text_or_default
+
     label = str(name or "").strip() or "—"
-    return _("Товар «%(name)s» зараз відсутній. Приберіть його з кошика.") % {"name": label}
+    return text_or_default("cart_item_unavailable", name=label)
 
 
 def insufficient_stock_message(name, left) -> str:
+    from src.content.ui_text import text_or_default
+
     label = str(name or "").strip() or "—"
-    return _("Товару «%(name)s» залишилось лише %(left)s шт.") % {"name": label, "left": left}
+    return text_or_default("cart_item_stock", name=label, left=left)
 
 
 def normalize_idempotency_key(value):

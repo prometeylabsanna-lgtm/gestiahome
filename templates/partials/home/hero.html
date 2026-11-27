@@ -41,6 +41,8 @@
           height="120"
           alt="{% firstof site_settings.logo_alt site_settings.site_name %}"
         >
+      {% else %}
+        {{ site_settings.site_name }}
       {% endif %}
     </h1>
     {% if hero_title %}

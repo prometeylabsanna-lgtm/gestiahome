@@ -169,6 +169,8 @@ THANKS_ORDER_HINTS = _merge(
     tri("order_text", ORDER_TEXT),
     tri("order_text_nonum", ORDER_TEXT_NONUM),
     tri("link", THANKS_LINK),
+    tri("email_subject", ORDER_TEXT),
+    tri("email_body", ORDER_TEXT),
 )
 LEGAL_HINTS = _merge(tri("body", LEGAL_BODY), {"updated_on": LEGAL_DATE})
 MENU_ITEM_HINTS = {"collection": MENU_COLLECTION}

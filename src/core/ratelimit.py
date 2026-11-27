@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.core.cache import cache
-from django.utils.translation import gettext as _
 
 # Не "website"/"url" — Safari/автозаповнення часто заповнюють їх і глушать заявки.
 HONEYPOT_FIELD = "gestia_hp"
@@ -58,5 +57,7 @@ def is_rate_limited(request, form_name: str) -> bool:
 def reject_if_limited(request, form, form_name: str) -> bool:
     if not is_rate_limited(request, form_name):
         return False
-    form.add_error(None, _("Забагато спроб. Спробуйте трохи пізніше."))
+    from src.content.ui_text import text_or_default
+
+    form.add_error(None, text_or_default("form_rate_limit"))
     return True

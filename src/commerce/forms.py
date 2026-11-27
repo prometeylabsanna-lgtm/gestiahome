@@ -162,7 +162,9 @@ class CheckoutForm(NamePhoneMixin, ConsentForm):
             kind = "locker" if method == Order.Delivery.LOCKER else "branch"
             found = resolve_warehouse(warehouse_ref, kind=kind, city_ref=city_ref)
             if found is None:
-                self.add_error("branch", _("Оберіть відділення зі списку"))
+                from src.content.ui_text import text_or_default
+
+                self.add_error("branch", text_or_default("checkout_pick_branch"))
             else:
                 warehouse_ref = found["ref"]
                 city_ref = found["city_ref"]

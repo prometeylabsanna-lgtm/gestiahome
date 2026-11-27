@@ -28,12 +28,12 @@ class ThankYouPage(SingletonModel):
     order_text_en = models.TextField(
         "Текст із номером (EN)",
         blank=True,
-        help_text="Placeholder {number} is substituted safely.",
+        help_text="Напишіть {number} там, де має стояти номер замовлення. Ці дужки не прибирайте.",
     )
     order_text_fr = models.TextField(
         "Текст із номером (FR)",
         blank=True,
-        help_text="Placeholder {number} is substituted safely.",
+        help_text="Напишіть {number} там, де має стояти номер замовлення. Ці дужки не прибирайте.",
     )
     order_text_nonum_uk = models.TextField("Текст без номера", blank=True)
     order_text_nonum_en = models.TextField("Текст без номера (EN)", blank=True)

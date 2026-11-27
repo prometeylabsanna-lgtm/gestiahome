@@ -38,12 +38,12 @@ class FaqPage(SingletonModel):
     contact_text_uk = models.TextField("Текст контактів", blank=True)
     contact_text_en = models.TextField("Текст контактів (EN)", blank=True)
     contact_text_fr = models.TextField("Текст контактів (FR)", blank=True)
-    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
-    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
-    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
-    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
-    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
-    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
+    seo_title_uk = models.CharField("SEO-заголовок", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO-заголовок (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO-заголовок (FR)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO-опис", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO-опис (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO-опис (FR)", max_length=300, blank=True)
     updated_at = models.DateTimeField("Оновлено", auto_now=True)
 
     class Meta:

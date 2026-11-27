@@ -2,7 +2,7 @@ from django.db import models
 
 
 class NovaPoshtaCity(models.Model):
-    ref = models.CharField("Ref", max_length=64, unique=True)
+    ref = models.CharField("Код (Ref)", max_length=64, unique=True)
     name = models.CharField("Назва", max_length=180)
     area = models.CharField("Область", max_length=160, blank=True, default="")
     search_text = models.CharField("Пошук", max_length=360)
@@ -24,7 +24,7 @@ class NovaPoshtaWarehouse(models.Model):
         BRANCH = "branch", "Відділення"
         LOCKER = "locker", "Поштамат"
 
-    ref = models.CharField("Ref", max_length=64, unique=True)
+    ref = models.CharField("Код (Ref)", max_length=64, unique=True)
     number = models.CharField("Номер", max_length=16, blank=True, default="")
     label = models.CharField("Назва", max_length=400)
     city_ref = models.CharField("Місто ref", max_length=64, blank=True, default="")

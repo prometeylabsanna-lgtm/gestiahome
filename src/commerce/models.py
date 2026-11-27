@@ -45,7 +45,7 @@ class Order(models.Model):
     source = models.CharField("Джерело", max_length=16, choices=Source.choices)
     customer_name = models.CharField("Ім'я", max_length=120)
     phone = models.CharField("Телефон", max_length=32)
-    email = models.EmailField("Email", blank=True)
+    email = models.EmailField("Електронна пошта", blank=True)
     language = models.CharField("Мова", max_length=8, default="uk")
     currency = models.CharField("Валюта", max_length=8, default="uah")
     delivery_method = models.CharField("Доставка", max_length=16, choices=Delivery.choices)
@@ -60,14 +60,14 @@ class Order(models.Model):
         default=PayStatus.UNPAID,
     )
     payment_ref = models.CharField(
-        "LiqPay order_id",
+        "ID замовлення LiqPay",
         max_length=64,
         blank=True,
         default="",
         db_index=True,
     )
-    payment_txn = models.CharField("LiqPay payment_id", max_length=64, blank=True, default="")
-    payment_raw_status = models.CharField("LiqPay status", max_length=64, blank=True, default="")
+    payment_txn = models.CharField("ID платежу LiqPay", max_length=64, blank=True, default="")
+    payment_raw_status = models.CharField("Статус LiqPay", max_length=64, blank=True, default="")
     paid_at = models.DateTimeField("Оплачено о", null=True, blank=True)
     stock_held = models.BooleanField("Залишок у резерві", default=False)
     stock_released = models.BooleanField("Резерв знято", default=False)
@@ -120,7 +120,7 @@ class Inquiry(models.Model):
     kind = models.CharField("Тип", max_length=16, choices=Kind.choices)
     name = models.CharField("Ім'я", max_length=120, blank=True)
     phone = models.CharField("Телефон", max_length=32, blank=True)
-    email = models.EmailField("Email", blank=True)
+    email = models.EmailField("Електронна пошта", blank=True)
     message = models.TextField("Повідомлення", blank=True)
     product = models.ForeignKey(
         Product,

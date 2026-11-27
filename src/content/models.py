@@ -33,7 +33,7 @@ class SingletonModel(models.Model):
 class SiteSettings(SingletonModel):
     cache_key = "site_settings_v2"
     phone = models.CharField("Телефон", max_length=40, default="+380000000000")
-    email = models.EmailField("Email", blank=True)
+    email = models.EmailField("Електронна пошта", blank=True)
     address_uk = models.CharField("Адреса", max_length=255, blank=True)
     address_en = models.CharField("Адреса (EN)", max_length=255, blank=True)
     address_fr = models.CharField("Адреса (FR)", max_length=255, blank=True)
@@ -227,12 +227,12 @@ class HomeBlock(MediaChoice):
     text_mobile_uk = models.TextField("Текст (застаріле)", blank=True)
     text_mobile_en = models.TextField("Текст (застаріле, EN)", blank=True)
     text_mobile_fr = models.TextField("Текст (застаріле, FR)", blank=True)
-    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
-    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
-    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
-    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
-    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
-    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
+    seo_title_uk = models.CharField("SEO-заголовок", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO-заголовок (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO-заголовок (FR)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO-опис", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO-опис (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO-опис (FR)", max_length=300, blank=True)
     cta_uk = models.CharField("Текст кнопки", max_length=200, blank=True)
     cta_en = models.CharField("Текст кнопки (EN)", max_length=200, blank=True)
     cta_fr = models.CharField("Текст кнопки (FR)", max_length=200, blank=True)
@@ -334,12 +334,12 @@ class HomeCollection(models.Model):
     box_items_en = models.TextField(
         "У боксі (EN)",
         blank=True,
-        help_text="One item per line.",
+        help_text="Один пункт у рядку.",
     )
     box_items_fr = models.TextField(
         "У боксі (FR)",
         blank=True,
-        help_text="One item per line.",
+        help_text="Один пункт у рядку.",
     )
     image_large = models.ImageField(
         "Велике фото",
@@ -381,12 +381,12 @@ class HomeCollection(models.Model):
         related_name="home_collections_as_addon",
         verbose_name="Доповнити сет",
     )
-    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
-    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
-    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
-    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
-    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
-    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
+    seo_title_uk = models.CharField("SEO-заголовок", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO-заголовок (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO-заголовок (FR)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO-опис", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO-опис (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO-опис (FR)", max_length=300, blank=True)
     is_active = models.BooleanField("Показувати на сайті", default=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
     updated_at = models.DateTimeField("Оновлено", auto_now=True)
@@ -475,9 +475,9 @@ class HomeCollectionImage(models.Model):
         upload_to="home/collections/gallery/",
         validators=[IMAGE_VALIDATOR],
     )
-    alt_uk = models.CharField("Alt", max_length=200, blank=True)
-    alt_en = models.CharField("Alt (EN)", max_length=200, blank=True)
-    alt_fr = models.CharField("Alt (FR)", max_length=200, blank=True)
+    alt_uk = models.CharField("Alt-текст", max_length=200, blank=True)
+    alt_en = models.CharField("Alt-текст (EN)", max_length=200, blank=True)
+    alt_fr = models.CharField("Alt-текст (FR)", max_length=200, blank=True)
     sort = models.PositiveIntegerField("Порядок", default=0)
 
     class Meta:
@@ -666,12 +666,12 @@ class AboutPage(MediaChoice, SingletonModel):
         blank=True,
         validators=[VIDEO_VALIDATOR],
     )
-    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
-    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
-    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
-    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
-    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
-    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
+    seo_title_uk = models.CharField("SEO-заголовок", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO-заголовок (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO-заголовок (FR)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO-опис", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO-опис (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO-опис (FR)", max_length=300, blank=True)
     reviews_title_uk = models.CharField("Заголовок відгуків", max_length=64, blank=True)
     reviews_title_en = models.CharField("Заголовок відгуків (EN)", max_length=64, blank=True)
     reviews_title_fr = models.CharField("Заголовок відгуків (FR)", max_length=64, blank=True)

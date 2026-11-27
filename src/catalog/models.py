@@ -46,37 +46,37 @@ class Category(MediaChoice, TimeStampedModel):
     filter_sort = models.PositiveSmallIntegerField("Порядок у фільтрі", null=True, blank=True)
     filter_name_uk = models.CharField("Назва у фільтрі", max_length=160, blank=True)
     seo_title_uk = models.CharField(
-        "SEO title",
+        "SEO-заголовок",
         max_length=200,
         blank=True,
         help_text="Цільова довжина: 50–60 символів.",
     )
     seo_title_en = models.CharField(
-        "SEO title (EN)",
+        "SEO-заголовок (EN)",
         max_length=200,
         blank=True,
         help_text="Цільова довжина: 50–60 символів.",
     )
     seo_title_fr = models.CharField(
-        "SEO title (FR)",
+        "SEO-заголовок (FR)",
         max_length=200,
         blank=True,
         help_text="Цільова довжина: 50–60 символів.",
     )
     seo_description_uk = models.CharField(
-        "SEO description",
+        "SEO-опис",
         max_length=300,
         blank=True,
         help_text="Цільова довжина: 140–160 символів.",
     )
     seo_description_en = models.CharField(
-        "SEO description (EN)",
+        "SEO-опис (EN)",
         max_length=300,
         blank=True,
         help_text="Цільова довжина: 140–160 символів.",
     )
     seo_description_fr = models.CharField(
-        "SEO description (FR)",
+        "SEO-опис (FR)",
         max_length=300,
         blank=True,
         help_text="Цільова довжина: 140–160 символів.",
@@ -303,12 +303,12 @@ class Product(MediaChoice, TimeStampedModel):
         related_name="related_from",
         help_text="Товари для блоку «Схожі» на сторінці цього товару. Почніть вводити назву.",
     )
-    seo_title_uk = models.CharField("SEO title", max_length=200, blank=True)
-    seo_title_en = models.CharField("SEO title (EN)", max_length=200, blank=True)
-    seo_title_fr = models.CharField("SEO title (FR)", max_length=200, blank=True)
-    seo_description_uk = models.CharField("SEO description", max_length=300, blank=True)
-    seo_description_en = models.CharField("SEO description (EN)", max_length=300, blank=True)
-    seo_description_fr = models.CharField("SEO description (FR)", max_length=300, blank=True)
+    seo_title_uk = models.CharField("SEO-заголовок", max_length=200, blank=True)
+    seo_title_en = models.CharField("SEO-заголовок (EN)", max_length=200, blank=True)
+    seo_title_fr = models.CharField("SEO-заголовок (FR)", max_length=200, blank=True)
+    seo_description_uk = models.CharField("SEO-опис", max_length=300, blank=True)
+    seo_description_en = models.CharField("SEO-опис (EN)", max_length=300, blank=True)
+    seo_description_fr = models.CharField("SEO-опис (FR)", max_length=300, blank=True)
 
     class Meta:
         ordering = ["sort", "name_uk"]

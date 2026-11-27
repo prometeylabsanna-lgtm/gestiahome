@@ -96,6 +96,7 @@ UI_FR = {
     "email_ph": "Email",
     "city_ph": "Ville",
     "branch_ph": "Point relais",
+    "clear": "Effacer",
     "locker_ph": "Consigne",
     "street_ph": "Rue",
     "house": "Immeuble",

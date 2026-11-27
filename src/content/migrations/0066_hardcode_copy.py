@@ -11,6 +11,7 @@ NEW_KEYS = (
     "checkout_pay_unavailable",
     "checkout_cannot_order",
     "form_rate_limit",
+    "clear",
 )
 
 
@@ -174,6 +175,21 @@ class Migration(migrations.Migration):
             model_name='interfacecopy',
             name='checkout_pick_branch_uk',
             field=models.CharField(blank=True, max_length=80, verbose_name='Оберіть відділення'),
+        ),
+        migrations.AddField(
+            model_name='interfacecopy',
+            name='clear_en',
+            field=models.CharField(blank=True, help_text='На екрані не видно, це назва для читалок.', max_length=40, verbose_name='Очистити (EN)'),
+        ),
+        migrations.AddField(
+            model_name='interfacecopy',
+            name='clear_fr',
+            field=models.CharField(blank=True, help_text='На екрані не видно, це назва для читалок.', max_length=40, verbose_name='Очистити (FR)'),
+        ),
+        migrations.AddField(
+            model_name='interfacecopy',
+            name='clear_uk',
+            field=models.CharField(blank=True, help_text='На екрані не видно, це назва для читалок.', max_length=40, verbose_name='Очистити'),
         ),
         migrations.AddField(
             model_name='interfacecopy',

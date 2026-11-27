@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from django.utils.translation import gettext as _
 
 from src.catalog.models import Product
 from src.commerce.cart import item_count, lines
 from src.commerce.selectors import drawer_addon_items, focus_cart_row, page_suggest_addons
+from src.content.ui_text import text_or_default
 from src.core.utils import format_money
 
 
@@ -45,7 +45,7 @@ def panel_context(request, panel_sku, notice=""):
         "addons": addons,
         "cart_notice": notice,
         "has_addons": bool(addons),
-        "aria_cart": _("Кошик"),
+        "aria_cart": text_or_default("cart"),
     }
 
 

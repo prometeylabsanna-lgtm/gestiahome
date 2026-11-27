@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static shop_tags ui_tags %}
+{% load static shop_tags ui_tags %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/nd/checkout.css' %}">
@@ -166,7 +166,7 @@
                       <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                   </label>
-                  <button type="button" class="nd-co-field__clear" data-np-clear hidden aria-label="{% translate 'Очистити' %}">
+                  <button type="button" class="nd-co-field__clear" data-np-clear hidden aria-label="{% ui "clear" %}">
                     <span aria-hidden="true">×</span>
                   </button>
                   <ul id="np-branch-listbox" class="co-suggest__list" role="listbox" hidden></ul>

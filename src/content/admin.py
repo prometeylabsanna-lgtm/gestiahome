@@ -22,6 +22,7 @@ import src.content.admin_menu  # noqa: F401, E402
 import src.content.admin_styles  # noqa: F401, E402
 import src.content.admin_contacts  # noqa: F401, E402
 import src.content.admin_thankyou  # noqa: F401, E402
+import src.content.admin_errors  # noqa: F401, E402
 import src.content.admin_ui  # noqa: F401, E402
 
 

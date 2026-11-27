@@ -88,10 +88,10 @@
 <body>
   <main>
     <p class="code">500</p>
-    <h1>Щось пішло не так</h1>
-    <p class="text">Спробуйте оновити сторінку або поверніться на головну.</p>
-    <p class="en" lang="en">Something went wrong. Refresh the page or go back home.</p>
-    <a href="/">На головну · Home</a>
+    <h1>{{ error.title|default:'Щось пішло не так' }}</h1>
+    <p class="text">{{ error.text|default:'Спробуйте оновити сторінку або поверніться на головну.' }}</p>
+    <p class="en" lang="en">{{ error.note_en|default:'Something went wrong. Refresh the page or go back home.' }}</p>
+    <a href="/">{{ error.button|default:'На головну · Home' }}</a>
   </main>
 </body>
 </html>

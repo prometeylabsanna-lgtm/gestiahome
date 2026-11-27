@@ -31,49 +31,4 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Сторінка помилки 500',
             },
         ),
-        migrations.DeleteModel(
-            name='AboutBanner',
-        ),
-        migrations.DeleteModel(
-            name='AboutGallery',
-        ),
-        migrations.DeleteModel(
-            name='AboutPopularBlock',
-        ),
-        migrations.DeleteModel(
-            name='AboutReview',
-        ),
-        migrations.DeleteModel(
-            name='AboutReviewsBlock',
-        ),
-        migrations.DeleteModel(
-            name='AboutStory',
-        ),
-        migrations.DeleteModel(
-            name='HomeAdvantagesBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeBottomBanner',
-        ),
-        migrations.DeleteModel(
-            name='HomeCallbackBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeCategoriesBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeMidBanner',
-        ),
-        migrations.DeleteModel(
-            name='HomeReview',
-        ),
-        migrations.DeleteModel(
-            name='HomeReviewsBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeVideo2Block',
-        ),
-        migrations.DeleteModel(
-            name='HomeVideoBlock',
-        ),
     ]

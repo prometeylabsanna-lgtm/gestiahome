@@ -18,6 +18,7 @@ from src.catalog.models import (
     ProductAttributeGroup,
     ProductImage,
 )
+from src.core.admin_actions import CATEGORY_ACTIONS, PRODUCT_ACTIONS
 from src.core.admin_base import GestiaModelAdmin, GestiaStackedInline
 from src.core.admin_hints import ATTRIBUTE_HINTS, CATEGORY_HINTS, GROUP_HINTS, PRODUCT_HINTS, apply_hints
 from src.core.admin_lang import language_tabs
@@ -66,6 +67,7 @@ class CategoryAdmin(SlugAdminMixin, GestiaModelAdmin):
         "menu_featured",
     )
     list_filter = ("is_active", "parent")
+    actions = CATEGORY_ACTIONS
     search_fields = ("name_uk", "name_en", "name_fr", "slug")
     ordering = ("sort", "name_uk")
     fieldsets = language_tabs(
@@ -219,12 +221,7 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         "is_active": {"horizontal": True, "label": "Активний"},
         "is_sale": {"horizontal": True, "label": "Акція"},
     }
-    actions = (
-        "activate_products",
-        "deactivate_products",
-        "set_sale",
-        "unset_sale",
-    )
+    actions = PRODUCT_ACTIONS
     search_fields = ("name_uk", "name_en", "name_fr", "sku", "slug")
     autocomplete_fields = ("category", "related_manual")
     inlines = [ProductImageInline]
@@ -296,18 +293,3 @@ class ProductAdmin(SlugAdminMixin, GestiaModelAdmin):
         force_tinymce(form, self.tiny_fields, short=False)
         return form
 
-    @admin.action(description="Активувати")
-    def activate_products(self, request, queryset):
-        queryset.update(is_active=True)
-
-    @admin.action(description="Деактивувати")
-    def deactivate_products(self, request, queryset):
-        queryset.update(is_active=False)
-
-    @admin.action(description="Позначити акцією")
-    def set_sale(self, request, queryset):
-        queryset.update(is_sale=True)
-
-    @admin.action(description="Зняти акцію")
-    def unset_sale(self, request, queryset):
-        queryset.update(is_sale=False)

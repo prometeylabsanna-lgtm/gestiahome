@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("content", "0062_site_settings_og_image"),
+        ("content", "0063_site_settings_og_image"),
     ]
 
     operations = [

@@ -99,7 +99,7 @@ class HardcodeCopyTests(TestCase):
 
         from src.content.ui_fr import UI_FR
 
-        migration = importlib.import_module("src.content.migrations.0059_hardcode_copy")
+        migration = importlib.import_module("src.content.migrations.0066_hardcode_copy")
 
         defaults = {item[0]: item for item in UI_FIELDS}
         copy = InterfaceCopy.objects.get(pk=1)

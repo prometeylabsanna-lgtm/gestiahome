@@ -66,55 +66,10 @@ def fill_empty(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0058_about_title_fr_english'),
+        ('content', '0065_site_settings_social_labels'),
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='AboutBanner',
-        ),
-        migrations.DeleteModel(
-            name='AboutGallery',
-        ),
-        migrations.DeleteModel(
-            name='AboutPopularBlock',
-        ),
-        migrations.DeleteModel(
-            name='AboutReview',
-        ),
-        migrations.DeleteModel(
-            name='AboutReviewsBlock',
-        ),
-        migrations.DeleteModel(
-            name='AboutStory',
-        ),
-        migrations.DeleteModel(
-            name='HomeAdvantagesBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeBottomBanner',
-        ),
-        migrations.DeleteModel(
-            name='HomeCallbackBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeCategoriesBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeMidBanner',
-        ),
-        migrations.DeleteModel(
-            name='HomeReview',
-        ),
-        migrations.DeleteModel(
-            name='HomeReviewsBlock',
-        ),
-        migrations.DeleteModel(
-            name='HomeVideo2Block',
-        ),
-        migrations.DeleteModel(
-            name='HomeVideoBlock',
-        ),
         migrations.AddField(
             model_name='interfacecopy',
             name='cart_item_stock_en',

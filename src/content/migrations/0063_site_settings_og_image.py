@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("content", "0061_site_settings_currency"),
+        ("content", "0062_site_settings_currency"),
     ]
 
     operations = [

@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("content", "0063_site_settings_short_name_theme"),
+        ("content", "0064_site_settings_short_name_theme"),
     ]
 
     operations = [

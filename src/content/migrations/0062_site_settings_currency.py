@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("content", "0060_site_settings_favicon"),
+        ("content", "0061_site_settings_favicon"),
     ]
 
     operations = [

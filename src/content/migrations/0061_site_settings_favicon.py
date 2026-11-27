@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("content", "0059_site_settings_site_name"),
+        ("content", "0060_merge_20261127_1617"),
     ]
 
     operations = [

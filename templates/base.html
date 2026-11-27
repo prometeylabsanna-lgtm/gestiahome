@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="{{ site_settings.theme_color }}">
   {% block extra_head %}{% endblock %}
   {% block_text "title" site_settings.site_name as seo_title %}
   {% block_text "description" "" as seo_description %}
@@ -38,9 +38,14 @@
   {% endfor %}
   {% structured_data %}
   {% block favicon %}
+  {% if site_settings.favicon %}
+  <link rel="icon" href="{{ site_settings.favicon.url }}" sizes="any">
+  <link rel="apple-touch-icon" href="{{ site_settings.favicon.url }}">
+  {% else %}
   <link rel="icon" href="{% static 'images/favicon.ico' %}" sizes="any">
   <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+  {% endif %}
   {% endblock %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

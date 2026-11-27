@@ -31,10 +31,18 @@ class SingletonModel(models.Model):
 
 
 class SiteSettings(SingletonModel):
-    cache_key = "site_settings_v3"
+    cache_key = "site_settings_v8"
     site_name_uk = models.CharField("Назва сайту", max_length=80, default="Gestia Home")
     site_name_en = models.CharField("Назва сайту (EN)", max_length=80, default="Gestia Home")
     site_name_fr = models.CharField("Назва сайту (FR)", max_length=80, default="Gestia Home")
+    site_name_short_uk = models.CharField(
+        "Коротка назва",
+        max_length=40,
+        default="Gestia",
+        help_text="У title каталогу та короткому бренді, зараз «Gestia».",
+    )
+    site_name_short_en = models.CharField("Коротка назва (EN)", max_length=40, default="Gestia")
+    site_name_short_fr = models.CharField("Коротка назва (FR)", max_length=40, default="Gestia")
     phone = models.CharField("Телефон", max_length=40, default="+380000000000")
     email = models.EmailField("Електронна пошта", blank=True)
     address_uk = models.CharField("Адреса", max_length=255, blank=True)
@@ -43,6 +51,9 @@ class SiteSettings(SingletonModel):
     instagram_url = models.URLField("Instagram", blank=True)
     pinterest_url = models.URLField("Pinterest", blank=True)
     telegram_url = models.URLField("Telegram", blank=True, help_text="Посилання t.me/… у соцряді.")
+    instagram_label = models.CharField("Підпис Instagram", max_length=40, default="Instagram")
+    pinterest_label = models.CharField("Підпис Pinterest", max_length=40, default="Pinterest")
+    telegram_label = models.CharField("Підпис Telegram", max_length=40, default="Telegram")
     developer_note_uk = models.CharField("Підпис розробника", max_length=160, blank=True)
     developer_note_en = models.CharField("Підпис розробника (EN)", max_length=160, blank=True)
     developer_note_fr = models.CharField("Підпис розробника (FR)", max_length=160, blank=True)
@@ -52,6 +63,52 @@ class SiteSettings(SingletonModel):
         blank=True,
         validators=[IMAGE_VALIDATOR],
         help_text="Шапка близько 113×43, підвал 191×73. JPG або PNG.",
+    )
+    favicon = models.FileField(
+        "Favicon",
+        upload_to="site/",
+        blank=True,
+        help_text="Іконка вкладки браузера. PNG або ICO.",
+    )
+    currency_uah = models.CharField(
+        "Суфікс гривні",
+        max_length=8,
+        default="UAH",
+        help_text="Після ціни в гривнях, зараз «UAH».",
+    )
+    currency_uah_sign = models.CharField(
+        "Знак гривні",
+        max_length=8,
+        default="₴",
+        help_text="Знак у format_money для гривні, зараз «₴».",
+    )
+    currency_eur = models.CharField(
+        "Знак євро",
+        max_length=8,
+        default="€",
+        help_text="Знак євро, зараз «€».",
+    )
+    og_image = models.ImageField(
+        "OG-картинка за замовчуванням",
+        upload_to="site/",
+        blank=True,
+        validators=[IMAGE_VALIDATOR],
+        help_text="Якщо порожня — лишається поточний static og-default.",
+    )
+    og_image_alt_uk = models.CharField(
+        "Підпис OG-картинки",
+        max_length=160,
+        default="Святковий стіл Gestia Home",
+    )
+    og_image_alt_en = models.CharField(
+        "Підпис OG-картинки (EN)",
+        max_length=160,
+        default="A festive table by Gestia Home",
+    )
+    og_image_alt_fr = models.CharField(
+        "Підпис OG-картинки (FR)",
+        max_length=160,
+        default="Une table de fête Gestia Home",
     )
     logo_alt_uk = models.CharField("Підпис логотипа", max_length=80, blank=True)
     logo_alt_en = models.CharField("Підпис логотипа (EN)", max_length=80, blank=True)
@@ -100,6 +157,12 @@ class SiteSettings(SingletonModel):
     color_ink = models.CharField("Колір тексту", max_length=7, default="#241c16")
     color_paper = models.CharField("Колір тла", max_length=7, default="#f3eee6")
     color_accent = models.CharField("Акцент", max_length=7, default="#8d3b2a")
+    theme_color = models.CharField(
+        "Колір вкладки (theme-color)",
+        max_length=7,
+        default="#ffffff",
+        help_text="Мета theme-color у браузері. За замовчуванням #ffffff.",
+    )
     footer_note_uk = models.CharField("Підпис у підвалі", max_length=255, blank=True)
     footer_note_en = models.CharField("Підпис у підвалі (EN)", max_length=255, blank=True)
     footer_note_fr = models.CharField("Підпис у підвалі (FR)", max_length=255, blank=True)
@@ -133,12 +196,20 @@ class SiteSettings(SingletonModel):
         return localized(self, "site_name")
 
     @property
+    def site_name_short(self):
+        return localized(self, "site_name_short")
+
+    @property
     def address(self):
         return localized(self, "address")
 
     @property
     def logo_alt(self):
         return localized(self, "logo_alt")
+
+    @property
+    def og_image_alt(self):
+        return localized(self, "og_image_alt")
 
     @property
     def nav_about(self):

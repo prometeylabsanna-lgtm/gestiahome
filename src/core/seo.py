@@ -25,8 +25,20 @@ def _site_name() -> str:
         return ""
 
 
+def _site_name_short() -> str:
+    try:
+        from src.content.models import SiteSettings
+
+        short = (SiteSettings.load().site_name_short or "").strip()
+    except (OperationalError, ProgrammingError):
+        return ""
+    if not short:
+        return _site_name()
+    return short
+
+
 def META_BRAND() -> str:
-    return _site_name()
+    return _site_name_short()
 
 
 _COPY_FIELDS = ("seo_description", "short_description", "description")
@@ -163,8 +175,9 @@ def collection_meta_title(collection) -> str:
     title = plain_text(localized(collection, "title"))
     if not title:
         return BRAND()
-    return gettext("Колекція «%(title)s» — Gestia Home") % {
+    return gettext("Колекція «%(title)s» — %(brand)s") % {
         "title": title.replace("%", "%%"),
+        "brand": BRAND(),
     }
 
 
@@ -299,6 +312,12 @@ def _alternates(request, query: str) -> list[dict]:
 
 
 def _default_image(request, site) -> str:
+    og = getattr(site, "og_image", None) if site is not None else None
+    if og:
+        try:
+            return absolute_media(request, og.url)
+        except ValueError:
+            pass
     logo = getattr(site, "logo", None) if site is not None else None
     if logo:
         try:
@@ -347,9 +366,25 @@ def _default_og(request) -> dict:
     from django.utils.translation import gettext
 
     url = absolute_media(request, static("images/og-default.jpg"))
+    alt = gettext("Святковий стіл Gestia Home")
+    try:
+        from src.content.models import SiteSettings
+
+        site = SiteSettings.load()
+        image = site.og_image
+    except (OperationalError, ProgrammingError):
+        image = None
+        site = None
+    if image:
+        try:
+            url = absolute_media(request, image.url)
+        except ValueError:
+            image = None
+        else:
+            alt = (site.og_image_alt or "").strip() or alt
     return _bundle(
         url,
-        gettext("Святковий стіл Gestia Home"),
+        alt,
         fallback_size=(_OG_WIDTH, _OG_HEIGHT),
     )
 

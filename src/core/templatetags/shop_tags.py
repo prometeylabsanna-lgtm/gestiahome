@@ -6,7 +6,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from src.core.utils import format_money
+from src.core.utils import currency_labels, format_money
 
 register = template.Library()
 
@@ -43,7 +43,7 @@ def line_uah(context, amount):
     currency = context.get("currency") or "uah"
     if currency == "eur":
         return format_money(amount, "eur")
-    return f"{_grouped(amount)} UAH"
+    return f"{_grouped(amount)} {currency_labels()[0]}"
 
 
 @register.simple_tag(takes_context=True)
@@ -51,7 +51,7 @@ def sum_uah(context, amount):
     currency = context.get("currency") or "uah"
     if currency == "eur":
         return format_money(amount, "eur")
-    return f"₴ {_grouped(amount)} {_('грн')}"
+    return f"{currency_labels()[1]} {_grouped(amount)} {_('грн')}"
 
 
 @register.simple_tag(takes_context=True)
@@ -68,4 +68,4 @@ def home_price(context, product):
     currency = context.get("currency") or "uah"
     if currency == "eur":
         return format_money(product.price_eur, "eur")
-    return f"{_grouped(product.price_uah)} UAH"
+    return f"{_grouped(product.price_uah)} {currency_labels()[0]}"
